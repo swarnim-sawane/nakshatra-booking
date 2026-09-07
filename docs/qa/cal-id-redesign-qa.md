@@ -11,7 +11,7 @@ The commands were run separately before browser QA and repeated separately after
 | Command | Result |
 | --- | --- |
 | `npm run check` | Exit 0; TypeScript emitted no diagnostics. |
-| `npm test` | Exit 0; production build completed, Node tests 6/6 passed, Vitest tests 18/18 passed. |
+| `npm test` | Exit 0; production build completed, Node tests 8/8 passed, Vitest tests 20/20 passed. |
 | `npm run build` | Exit 0; Vite transformed 1751 modules and emitted both `index.html` and `book/index.html`. |
 
 The first preview attempt exposed an environment-specific Vite cache failure because the gitignored `node_modules` path is a junction outside this workspace. A failing regression test was recorded, `vite.config.cjs` was changed to use the local `.vite-cache`, and the focused Node test then passed 3/3. The persistent Vite server started successfully afterward.
@@ -22,12 +22,12 @@ The viewport capability controls the in-app browser's outer size. Its chrome and
 
 | Route | State | Requested outer viewport | Captured pixels | Result | Evidence |
 | --- | --- | ---: | ---: | --- | --- |
-| `/` | Landing, post-density fix | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/landing-desktop-1440x1024.jpg` |
+| `/` | Landing, final accessible-label state | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/landing-desktop-1440x1024.jpg` |
 | `/book/` | Safe unconfigured booking state | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/book-desktop-1440x1024.jpg` |
-| `/` | Landing, post-density fix | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/landing-mobile-390x844.jpg` |
+| `/` | Landing, final accessible-label state | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/landing-mobile-390x844.jpg` |
 | `/book/` | Safe unconfigured booking state | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/book-mobile-390x844.jpg` |
 
-The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and resized to match the implementation's native 1425 × 970 capture. The resulting comparison is `docs/qa/option-3-vs-landing-desktop.png`; its focused hero inspection is `docs/qa/option-3-vs-landing-hero-focus.png`. The initial P2 first-fold density drift was corrected and the regenerated comparison found no remaining P0/P1/P2 issue. See the project-root `design-qa.md` for full findings and normalization details.
+The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and resized to match the implementation's native 1425 × 970 capture. After the accessible label-color correction, all four canonical screenshots were refreshed and both boards were regenerated. The resulting comparison is `docs/qa/option-3-vs-landing-desktop.png`; its focused hero inspection is `docs/qa/option-3-vs-landing-hero-focus.png`. The initial P2 first-fold density drift was corrected and the final comparison found no remaining P0/P1/P2 issue. See the project-root `design-qa.md` for full findings and normalization details.
 
 ## Interaction, responsive, console, and accessibility evidence
 
@@ -36,6 +36,10 @@ The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and re
 - The mobile Menu opened by click and by keyboard and exposed the three navigation links.
 - The first FAQ expanded and collapsed, with its answer entering and leaving the accessibility tree.
 - Keyboard focus exposed the skip link clearly; Enter moved focus to the main content.
+- The final-booking action's two-tone surface/ink focus ring was visibly distinct from the forest panel in the mobile in-app browser and was not clipped.
+- The 12 px text-ochre token is `#875d24`; its measured contrast is 5.24:1 on paper and 5.70:1 on the light surface. The WCAG luminance regression test enforces both ratios at or above 4.5:1.
+- A configured embed renders Retry and the direct Cal ID link unconditionally. Retry only increments the iframe remount key after revalidating the supplied URL; it does not infer iframe success or failure.
+- Raw URL validation rejects explicitly written `:443` for both `cal.id` and `app.cal.id`, as well as custom ports and credentials.
 - `/book/?s=opaque-test-token` showed the safe unconfigured heading while rendering zero token-text matches, zero iframes, and zero external `cal.id`/`app.cal.id` links.
 - Desktop body and document `scrollWidth` equalled `clientWidth` at 1425 px. Mobile screenshots show no clipped header, primary action, or content edge.
 - The landing and booking pages preserve one H1 each, semantic navigation/landmarks, visible focus, 44 px minimum targets, and reduced-motion support.

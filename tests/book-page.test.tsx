@@ -28,6 +28,7 @@ describe("Cal ID booking page", () => {
     expect(html).toContain('href="https://cal.id/example/consultation"');
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain("Retry calendar");
     expect(html).not.toMatch(/razorpay_order_id|payment successful|localStorage/i);
   });
 

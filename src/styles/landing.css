@@ -19,7 +19,7 @@
 
 .eyebrow {
   margin: 0 0 var(--space-4);
-  color: var(--color-ochre);
+  color: var(--color-ochre-text);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -376,10 +376,20 @@
   color: #e2e8e2;
 }
 
+.final-booking .eyebrow {
+  color: var(--color-surface);
+}
+
 .final-booking .button {
   flex: 0 0 auto;
   background: var(--color-surface);
   color: var(--color-ink);
+}
+
+.final-booking .button:focus-visible {
+  outline: 3px solid var(--color-surface);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--color-ink);
 }
 
 @media (max-width: 960px) {

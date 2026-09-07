@@ -8,10 +8,14 @@ export type SchedulingConfig = {
 };
 
 export function parseCalIdBookingUrl(value: string): URL | null {
-  if (!value.trim()) return null;
+  const rawValue = value.trim();
+  if (!rawValue) return null;
+
+  const authority = rawValue.match(/^https:\/\/([^/?#]+)/i)?.[1];
+  if (!authority || authority.includes(":")) return null;
 
   try {
-    const url = new URL(value);
+    const url = new URL(rawValue);
     return (
       url.protocol === "https:" &&
       ["cal.id", "app.cal.id"].includes(url.hostname) &&

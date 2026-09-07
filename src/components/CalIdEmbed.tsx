@@ -14,7 +14,6 @@ function validatedEmbedUrl(bookingUrl: URL | null): URL | null {
 export default function CalIdEmbed({ bookingUrl }: CalIdEmbedProps) {
   const safeUrl = validatedEmbedUrl(bookingUrl);
   const [embedKey, setEmbedKey] = useState(0);
-  const [hasEmbedError, setHasEmbedError] = useState(false);
 
   if (!safeUrl) {
     return (
@@ -27,8 +26,9 @@ export default function CalIdEmbed({ bookingUrl }: CalIdEmbedProps) {
   }
 
   const retryEmbed = () => {
-    setHasEmbedError(false);
-    setEmbedKey((currentKey) => currentKey + 1);
+    if (validatedEmbedUrl(bookingUrl)) {
+      setEmbedKey((currentKey) => currentKey + 1);
+    }
   };
 
   return (
@@ -39,19 +39,12 @@ export default function CalIdEmbed({ bookingUrl }: CalIdEmbedProps) {
         src={safeUrl.href}
         title={embedTitle}
         loading="lazy"
-        onError={() => setHasEmbedError(true)}
       />
       <div className="booking-embed__fallback" aria-live="polite">
-        <p>
-          {hasEmbedError
-            ? "The calendar could not be shown here."
-            : "If the calendar does not appear, you can continue on Cal ID."}
-        </p>
-        {hasEmbedError ? (
-          <button className="booking-embed__retry" type="button" onClick={retryEmbed}>
-            Retry calendar
-          </button>
-        ) : null}
+        <p>If the calendar does not appear, retry it here or continue on Cal ID.</p>
+        <button className="booking-embed__retry" type="button" onClick={retryEmbed}>
+          Retry calendar
+        </button>
         <a href={safeUrl.href} target="_blank" rel="noopener noreferrer">
           Open Cal ID in a new tab
         </a>

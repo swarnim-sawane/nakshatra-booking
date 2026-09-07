@@ -13,6 +13,8 @@ describe("parseCalIdBookingUrl", () => {
     "http://cal.id/example",
     "https://evil.example/book",
     "javascript:alert(1)",
+    "https://cal.id:443/example",
+    "https://app.cal.id:443/example",
     "https://cal.id:8443/example",
     "https://app.cal.id:444/example",
     "https://user:pass@cal.id/example",

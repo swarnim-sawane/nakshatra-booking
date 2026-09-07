@@ -35,7 +35,7 @@ Create an ignored `.env.local` from `.env.example` and replace the example URL:
 PUBLIC_CAL_ID_BOOKING_URL=https://cal.id/your-account/your-event
 ```
 
-`PUBLIC_CAL_ID_BOOKING_URL` is the only public environment value consumed by the application. It must use HTTPS, have no credentials or custom port, and use the exact host `cal.id` or `app.cal.id`. An absent or invalid value keeps the booking page in its safe unconfigured state.
+`PUBLIC_CAL_ID_BOOKING_URL` is the only public environment value consumed by the application. It must use HTTPS, have no credentials or explicitly written port (including `:443`), and use the exact host `cal.id` or `app.cal.id`. An absent or invalid value keeps the booking page in its safe unconfigured state.
 
 `SITE_URL` remains in `.env.example` as a reserved deployment example; the current Vite application does not consume it.
 

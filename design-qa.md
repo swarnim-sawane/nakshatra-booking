@@ -17,9 +17,9 @@ Date: 7 September 2026
 
 ## Findings
 
-No actionable P0, P1, or P2 finding remains after the second comparison pass.
+No actionable P0, P1, or P2 finding remains after the final comparison pass.
 
-The full comparison confirms that the warm paper/surface balance, black pill actions, ochre labels, serif-led hierarchy, two-column composition, quiet one-pixel borders, and consultation imagery preserve the approved Option 3 direction. The generated image is sharp, naturally cropped, correctly integrated into its panel, and uses no CSS art or placeholder illustration.
+The full comparison confirms that the warm paper/surface balance, black pill actions, accessible text-specific ochre labels, serif-led hierarchy, two-column composition, quiet one-pixel borders, and consultation imagery preserve the approved Option 3 direction. The generated image is sharp, naturally cropped, correctly integrated into its panel, and uses no CSS art or placeholder illustration.
 
 The approved source shows a fictional live calendar. The implementation intentionally replaces it with the consultation image, truthful booking summary, and “Live availability on the booking page” status. This is an accepted product constraint: local QA used the safe unconfigured state and did not invent slots, price, or payment acceptance.
 
@@ -43,9 +43,18 @@ The focused comparison confirms readable heading wraps, aligned factual rows, co
 - Result: the next consultation-section cue now begins around y≈843 in the honest capture, restoring the intended first-fold rhythm near the requested 850–900 px target. The hero remains spacious and the card, image, text, status, icons, and both primary actions remain fully visible.
 - Mobile evidence: `docs/qa/screenshots/landing-mobile-390x844.jpg` confirms the 390 × 844 requested outer viewport still has a readable four-line heading, full-width primary action, visible Menu and Book controls, and no visible horizontal clipping.
 
+### Final accessibility and fallback pass — passed
+
+- A darker `--color-ochre-text` value of `#875d24` now gives 5.24:1 contrast on paper and 5.70:1 on the light surface. Decorative icons, borders, and large step numbers retain the original ochre.
+- The white final-booking action now has a two-tone surface/ink focus ring. The focused mobile state was inspected in the Codex in-app browser and remained clearly separated from the forest panel without clipping.
+- A configured Cal ID embed always presents both Retry and the direct Cal ID link. Retry remounts only a newly revalidated URL; no cross-origin iframe error or success inference controls the fallback.
+- Explicit default ports (`:443`) now fail closed for both allowed Cal ID hosts, alongside custom ports and credentials.
+- All four canonical screenshots were refreshed after the label-color change. Both comparison boards were rebuilt from the verified 1487 × 1012 centre crop and inspected together; the visual verdict remains passed.
+
 ## Interaction and accessibility evidence
 
 - Keyboard Tab exposed a high-contrast skip link with a two-tone focus treatment; Enter moved focus to `main-content`.
+- The final-booking action's two-tone focus treatment was visibly distinct against the forest panel in the mobile in-app-browser inspection.
 - The mobile Menu opened by pointer and keyboard and exposed About, The consultation, and FAQs.
 - Header anchors navigated to `#about`, `#consultation`, and `#faqs`.
 - The first FAQ expanded and collapsed as a semantic disclosure, and the answer appeared in the accessibility tree.
@@ -53,6 +62,6 @@ The focused comparison confirms readable heading wraps, aligned factual rows, co
 - `/book/?s=opaque-test-token` retained the public URL while rendering no token text, iframe, or external Cal ID link in the unconfigured state.
 - Desktop measurement recorded body/document `scrollWidth` equal to `clientWidth` at 1425 px. Mobile captures show the full header, primary action, and right edge without horizontal clipping.
 - Browser warning/error log query returned an empty list after the route and interaction walkthrough.
-- Reduced-motion rules, semantic headings/landmarks, accessible image text, 44 px minimum targets, and visible focus styling are present.
+- Reduced-motion rules, semantic headings/landmarks, accessible image text, 44 px minimum targets, visible focus styling, and WCAG-AA small-label contrast are present.
 
 final result: passed
