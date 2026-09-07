@@ -5,6 +5,7 @@ import FAQ from "./components/FAQ";
 import Hero from "./components/Hero";
 import HowItWorks from "./components/HowItWorks";
 import Preparation from "./components/Preparation";
+import BookPage from "./pages/BookPage";
 import "./styles/landing.css";
 
 type AppProps = {
@@ -42,9 +43,7 @@ export default function App({ pathname }: AppProps) {
   return (
     <BaseLayout description={page.description} title={page.title}>
       {isBookingPage ? (
-        <div className="container booking-placeholder">
-          <h1>Book a consultation</h1>
-        </div>
+        <BookPage />
       ) : (
         <>
           <Hero />
