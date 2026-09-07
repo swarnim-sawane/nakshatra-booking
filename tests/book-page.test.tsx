@@ -25,12 +25,72 @@ describe("Cal ID booking page", () => {
     expect(html).toContain('<iframe class="booking-embed__frame"');
     expect(html).toContain('title="Book a private consultation with Celestial Guidance"');
     expect(html).toContain('loading="lazy"');
+    expect(html).toContain('scrolling="no"');
     expect(html).toContain(`src="${DEFAULT_CAL_ID_BOOKING_URL}"`);
     expect(html).toContain(`href="${DEFAULT_CAL_ID_BOOKING_URL}"`);
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).toContain("Retry calendar");
     expect(html).not.toMatch(/razorpay_order_id|payment successful|localStorage/i);
+  });
+
+  it("renders hash-only selectors for all three readings and announces the active selection", () => {
+    const html = renderToStaticMarkup(
+      <BookPage
+        bookingUrl={new URL(DEFAULT_CAL_ID_BOOKING_URL)}
+        initialHash="#relationship-consultation"
+      />,
+    );
+
+    expect(html).toContain('href="#personal-consultation"');
+    expect(html).toContain('href="#relationship-consultation"');
+    expect(html).toContain('href="#best-date-analysis"');
+    expect(html).not.toMatch(/href="[^\"]*\?/);
+    expect(html).toMatch(
+      /href="#relationship-consultation"[^>]*aria-current="true"/,
+    );
+  });
+
+  it("repeats the selected reading's exact details before the scheduler", () => {
+    const html = renderToStaticMarkup(
+      <BookPage
+        bookingUrl={new URL(DEFAULT_CAL_ID_BOOKING_URL)}
+        initialHash="#best-date-analysis"
+      />,
+    );
+    const selectedSummary = html.match(
+      /<section class="booking-page__selection"[^>]*>(.*?)<\/section>/s,
+    )?.[1];
+
+    expect(selectedSummary).toContain("Best Date Analysis");
+    expect(selectedSummary).toContain("30 minutes");
+    expect(selectedSummary).toContain("₹500");
+    expect(selectedSummary).toContain(
+      "birth details, event type, preferred date range, location, and constraints.",
+    );
+  });
+
+  it("uses the selected service's validated event URL without changing the destination", () => {
+    const eventUrl = "https://cal.id/nilima-sawane/best-date-analysis";
+    const html = renderToStaticMarkup(
+      <BookPage
+        initialHash="#best-date-analysis"
+        serviceEnvironment={{ PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL: eventUrl }}
+      />,
+    );
+
+    expect(html).toContain(`src="${eventUrl}"`);
+    expect(html).toContain(`href="${eventUrl}"`);
+    expect(html).not.toContain(`${eventUrl}#best-date-analysis`);
+  });
+
+  it("keeps the exact public Cal ID profile fallback for every unconfigured service", () => {
+    const html = renderToStaticMarkup(
+      <BookPage initialHash="#relationship-consultation" serviceEnvironment={{}} />,
+    );
+
+    expect(html).toContain(`src="${DEFAULT_CAL_ID_BOOKING_URL}"`);
+    expect(html).toContain(`href="${DEFAULT_CAL_ID_BOOKING_URL}"`);
   });
 
   it("fails closed when a caller supplies a URL outside Cal ID", () => {
@@ -41,11 +101,12 @@ describe("Cal ID booking page", () => {
     expect(html).not.toContain("https://example.com/consultation");
   });
 
-  it("renders the booking route from pathname without touching or exposing an opaque token", () => {
+  it("selects from the hash without touching or exposing an opaque query token", () => {
     const opaqueToken = "opaque-test-token";
     vi.stubGlobal("window", {
       location: {
         pathname: "/book/",
+        hash: "#relationship-consultation",
         get search() {
           throw new Error("The booking route must not read window.location.search.");
         },
@@ -56,6 +117,7 @@ describe("Cal ID booking page", () => {
 
     expect(getRouteKind("/book/")).toBe("booking");
     expect(html).toContain("Book a time that feels right.");
+    expect(html).toContain("Relationship Consultation");
     expect(html).not.toContain(opaqueToken);
   });
 });

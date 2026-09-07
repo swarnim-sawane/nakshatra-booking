@@ -32,13 +32,18 @@ export default function CalIdEmbed({ bookingUrl }: CalIdEmbedProps) {
   };
 
   return (
-    <section className="booking-embed" aria-label="Cal ID booking calendar">
+    <section
+      className="booking-embed booking-embed--temporary-fallback"
+      aria-label="Cal ID booking calendar"
+      data-integration="temporary-raw-iframe"
+    >
       <iframe
         key={embedKey}
         className="booking-embed__frame"
         src={safeUrl.href}
         title={embedTitle}
         loading="lazy"
+        scrolling="no"
       />
       <div className="booking-embed__fallback" aria-live="polite">
         <p>If the calendar does not appear, retry it here or continue on Cal ID.</p>
