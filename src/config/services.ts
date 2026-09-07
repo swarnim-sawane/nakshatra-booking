@@ -24,7 +24,7 @@ export const consultationServices = [
     purpose:
       "A one-to-one session for clarity, direction, and a deeper understanding of the client's current life context.",
     scope:
-      "The birth chart, natural tendencies, strengths, recurring patterns, and current themes. Upcoming transits may be considered with a focus on the next year.",
+      "Your birth chart: natural tendencies, strengths, recurring patterns, and the themes shaping your experiences. Upcoming transits can also be considered, with a focus on what may unfold over the next year.",
     preparation:
       "One person's birth date, exact birth time when known, birth place, and the main question or situation.",
   },
@@ -37,7 +37,7 @@ export const consultationServices = [
     purpose:
       "A clearer understanding of a relationship without deterministic compatibility scores or soulmate claims.",
     scope:
-      "Both birth charts, each person's natural tendencies and emotional needs, synastry, and the composite chart.",
+      "Both birth charts: natural tendencies, emotional needs, and ways of relating. The reading considers synastry—where there may be ease, attraction, tension, or misunderstanding—and the composite chart, which represents the relationship itself.",
     preparation:
       "Both people's birth dates, exact birth times when known, birth places, and one relationship question.",
   },
@@ -50,7 +50,7 @@ export const consultationServices = [
     purpose:
       "Choose supportive timing for an important event such as a marriage, business launch, contract, or major move.",
     scope:
-      "The client's birth chart and relevant upcoming transits applied to the stated goal.",
+      "Your birth chart and upcoming transits, considered against the event, date range, location, and goals you provide.",
     preparation:
       "The client's birth details, event type, preferred date range, location, and constraints.",
   },
