@@ -26,10 +26,13 @@ input,
 select,
 textarea,
 summary {
-  min-height: 44px;
+  min-block-size: 44px;
+  min-inline-size: 44px;
 }
 
 a {
+  display: inline-flex;
+  align-items: center;
   color: inherit;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
@@ -166,6 +169,7 @@ summary {
 .mobile-navigation summary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
   list-style: none;
   font-size: 0.875rem;

@@ -1,13 +1,32 @@
 import BaseLayout from "./layouts/BaseLayout";
 
-export default function App() {
+type AppProps = {
+  pathname?: string;
+};
+
+const homePage = {
+  title: "Celestial Guidance",
+  description: "Private one-to-one astrology consultations with a clear route to booking.",
+};
+
+const bookingPage = {
+  title: "Book | Celestial Guidance",
+  description: "Choose a time for a private one-to-one astrology consultation.",
+};
+
+function currentPathname(pathname?: string) {
+  return pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname);
+}
+
+export default function App({ pathname }: AppProps) {
+  const activePathname = currentPathname(pathname);
+  const isBookingPage = activePathname === "/book/" || activePathname === "/book";
+  const page = isBookingPage ? bookingPage : homePage;
+
   return (
-    <BaseLayout
-      description="Private one-to-one astrology consultations with a clear route to booking."
-      title="Celestial Guidance"
-    >
+    <BaseLayout description={page.description} title={page.title}>
       <div className="container">
-        <h1>Celestial Guidance</h1>
+        <h1>{isBookingPage ? "Book a consultation" : "Celestial Guidance"}</h1>
       </div>
     </BaseLayout>
   );
