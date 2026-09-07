@@ -7,7 +7,7 @@ Date: 7 September 2026
 - Source visual truth: `docs/design/option-3-booking-first-concierge.png`
 - Source pixels: 1487 × 1058.
 - Implementation screenshot: `docs/qa/screenshots/landing-desktop-1440x1024.jpg`
-- Route and state: `/`, light appearance, signed-out public landing page, first-load state; no live Cal ID event is configured.
+- Route and state: `/`, light appearance, signed-out public landing page, first-load state. Nilima Sawane's public Cal ID profile is connected on `/book/`; the dedicated astrology event is not yet configured in Cal ID.
 - Requested Codex in-app browser outer viewport: 1440 × 1024 CSS px.
 - Honest browser content capture: 1425 × 970 pixels. The in-app browser reserved 15 px for the vertical scrollbar and 54 px for browser chrome.
 - Density: one screenshot pixel per captured CSS pixel; no double-density scaling was applied.
@@ -21,7 +21,7 @@ No actionable P0, P1, or P2 finding remains after the final comparison pass.
 
 The full comparison confirms that the warm paper/surface balance, black pill actions, accessible text-specific ochre labels, serif-led hierarchy, two-column composition, quiet one-pixel borders, and consultation imagery preserve the approved Option 3 direction. The generated image is sharp, naturally cropped, correctly integrated into its panel, and uses no CSS art or placeholder illustration.
 
-The approved source shows a fictional live calendar. The implementation intentionally replaces it with the consultation image, truthful booking summary, and “Live availability on the booking page” status. This is an accepted product constraint: local QA used the safe unconfigured state and did not invent slots, price, or payment acceptance.
+The approved source shows a fictional live calendar. The landing page intentionally replaces it with the consultation image, truthful booking summary, and “Live availability on the booking page” status. The separate `/book/` route now embeds Nilima Sawane's real public Cal ID profile; the website still invents no slots, price, payment, or confirmation state.
 
 The focused comparison confirms readable heading wraps, aligned factual rows, consistent icon stroke weight, clear action hierarchy, and unchanged touch-target sizing after the density fix.
 
@@ -60,7 +60,7 @@ The focused comparison confirms readable heading wraps, aligned factual rows, co
 - Header anchors navigated to `#about`, `#consultation`, and `#faqs`.
 - The first FAQ expanded and collapsed as a semantic disclosure, and the answer appeared in the accessibility tree.
 - Seven booking links resolve to `/book/`; the visible mobile Book action successfully opened the booking route.
-- `/book/?s=opaque-test-token` retained the public URL while rendering no token text, iframe, or external Cal ID link in the unconfigured state.
+- `/book/?s=opaque-test-token` retained the public URL while rendering Nilima Sawane's Cal ID profile from the unchanged `https://cal.id/nilima-sawane` iframe source. The opaque token was neither displayed nor forwarded.
 - Desktop measurement recorded body/document `scrollWidth` equal to `clientWidth` at 1425 px. Mobile captures show the full header, primary action, and right edge without horizontal clipping.
 - Browser warning/error log query returned an empty list after the route and interaction walkthrough.
 - Reduced-motion rules, semantic headings/landmarks, accessible image text, 44 px minimum targets, visible focus styling, and WCAG-AA small-label contrast are present.

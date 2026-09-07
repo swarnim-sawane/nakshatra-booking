@@ -11,7 +11,7 @@ The commands were run separately before browser QA and repeated separately after
 | Command | Result |
 | --- | --- |
 | `npm run check` | Exit 0; TypeScript emitted no diagnostics. |
-| `npm test` | Exit 0; production build completed, Node tests 9/9 passed, Vitest tests 20/20 passed. |
+| `npm test` | Exit 0; production build completed, Node tests 9/9 passed, Vitest tests 23/23 passed. |
 | `npm run build` | Exit 0; Vite transformed 1751 modules and emitted both `index.html` and `book/index.html`. |
 
 The first preview attempt exposed an environment-specific Vite cache failure because the gitignored `node_modules` path is a junction outside this workspace. A failing regression test was recorded, `vite.config.cjs` was changed to use the local `.vite-cache`, and the focused Node test then passed 3/3. The persistent Vite server started successfully afterward.
@@ -23,9 +23,9 @@ The viewport capability controls the in-app browser's outer size. Its chrome and
 | Route | State | Requested outer viewport | Captured pixels | Result | Evidence |
 | --- | --- | ---: | ---: | --- | --- |
 | `/` | Landing, final accessible-label state | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/landing-desktop-1440x1024.jpg` |
-| `/book/` | Safe unconfigured booking state | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/book-desktop-1440x1024.jpg` |
+| `/book/` | Historical pre-connection safe fallback | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/book-desktop-1440x1024.jpg` |
 | `/` | Landing, final accessible-label state | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/landing-mobile-390x844.jpg` |
-| `/book/` | Safe unconfigured booking state | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/book-mobile-390x844.jpg` |
+| `/book/` | Historical pre-connection safe fallback | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/book-mobile-390x844.jpg` |
 
 The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and resized to match the implementation's native 1425 × 970 capture. After the accessible label-color correction, all four canonical screenshots were refreshed and both boards were regenerated. The resulting comparison is `docs/qa/option-3-vs-landing-desktop.png`; its focused hero inspection is `docs/qa/option-3-vs-landing-hero-focus.png`. The initial P2 first-fold density drift was corrected and the final comparison found no remaining P0/P1/P2 issue. See the project-root `design-qa.md` for full findings and normalization details.
 
@@ -41,11 +41,11 @@ The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and re
 - The About eyebrow uses `#b5833b`, measured at 5.23:1 against its `#1c1915` background. A focused luminance regression enforces that on-dark ratio at or above 4.5:1. Because the About section is below the canonical first fold, this scoped correction did not alter or require recapturing the existing comparison-board pixels.
 - A configured embed renders Retry and the direct Cal ID link unconditionally. Retry only increments the iframe remount key after revalidating the supplied URL; it does not infer iframe success or failure.
 - Raw URL validation rejects explicitly written `:443` for both `cal.id` and `app.cal.id`, as well as custom ports and credentials.
-- `/book/?s=opaque-test-token` showed the safe unconfigured heading while rendering zero token-text matches, zero iframes, and zero external `cal.id`/`app.cal.id` links.
+- `/book/?s=opaque-test-token` rendered the connected profile with iframe source exactly `https://cal.id/nilima-sawane`; the opaque token had zero visible matches and was not forwarded to Cal ID.
 - Desktop body and document `scrollWidth` equalled `clientWidth` at 1425 px. Mobile screenshots show no clipped header, primary action, or content edge.
 - The landing and booking pages preserve one H1 each, semantic navigation/landmarks, visible focus, 44 px minimum targets, and reduced-motion support.
 - Browser diagnostics returned zero warning or error entries after the walkthrough.
-- No live Cal ID page, booking, payment, Google Meet, cancellation, refund, deployment, or WhatsApp action was opened or attempted.
+- Nilima Sawane's public Cal ID profile, the Partnership Call calendar, and its attendee-details form were opened without submitting. Google Meet and Asia/Kolkata were visible. No booking, payment, cancellation, refund, deployment, or WhatsApp action was attempted.
 
 Residual P3 observations are limited to offline system-font fallbacks and the mobile native menu remaining open after an in-page anchor selection. Neither blocks the path to `/book/`; both are documented in `design-qa.md`.
 
@@ -53,7 +53,7 @@ Residual P3 observations are limited to offline system-font fallbacks and the mo
 
 Local evidence does not establish production acceptance. Before launch, complete and verify all of the following:
 
-- Supply the owner's real Cal ID event URL and re-run the configured embed/fallback browser pass.
+- Create the dedicated astrology consultation in Cal ID, replace the temporary public-profile URL with its event-specific URL, and repeat the embed/fallback browser pass.
 - Confirm the real duration, price, currency, tax treatment, business name, biography, portrait, contact details, and support path.
 - Connect the owner's Google Calendar for conflict checking and Google Meet for meeting creation.
 - Configure real availability, buffers, booking limits, attendee questions, consent, confirmation, reminders, cancellation, rescheduling, and refund rules in Cal ID.
@@ -65,4 +65,4 @@ Local evidence does not establish production acceptance. Before launch, complete
 
 ## Handoff state
 
-The Vite development server remains running on `127.0.0.1:4173`, and the local landing page is left open in the Codex in-app browser. The booking route remains intentionally unconfigured until the owner supplies the real Cal ID event URL.
+The Vite development server remains running on `127.0.0.1:4173`, and the connected booking route is left open in the Codex in-app browser. It currently shows Nilima Sawane's public profile; the event-specific URL must replace it after the dedicated astrology consultation is created in Cal ID.

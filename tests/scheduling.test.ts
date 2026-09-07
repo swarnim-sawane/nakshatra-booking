@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { parseCalIdBookingUrl } from "../src/config/scheduling";
+import {
+  parseCalIdBookingUrl,
+  resolveCalIdBookingUrl,
+} from "../src/config/scheduling";
 
 describe("parseCalIdBookingUrl", () => {
   it("accepts an HTTPS Cal ID event URL", () => {
@@ -22,4 +25,21 @@ describe("parseCalIdBookingUrl", () => {
     "rejects unsafe value %s",
     (value) => expect(parseCalIdBookingUrl(value)).toBeNull(),
   );
+});
+
+describe("resolveCalIdBookingUrl", () => {
+  it("uses Nilima Sawane's public Cal ID page when no deployment override is set", () => {
+    expect(resolveCalIdBookingUrl(undefined)?.href).toBe("https://cal.id/nilima-sawane");
+    expect(resolveCalIdBookingUrl("  ")?.href).toBe("https://cal.id/nilima-sawane");
+  });
+
+  it("keeps a valid event-specific deployment override", () => {
+    expect(resolveCalIdBookingUrl("https://cal.id/nilima-sawane/astrology-consultation")?.href).toBe(
+      "https://cal.id/nilima-sawane/astrology-consultation",
+    );
+  });
+
+  it("fails closed for an explicitly unsafe deployment override", () => {
+    expect(resolveCalIdBookingUrl("https://example.com/fake-calendar")).toBeNull();
+  });
 });

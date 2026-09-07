@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App, { getRouteKind } from "../src/App";
+import { DEFAULT_CAL_ID_BOOKING_URL } from "../src/config/scheduling";
 import BookPage from "../src/pages/BookPage";
 
 afterEach(() => {
@@ -18,14 +19,14 @@ describe("Cal ID booking page", () => {
 
   it("embeds only the supplied validated Cal ID URL with a safe direct fallback", () => {
     const html = renderToStaticMarkup(
-      <BookPage bookingUrl={new URL("https://cal.id/example/consultation")} />,
+      <BookPage bookingUrl={new URL(DEFAULT_CAL_ID_BOOKING_URL)} />,
     );
 
     expect(html).toContain('<iframe class="booking-embed__frame"');
     expect(html).toContain('title="Book a private consultation with Celestial Guidance"');
     expect(html).toContain('loading="lazy"');
-    expect(html).toContain('src="https://cal.id/example/consultation"');
-    expect(html).toContain('href="https://cal.id/example/consultation"');
+    expect(html).toContain(`src="${DEFAULT_CAL_ID_BOOKING_URL}"`);
+    expect(html).toContain(`href="${DEFAULT_CAL_ID_BOOKING_URL}"`);
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).toContain("Retry calendar");

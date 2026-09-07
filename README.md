@@ -2,7 +2,7 @@
 
 Celestial Guidance is a responsive website for one private, 60-minute astrology consultation. The site explains the session and sends visitors to a dedicated booking page. Cal ID is the intended scheduling boundary; Google Meet and Razorpay are configured inside Cal ID rather than recreated in this frontend.
 
-The current build is intentionally safe when Cal ID is not configured: `/book/` shows a clear setup message and does not display invented availability, price, payment, or confirmation states.
+The current build connects `/book/` to Nilima Sawane's public Cal ID profile. If a deployment supplies an invalid explicit Cal ID URL, the page fails closed with a setup message rather than displaying an unsafe embed.
 
 ## Local setup
 
@@ -29,13 +29,15 @@ This repository does not yet contain a lockfile. Registry access was unavailable
 
 ## Public configuration
 
-Create an ignored `.env.local` from `.env.example` and replace the example URL:
+Create an ignored `.env.local` from `.env.example`. The public profile URL works for local review:
 
 ```env
-PUBLIC_CAL_ID_BOOKING_URL=https://cal.id/your-account/your-event
+PUBLIC_CAL_ID_BOOKING_URL=https://cal.id/nilima-sawane
 ```
 
-`PUBLIC_CAL_ID_BOOKING_URL` is the only public environment value consumed by the application. It must use HTTPS, have no credentials or explicitly written port (including `:443`), and use the exact host `cal.id` or `app.cal.id`. An absent or invalid value keeps the booking page in its safe unconfigured state.
+`PUBLIC_CAL_ID_BOOKING_URL` is the only public environment value consumed by the application. The site defaults to Nilima Sawane's public Cal ID profile, and this variable can override it with an event-specific URL after the astrology consultation event is created. It must use HTTPS, have no credentials or explicitly written port (including `:443`), and use the exact host `cal.id` or `app.cal.id`. An invalid explicit value keeps the booking page in its safe unconfigured state.
+
+The public profile currently contains several general-purpose meeting types. Before launch, replace the value with the direct URL for the dedicated astrology consultation so visitors cannot choose an unrelated event.
 
 `SITE_URL` remains in `.env.example` as a reserved deployment example; the current Vite application does not consume it.
 

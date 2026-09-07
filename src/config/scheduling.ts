@@ -7,6 +7,8 @@ export type SchedulingConfig = {
   sessionMinutes: 60;
 };
 
+export const DEFAULT_CAL_ID_BOOKING_URL = "https://cal.id/nilima-sawane";
+
 export function parseCalIdBookingUrl(value: string): URL | null {
   const rawValue = value.trim();
   if (!rawValue) return null;
@@ -30,9 +32,14 @@ export function parseCalIdBookingUrl(value: string): URL | null {
   }
 }
 
+export function resolveCalIdBookingUrl(value: string | undefined): URL | null {
+  const configuredValue = value?.trim();
+  return parseCalIdBookingUrl(configuredValue || DEFAULT_CAL_ID_BOOKING_URL);
+}
+
 export const schedulingConfig: SchedulingConfig = {
   provider: "cal-id",
-  bookingUrl: parseCalIdBookingUrl(import.meta.env.PUBLIC_CAL_ID_BOOKING_URL ?? ""),
+  bookingUrl: resolveCalIdBookingUrl(import.meta.env.PUBLIC_CAL_ID_BOOKING_URL),
   defaultTimeZone: "Asia/Kolkata",
   sessionMinutes: 60,
 };
