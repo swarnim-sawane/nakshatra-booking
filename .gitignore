@@ -1,0 +1,10 @@
+.env*
+!.env.example
+node_modules/
+dist/
+.astro/
+.vercel/
+legacy/calcom-prototype/
+.superpowers/sdd/
+.DS_Store
+*.log
