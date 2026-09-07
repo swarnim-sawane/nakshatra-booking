@@ -11,7 +11,7 @@ The commands were run separately before browser QA and repeated separately after
 | Command | Result |
 | --- | --- |
 | `npm run check` | Exit 0; TypeScript emitted no diagnostics. |
-| `npm test` | Exit 0; production build completed, Node tests 8/8 passed, Vitest tests 20/20 passed. |
+| `npm test` | Exit 0; production build completed, Node tests 9/9 passed, Vitest tests 20/20 passed. |
 | `npm run build` | Exit 0; Vite transformed 1751 modules and emitted both `index.html` and `book/index.html`. |
 
 The first preview attempt exposed an environment-specific Vite cache failure because the gitignored `node_modules` path is a junction outside this workspace. A failing regression test was recorded, `vite.config.cjs` was changed to use the local `.vite-cache`, and the focused Node test then passed 3/3. The persistent Vite server started successfully afterward.
@@ -38,6 +38,7 @@ The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and re
 - Keyboard focus exposed the skip link clearly; Enter moved focus to the main content.
 - The final-booking action's two-tone surface/ink focus ring was visibly distinct from the forest panel in the mobile in-app browser and was not clipped.
 - The 12 px text-ochre token is `#875d24`; its measured contrast is 5.24:1 on paper and 5.70:1 on the light surface. The WCAG luminance regression test enforces both ratios at or above 4.5:1.
+- The About eyebrow uses `#b5833b`, measured at 5.23:1 against its `#1c1915` background. A focused luminance regression enforces that on-dark ratio at or above 4.5:1. Because the About section is below the canonical first fold, this scoped correction did not alter or require recapturing the existing comparison-board pixels.
 - A configured embed renders Retry and the direct Cal ID link unconditionally. Retry only increments the iframe remount key after revalidating the supplied URL; it does not infer iframe success or failure.
 - Raw URL validation rejects explicitly written `:443` for both `cal.id` and `app.cal.id`, as well as custom ports and credentials.
 - `/book/?s=opaque-test-token` showed the safe unconfigured heading while rendering zero token-text matches, zero iframes, and zero external `cal.id`/`app.cal.id` links.

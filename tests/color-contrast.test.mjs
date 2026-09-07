@@ -45,3 +45,14 @@ test("small ochre labels meet WCAG AA on paper and light surfaces", () => {
     /\.booking-page__eyebrow,\s*\.booking-embed__eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text\);/s,
   );
 });
+
+test("warm labels meet WCAG AA on the dark about section", () => {
+  const textOchreOnDark = readHexToken("--color-ochre-text-on-dark");
+  const ink = readHexToken("--color-ink");
+
+  assert.ok(contrastRatio(textOchreOnDark, ink) >= 4.5);
+  assert.match(
+    landingCss,
+    /\.about-practice \.eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text-on-dark\);/s,
+  );
+});

@@ -46,6 +46,7 @@ The focused comparison confirms readable heading wraps, aligned factual rows, co
 ### Final accessibility and fallback pass — passed
 
 - A darker `--color-ochre-text` value of `#875d24` now gives 5.24:1 contrast on paper and 5.70:1 on the light surface. Decorative icons, borders, and large step numbers retain the original ochre.
+- The About section uses the dedicated warm on-dark label token `#b5833b`, measured at 5.23:1 against its `#1c1915` ink background. This section is below the canonical first fold, so the scoped correction does not change either comparison board's pixels.
 - The white final-booking action now has a two-tone surface/ink focus ring. The focused mobile state was inspected in the Codex in-app browser and remained clearly separated from the forest panel without clipping.
 - A configured Cal ID embed always presents both Retry and the direct Cal ID link. Retry remounts only a newly revalidated URL; no cross-origin iframe error or success inference controls the fallback.
 - Explicit default ports (`:443`) now fail closed for both allowed Cal ID hosts, alongside custom ports and credentials.

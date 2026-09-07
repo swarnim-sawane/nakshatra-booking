@@ -250,6 +250,10 @@
   color: var(--color-surface);
 }
 
+.about-practice .eyebrow {
+  color: var(--color-ochre-text-on-dark);
+}
+
 .about-practice__grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
