@@ -55,4 +55,11 @@ describe("Nilima-led reading services landing page", () => {
     expect(html).toContain("review the terms presented before confirming your booking");
     expect(html).not.toContain("policies still need to be supplied");
   });
+
+  it("keeps the footer aligned with the three-reading offer", () => {
+    const html = renderToStaticMarkup(<App pathname="/" />);
+
+    expect(html).toContain("Three focused readings with Nilima");
+    expect(html).not.toContain("One private consultation");
+  });
 });

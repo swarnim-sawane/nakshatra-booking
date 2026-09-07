@@ -22,7 +22,7 @@ export const consultationServices = [
     durationMinutes: 60,
     priceInr: 1_000,
     purpose:
-      "A one-to-one session for clarity, direction, and a deeper understanding of the client's current life context.",
+      "A one-to-one session for clarity, direction, and a deeper understanding of where you are in life right now.",
     scope:
       "Your birth chart: natural tendencies, strengths, recurring patterns, and the themes shaping your experiences. Upcoming transits can also be considered, with a focus on what may unfold over the next year.",
     preparation:
@@ -52,7 +52,7 @@ export const consultationServices = [
     scope:
       "Your birth chart and upcoming transits, considered against the event, date range, location, and goals you provide.",
     preparation:
-      "The client's birth details, event type, preferred date range, location, and constraints.",
+      "Your birth details, event type, preferred date range, location, and constraints.",
   },
 ] as const satisfies readonly ConsultationService[];
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_CAL_ID_EVENT_URLS,
   getCalIdUrlForService,
   parseCalIdBookingUrl,
   resolveCalIdBookingUrl,
@@ -72,15 +73,18 @@ describe("getCalIdUrlForService", () => {
     ).toBe("https://cal.id/nilima-sawane/best-date-analysis");
   });
 
-  it("uses the validated public profile when an event-specific URL is absent", () => {
+  it("uses verified direct-event defaults when deployment overrides are absent", () => {
     expect(getCalIdUrlForService(personal, {})?.href).toBe(
-      "https://cal.id/nilima-sawane",
+      DEFAULT_CAL_ID_EVENT_URLS["personal-consultation"],
     );
     expect(
       getCalIdUrlForService(relationship, {
         PUBLIC_CAL_ID_BOOKING_URL: "https://cal.id/nilima-sawane",
       })?.href,
-    ).toBe("https://cal.id/nilima-sawane");
+    ).toBe(DEFAULT_CAL_ID_EVENT_URLS["relationship-consultation"]);
+    expect(getCalIdUrlForService(bestDate, {})?.href).toBe(
+      DEFAULT_CAL_ID_EVENT_URLS["best-date-analysis"],
+    );
   });
 
   it.each([

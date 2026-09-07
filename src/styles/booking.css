@@ -178,8 +178,7 @@
 .booking-embed__frame {
   display: block;
   width: 100%;
-  height: clamp(1500px, 200vh, 1800px);
-  height: clamp(1500px, 200svh, 1800px);
+  height: 960px;
   border: 0;
   background: var(--color-surface-muted);
 }
@@ -225,6 +224,12 @@
 
 .booking-page__note p {
   margin: 0;
+}
+
+@media (max-width: 860px) {
+  .booking-embed__frame {
+    height: 1500px;
+  }
 }
 
 @media (max-width: 640px) {

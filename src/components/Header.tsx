@@ -6,7 +6,7 @@ export default function Header() {
     <header className="site-header">
       <div className="container site-header__inner">
         <a className="brand" href="/" aria-label={brandName}>
-          <img aria-hidden="true" className="brand__mark" src="/brand/favicon-32.png" width="32" height="32" />
+          <img aria-hidden="true" className="brand__mark" src="/brand/icon-192.png" width="32" height="32" />
           <span>{brandName}</span>
         </a>
         <nav className="primary-navigation" aria-label="Primary navigation">

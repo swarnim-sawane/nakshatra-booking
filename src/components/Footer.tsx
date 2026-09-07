@@ -9,7 +9,7 @@ export default function Footer() {
           <a className="brand" href="/">
             {brandName}
           </a>
-          <p>One private consultation, with a clear path to choosing a time online.</p>
+          <p>Three focused readings with Nilima, with a clear path to booking online.</p>
         </div>
         <BookingAction class="site-footer__booking" />
       </div>

@@ -39,7 +39,7 @@ export default function Hero() {
               </li>
               <li>
                 <Globe2 aria-hidden="true" size={19} strokeWidth={1.7} />
-                <span>Asia/Kolkata</span>
+                <span>Times shown in your timezone</span>
               </li>
               <li>
                 <Video aria-hidden="true" size={19} strokeWidth={1.7} />

@@ -20,7 +20,8 @@ export const howItWorks = [
   },
   {
     title: "Share context and book",
-    description: "Complete the requested details and secure online payment through Razorpay in Cal ID.",
+    description:
+      "Complete the requested details, choose an available time, and pay securely online through Razorpay.",
   },
   {
     title: "Meet with Nilima",

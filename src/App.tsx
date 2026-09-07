@@ -20,12 +20,13 @@ type PageMetadata = {
 
 const homePage: PageMetadata = {
   title: "Celestial Guidance",
-  description: "Private one-to-one astrology consultations with a clear route to booking.",
+  description:
+    "Private astrology consultations with Nilima Sawane for personal insight, relationships, and meaningful timing.",
 };
 
 const bookingPage: PageMetadata = {
   title: "Book | Celestial Guidance",
-  description: "Choose a time for a private one-to-one astrology consultation.",
+  description: "Choose a reading and book a private Google Meet consultation with Nilima Sawane.",
 };
 
 function currentPathname(pathname?: string) {

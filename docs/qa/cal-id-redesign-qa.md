@@ -1,68 +1,72 @@
-# Cal ID redesign local QA record
+# Cal ID three-reading local QA record
 
-Date: 7 September 2026
-Environment: Windows, Node.js 22.12.0, Vite 7.3.1, React 18.3.1, Codex in-app browser
+Date: 8 September 2026
+Environment: Windows, Vite 7.3.1, React 18.3.1, Codex in-app browser
 Local preview: `http://127.0.0.1:4173/`
 
 ## Automated gate
 
-The commands were run separately before browser QA and repeated separately after all QA fixes:
-
 | Command | Result |
 | --- | --- |
 | `npm run check` | Exit 0; TypeScript emitted no diagnostics. |
-| `npm test` | Exit 0; production build completed, Node tests 9/9 passed, Vitest tests 23/23 passed. |
-| `npm run build` | Exit 0; Vite transformed 1751 modules and emitted both `index.html` and `book/index.html`. |
+| `npm test` | Exit 0; production build passed, Node tests 12/12 passed, Vitest tests 47/47 passed. |
+| `npm run build` | Exit 0; Vite transformed 1,754 modules and emitted both HTML entries. |
 
-The first preview attempt exposed an environment-specific Vite cache failure because the gitignored `node_modules` path is a junction outside this workspace. A failing regression test was recorded, `vite.config.cjs` was changed to use the local `.vite-cache`, and the focused Node test then passed 3/3. The persistent Vite server started successfully afterward.
+The suite covers the exact service catalogue, hash-only selection, click and history-style hash changes, URL validation, future-token isolation, direct-event resolution and defaults, booking-page rendering, shell/metadata, responsive frame heights, focus/contrast, production headers, Vite configuration, and every Kundli asset's PNG dimensions and alpha channel.
 
-## Screenshot matrix
+## Responsive matrix
 
-The viewport capability controls the in-app browser's outer size. Its chrome and vertical scrollbar reduce the honest captured content dimensions; both requested and captured dimensions are recorded instead of padding or stretching evidence.
+The in-app browser viewport capability was used for each requested size. The browser reserves 15 px for its scrollbar, so the document client width is 15 px below the requested outer width. `scrollWidth` equalled `clientWidth` at every size.
 
-| Route | State | Requested outer viewport | Captured pixels | Result | Evidence |
-| --- | --- | ---: | ---: | --- | --- |
-| `/` | Landing, final accessible-label state | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/landing-desktop-1440x1024.jpg` |
-| `/book/` | Historical pre-connection safe fallback | 1440 × 1024 | 1425 × 970 | Pass | `docs/qa/screenshots/book-desktop-1440x1024.jpg` |
-| `/` | Landing, final accessible-label state | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/landing-mobile-390x844.jpg` |
-| `/book/` | Historical pre-connection safe fallback | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/book-mobile-390x844.jpg` |
+| Requested viewport | Client and scroll width | Landing | Booking |
+| ---: | ---: | --- | --- |
+| 375 × 812 | 360 / 360 px | Three cards present; no horizontal overflow | Best Date active; direct event; no token; no iframe scroll |
+| 768 × 900 | 753 / 753 px | Three cards present; no horizontal overflow | Best Date active; direct event; no token; no iframe scroll |
+| 1024 × 900 | 1009 / 1009 px | Three cards present; no horizontal overflow | Best Date active; direct event; no token; no iframe scroll |
+| 1440 × 1024 | 1425 / 1425 px | Three cards present; no horizontal overflow | Best Date active; direct event; no token; no iframe scroll |
 
-The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and resized to match the implementation's native 1425 × 970 capture. After the accessible label-color correction, all four canonical screenshots were refreshed and both boards were regenerated. The resulting comparison is `docs/qa/option-3-vs-landing-desktop.png`; its focused hero inspection is `docs/qa/option-3-vs-landing-hero-focus.png`. The initial P2 first-fold density drift was corrected and the final comparison found no remaining P0/P1/P2 issue. See the project-root `design-qa.md` for full findings and normalization details.
+The 375 px landing and booking headers were visually inspected, including the Kundli mark, Menu, Book action, multi-line editorial H1, service choices, active service, and booking facts. The 1440 px landing hero was compared directly beside the live Starheal reference using the same viewport override.
 
-## Interaction, responsive, console, and accessibility evidence
+## Verified interaction path
 
-- All seven rendered booking links use `/book/`; the mobile Book action navigated successfully.
-- About, The consultation, and FAQs anchors reached `#about`, `#consultation`, and `#faqs`.
-- The mobile Menu opened by click and by keyboard and exposed the three navigation links.
-- The first FAQ expanded and collapsed, with its answer entering and leaving the accessibility tree.
-- Keyboard focus exposed the skip link clearly; Enter moved focus to the main content.
-- The final-booking action's two-tone surface/ink focus ring was visibly distinct from the forest panel in the mobile in-app browser and was not clipped.
-- The 12 px text-ochre token is `#875d24`; its measured contrast is 5.24:1 on paper and 5.70:1 on the light surface. The WCAG luminance regression test enforces both ratios at or above 4.5:1.
-- The About eyebrow uses `#b5833b`, measured at 5.23:1 against its `#1c1915` background. A focused luminance regression enforces that on-dark ratio at or above 4.5:1. Because the About section is below the canonical first fold, this scoped correction did not alter or require recapturing the existing comparison-board pixels.
-- A configured embed renders Retry and the direct Cal ID link unconditionally. Retry only increments the iframe remount key after revalidating the supplied URL; it does not infer iframe success or failure.
-- Raw URL validation rejects explicitly written `:443` for both `cal.id` and `app.cal.id`, as well as custom ports and credentials.
-- `/book/?s=opaque-test-token` rendered the connected profile with iframe source exactly `https://cal.id/nilima-sawane`; the opaque token had zero visible matches and was not forwarded to Cal ID.
-- Desktop body and document `scrollWidth` equalled `clientWidth` at 1425 px. Mobile screenshots show no clipped header, primary action, or content edge.
-- The landing and booking pages preserve one H1 each, semantic navigation/landmarks, visible focus, 44 px minimum targets, and reduced-motion support.
-- Browser diagnostics returned zero warning or error entries after the walkthrough.
-- Nilima Sawane's public Cal ID profile, the Partnership Call calendar, and its attendee-details form were opened without submitting. Google Meet and Asia/Kolkata were visible. No booking, payment, cancellation, refund, deployment, or WhatsApp action was attempted.
+- The three landing-card actions route to `/book/#personal-consultation`, `/book/#relationship-consultation`, and `/book/#best-date-analysis`.
+- Clicking Best Date Analysis updated the browser hash, accessible active state, selected duration/price/preparation, iframe source, and direct fallback link.
+- The exact event-specific iframe sources are:
+  - `https://cal.id/nilima-sawane/personal-consultation?duration=60`
+  - `https://cal.id/nilima-sawane/relationship-consultation?duration=60`
+  - `https://cal.id/nilima-sawane/best-date-analysis?duration=30`
+- `/book/?s=opaque-test-token#best-date-analysis` kept the token in the visitor-facing URL but did not render it or forward it to Cal ID.
+- The iframe carries `scrolling="no"`; the main document owns the visible scrollbar. The direct event has a 960 px desktop height and a 1500 px narrow-screen height.
+- Relationship Consultation exposed Asia/Kolkata, Google Meet, ₹1,000, live dates, and time slots.
+- A Relationship time slot was selected to open the attendee form. Name, email, notes, guest, Terms, Privacy Policy, Back, and Pay to book controls were visible. No customer data was entered and no booking or payment was submitted.
+- Browser diagnostics returned no warning or error whose source URL was the local application.
 
-Residual P3 observations are limited to offline system-font fallbacks and the mobile native menu remaining open after an in-page anchor selection. Neither blocks the path to `/book/`; both are documented in `design-qa.md`.
+Cal ID's third-party scripts emitted their own `markdownToSafeHTML`, i18n, Zustand deprecation, dialog-label, and query-debug console messages. These messages originate on `https://cal.id/`; they are not evidence of a local React failure, but the dialog accessibility warning should be monitored when the official Inline embed is reviewed.
 
-## External production gates
+## Cal ID dashboard discrepancies
 
-Local evidence does not establish production acceptance. Before launch, complete and verify all of the following:
+The public event pages are live, but the current Cal ID dashboard state is not launch-ready:
 
-- Create the dedicated astrology consultation in Cal ID, replace the temporary public-profile URL with its event-specific URL, and repeat the embed/fallback browser pass.
-- Confirm the real duration, price, currency, tax treatment, business name, biography, portrait, contact details, and support path.
-- Connect the owner's Google Calendar for conflict checking and Google Meet for meeting creation.
-- Configure real availability, buffers, booking limits, attendee questions, consent, confirmation, reminders, cancellation, rescheduling, and refund rules in Cal ID.
-- Supply and review cancellation, refund, privacy, and consultation-scope policies.
-- Complete Razorpay KYC and Live Mode activation, then verify a controlled payment, server-side signature/webhook handling, idempotency, refund, and operational reconciliation.
-- Verify Cal ID webhooks before treating browser redirects or UI messages as authoritative booking/payment confirmation.
-- Implement WhatsApp automation only as the later phase described in the design specification, using opaque, expiring, hashed session tokens and signed/idempotent webhooks.
-- Perform a clean dependency install and generate/review a lockfile once package-registry access is available.
+- Personal Consultation shows 60 minutes and ₹500. Duration is correct; price must become ₹1,000.
+- Relationship Consultation shows 60 minutes and ₹1,000. Both match.
+- Best Date Analysis shows 30 minutes and ₹1,000. Duration is correct; price must become ₹500.
+- Cal ID still renders in a dark theme with pink controls, which does not match the website's paper/forest/ochre system.
+- Nilima's current Cal ID avatar is a photo collage, not the supplied Kundli identity.
+
+Required dashboard changes are Light appearance, Column mobile layout, `#2F5D50` primary colour, `public/brand/cal-id-logo-600x400.png` logo, and `public/brand/icon-512.png` favicon.
+
+## Remaining production gates
+
+- Correct the two Cal ID amounts and repeat the public-page check.
+- Apply the Cal ID appearance and brand assets, then repeat desktop/mobile visual comparison.
+- Copy the exact Inline code for each event from its Embed tab and review it before replacing the raw iframe fallback or changing CSP.
+- Approve cancellation, rescheduling, refund, privacy, and consultation-scope policies.
+- Confirm the final booking questions and whether any notes, recording, chart copy, or written date recommendation are included.
+- Complete a controlled owner-approved payment for each distinct price, verify exactly one Cal ID booking and Google Meet event, reconcile Razorpay, and test failure/cancellation without creating a booking.
+- Verify confirmation, reminders, rescheduling, cancellation, refund, mobile Cal ID access, Google Calendar conflict checking, and timezone conversion.
+- Supply a genuine Nilima portrait, method/tradition, training, experience, and languages only if those details should be published.
+- Perform a clean dependency install and generate/review a lockfile when registry access is available.
 
 ## Handoff state
 
-The Vite development server remains running on `127.0.0.1:4173`, and the connected booking route is left open in the Codex in-app browser. It currently shows Nilima Sawane's public profile; the event-specific URL must replace it after the dedicated astrology consultation is created in Cal ID.
+The Vite development server is running on `127.0.0.1:4173`. `.env.local` contains the three exact public event URLs and remains gitignored. The website code, examples, and QA records contain no secret credentials.

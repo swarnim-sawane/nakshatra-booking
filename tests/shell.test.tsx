@@ -29,12 +29,12 @@ describe("application shell", () => {
     [
       "/",
       "Celestial Guidance",
-      "Private one-to-one astrology consultations with a clear route to booking.",
+      "Private astrology consultations with Nilima Sawane for personal insight, relationships, and meaningful timing.",
     ],
     [
       "/book/",
       "Book | Celestial Guidance",
-      "Choose a time for a private one-to-one astrology consultation.",
+      "Choose a reading and book a private Google Meet consultation with Nilima Sawane.",
     ],
   ])("selects the correct metadata for %s", (pathname, title, description) => {
     const getPageMetadata = (appModule as MetadataSelectorModule).getPageMetadata;

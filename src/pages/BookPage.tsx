@@ -68,11 +68,11 @@ export default function BookPage({
         <p className="booking-page__eyebrow">Readings with Nilima Sawane</p>
         <h1>Book a time that feels right.</h1>
         <p className="booking-page__lede">
-          Choose the reading that fits your question, then continue to Nilima's Cal ID calendar.
+          Choose the reading that fits your question, then select an available time.
         </p>
         <div className="booking-page__facts" aria-label="Booking details">
-          <span>Asia/Kolkata</span>
-          <span>Google Meet</span>
+          <span>Times shown in your timezone</span>
+          <span>Join privately through Google Meet</span>
           <span>Secure online payment through Razorpay</span>
         </div>
       </div>

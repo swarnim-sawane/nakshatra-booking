@@ -24,8 +24,8 @@ export default function Preparation() {
             <div>
               <h3>Share birth details during booking</h3>
               <p>
-                Cal ID may request your date, time, and place of birth so the chart can be prepared.
-                This landing page does not collect those details.
+                Cal ID may request your date, time, and place of birth so Nilima has the context for
+                your reading. This landing page does not collect those details.
               </p>
             </div>
           </article>

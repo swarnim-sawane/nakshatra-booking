@@ -1,7 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App, { getRouteKind } from "../src/App";
-import { DEFAULT_CAL_ID_BOOKING_URL } from "../src/config/scheduling";
+import {
+  DEFAULT_CAL_ID_BOOKING_URL,
+  DEFAULT_CAL_ID_EVENT_URLS,
+} from "../src/config/scheduling";
 import BookPage from "../src/pages/BookPage";
 
 afterEach(() => {
@@ -66,7 +69,7 @@ describe("Cal ID booking page", () => {
     expect(selectedSummary).toContain("30 minutes");
     expect(selectedSummary).toContain("₹500");
     expect(selectedSummary).toContain(
-      "birth details, event type, preferred date range, location, and constraints.",
+      "Your birth details, event type, preferred date range, location, and constraints.",
     );
   });
 
@@ -84,13 +87,17 @@ describe("Cal ID booking page", () => {
     expect(html).not.toContain(`${eventUrl}#best-date-analysis`);
   });
 
-  it("keeps the exact public Cal ID profile fallback for every unconfigured service", () => {
+  it("keeps the exact direct-event default for an unconfigured service", () => {
     const html = renderToStaticMarkup(
       <BookPage initialHash="#relationship-consultation" serviceEnvironment={{}} />,
     );
 
-    expect(html).toContain(`src="${DEFAULT_CAL_ID_BOOKING_URL}"`);
-    expect(html).toContain(`href="${DEFAULT_CAL_ID_BOOKING_URL}"`);
+    expect(html).toContain(
+      `src="${DEFAULT_CAL_ID_EVENT_URLS["relationship-consultation"]}"`,
+    );
+    expect(html).toContain(
+      `href="${DEFAULT_CAL_ID_EVENT_URLS["relationship-consultation"]}"`,
+    );
   });
 
   it("fails closed when a caller supplies a URL outside Cal ID", () => {

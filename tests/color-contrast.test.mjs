@@ -53,6 +53,6 @@ test("warm labels meet WCAG AA on the dark about section", () => {
   assert.ok(contrastRatio(textOchreOnDark, ink) >= 4.5);
   assert.match(
     landingCss,
-    /\.about-practice \.eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text-on-dark\);/s,
+    /\.meet-nilima \.eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text-on-dark\);/s,
   );
 });

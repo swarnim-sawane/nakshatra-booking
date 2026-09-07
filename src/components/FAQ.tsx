@@ -27,7 +27,7 @@ export default function FAQ() {
         <div>
           <p className="eyebrow">Ready when you are</p>
           <h2>Choose your consultation time</h2>
-          <p>See current availability and complete the booking in Cal ID.</p>
+          <p>See current availability, then confirm your booking securely online.</p>
         </div>
         <BookingAction label="Continue to booking" />
       </div>

@@ -6,10 +6,18 @@ export type SchedulingConfig = {
   provider: "cal-id";
   bookingUrl: URL | null;
   defaultTimeZone: "Asia/Kolkata";
-  sessionMinutes: 60;
 };
 
 export const DEFAULT_CAL_ID_BOOKING_URL = "https://cal.id/nilima-sawane";
+
+export const DEFAULT_CAL_ID_EVENT_URLS = {
+  "personal-consultation":
+    "https://cal.id/nilima-sawane/personal-consultation?duration=60",
+  "relationship-consultation":
+    "https://cal.id/nilima-sawane/relationship-consultation?duration=60",
+  "best-date-analysis":
+    "https://cal.id/nilima-sawane/best-date-analysis?duration=30",
+} as const satisfies Record<ServiceSlug, string>;
 
 type CalIdEventEnvironmentKey =
   | "PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL"
@@ -62,12 +70,11 @@ export function getCalIdUrlForService(
 
   if (eventUrl) return parseCalIdBookingUrl(eventUrl);
 
-  return resolveCalIdBookingUrl(env.PUBLIC_CAL_ID_BOOKING_URL);
+  return parseCalIdBookingUrl(DEFAULT_CAL_ID_EVENT_URLS[service.slug]);
 }
 
 export const schedulingConfig: SchedulingConfig = {
   provider: "cal-id",
   bookingUrl: resolveCalIdBookingUrl(import.meta.env.PUBLIC_CAL_ID_BOOKING_URL),
   defaultTimeZone: "Asia/Kolkata",
-  sessionMinutes: 60,
 };
