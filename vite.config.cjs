@@ -5,6 +5,7 @@ const srcRoot = resolve(__dirname, "src");
 module.exports = {
   root: srcRoot,
   envDir: __dirname,
+  cacheDir: resolve(__dirname, ".vite-cache"),
   publicDir: "../public",
   envPrefix: ["VITE_", "PUBLIC_"],
   test: {

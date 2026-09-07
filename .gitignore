@@ -2,6 +2,7 @@
 !.env.example
 node_modules/
 dist/
+.vite-cache/
 .astro/
 .vercel/
 legacy/calcom-prototype/

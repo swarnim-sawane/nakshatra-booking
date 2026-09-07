@@ -10,6 +10,10 @@ test("loads public environment values from the repository root", () => {
   assert.equal(viteConfig.envDir, resolve(process.cwd()));
 });
 
+test("keeps Vite's development cache outside the dependency junction", () => {
+  assert.equal(viteConfig.cacheDir, resolve(process.cwd(), ".vite-cache"));
+});
+
 test("suppresses only lucide-react module directive warnings", () => {
   const forwarded = [];
   const onwarn = viteConfig.build.rollupOptions.onwarn;
