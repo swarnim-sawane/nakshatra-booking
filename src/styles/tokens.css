@@ -1,0 +1,31 @@
+:root {
+  --color-paper: #f7f3ea;
+  --color-surface: #fffdf8;
+  --color-surface-muted: #efe8dd;
+  --color-ink: #1c1915;
+  --color-text-muted: #6d675f;
+  --color-border: #d8cec0;
+  --color-forest: #2f5d50;
+  --color-ochre: #a97835;
+  --color-error: #a34a43;
+
+  --font-display: "Newsreader Variable", "Noto Serif Devanagari", Georgia, serif;
+  --font-body: "Manrope Variable", "Noto Sans Devanagari", "Segoe UI", system-ui, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  --content-width: 1240px;
+  --page-gutter: 40px;
+  --radius-pill: 999px;
+  --radius-panel: 24px;
+  --focus-ring: 2px solid var(--color-forest);
+}

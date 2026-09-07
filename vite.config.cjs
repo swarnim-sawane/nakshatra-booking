@@ -8,7 +8,7 @@ module.exports = {
   envPrefix: ["VITE_", "PUBLIC_"],
   test: {
     root: __dirname,
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     passWithNoTests: true,
   },
   build: {
