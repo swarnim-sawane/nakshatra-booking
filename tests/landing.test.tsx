@@ -13,6 +13,6 @@ describe("booking-first landing journey", () => {
     expect(html).toContain("Google Meet");
     expect(html).toContain("Razorpay");
     expect(html.match(/href="\/book\/"/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
-    expect(html).not.toMatch(/₹1|1000\+|98%|4\.9\/5|Professional Photo/);
+    expect(html).not.toMatch(/1000\+|98%|4\.9\/5|Professional Photo/);
   });
 });

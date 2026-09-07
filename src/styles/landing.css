@@ -1,7 +1,3 @@
-.booking-placeholder {
-  padding-block: var(--space-24);
-}
-
 .landing-hero {
   padding-block: var(--space-12) var(--space-16);
 }
@@ -164,7 +160,9 @@
 }
 
 .section-heading > p:last-child,
-.about-practice__copy,
+.meet-nilima__copy,
+.service-card__header > p,
+.service-card__detail p,
 .consultation-overview__scope p,
 .process__steps p,
 .preparation__items p,
@@ -245,34 +243,27 @@
   margin: var(--space-3) 0 0;
 }
 
-.about-practice {
-  background: var(--color-ink);
-  color: var(--color-surface);
-}
+.service-cards { border-block: 1px solid var(--color-border); background: var(--color-surface); }
+.service-cards__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); margin-top: var(--space-16); }
+.service-card { display: flex; min-width: 0; flex-direction: column; gap: var(--space-6); padding: clamp(24px, 2.6vw, 36px); border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: var(--color-bg); }
 
-.about-practice .eyebrow {
-  color: var(--color-ochre-text-on-dark);
-}
+.service-card__header > p { margin: var(--space-3) 0 0; }
+.service-card__duration { color: var(--color-ochre-text); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.11em; text-transform: uppercase; }
+.service-card__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding-block: var(--space-4); border-block: 1px solid var(--color-border); }
+.service-card__facts div + div { padding-left: var(--space-4); border-left: 1px solid var(--color-border); }
+.service-card__facts dt { color: var(--color-text-muted); font-size: 0.8rem; font-weight: 700; }
+.service-card__facts dd { margin: var(--space-1) 0 0; font-family: var(--font-display); font-size: 1.25rem; }
+.service-card__detail h4 { margin: 0; font-size: 0.92rem; }
+.service-card__detail p { margin: var(--space-2) 0 0; }
+.service-card__action { width: 100%; margin-top: auto; }
+.service-cards__payment { margin: var(--space-6) 0 0; color: var(--color-text-muted); text-align: center; }
 
-.about-practice__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-  align-items: start;
-  gap: clamp(48px, 8vw, 120px);
-}
-
-.about-practice__copy {
-  color: #ded7cd;
-  font-size: clamp(1.1rem, 1.7vw, 1.3rem);
-}
-
-.about-practice__copy p {
-  margin: 0;
-}
-
-.about-practice__copy p + p {
-  margin-top: var(--space-6);
-}
+.meet-nilima { background: var(--color-ink); color: var(--color-surface); }
+.meet-nilima .eyebrow { color: var(--color-ochre-text-on-dark); }
+.meet-nilima__grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); align-items: start; gap: clamp(48px, 8vw, 120px); }
+.meet-nilima__copy { color: #ded7cd; font-size: clamp(1.1rem, 1.7vw, 1.3rem); }
+.meet-nilima__copy p { margin: 0; }
+.meet-nilima__copy p + p { margin-top: var(--space-6); }
 
 .preparation__panel {
   display: grid;
@@ -398,7 +389,7 @@
 
 @media (max-width: 960px) {
   .landing-hero__grid,
-  .about-practice__grid,
+  .meet-nilima__grid,
   .preparation__panel,
   .faq__grid {
     grid-template-columns: 1fr;
@@ -418,6 +409,10 @@
   }
 
   .consultation-overview__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .service-cards__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -454,7 +449,8 @@
   .trust-row,
   .booking-preview__facts,
   .consultation-overview__grid,
-  .process__steps {
+  .process__steps,
+  .service-cards__grid {
     grid-template-columns: 1fr;
   }
 

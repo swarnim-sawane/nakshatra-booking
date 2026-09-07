@@ -1,5 +1,4 @@
 import { Clock3, Globe2, Video } from "lucide-react";
-import BookingAction from "./BookingAction";
 import TrustRow from "./TrustRow";
 
 export default function Hero() {
@@ -7,14 +6,16 @@ export default function Hero() {
     <section className="landing-hero" aria-labelledby="hero-title">
       <div className="container landing-hero__grid">
         <div className="landing-hero__intro">
-          <p className="eyebrow">One-to-one astrology consultation</p>
-          <h1 id="hero-title">A private space for clarity and direction</h1>
+          <p className="eyebrow">Astrology readings with Nilima Sawane</p>
+          <h1 id="hero-title">Your birth chart, understood in the context of your life.</h1>
           <p className="landing-hero__lede">
-            A focused 60-minute conversation shaped around the questions, patterns, or decisions you
-            want to explore.
+            Nilima offers focused consultations that place the chart beside the questions,
+            relationships, and timing you are navigating.
           </p>
           <TrustRow />
-          <BookingAction label="Book your 60-minute session" />
+          <a className="button button--primary" href="#consultation">
+            Explore the readings
+          </a>
         </div>
 
         <aside className="booking-preview" aria-label="Consultation booking preview">
@@ -27,14 +28,14 @@ export default function Hero() {
           />
           <div className="booking-preview__body">
             <div>
-              <p className="eyebrow">Private consultation</p>
-              <h2>Choose a time that works for you</h2>
+              <p className="eyebrow">Three focused readings</p>
+              <h2>Choose the kind of guidance you need</h2>
             </div>
-            <p className="booking-preview__status">Live availability on the booking page.</p>
+            <p className="booking-preview__status">Clear duration and pricing before you book.</p>
             <ul className="booking-preview__facts" aria-label="Booking details">
               <li>
                 <Clock3 aria-hidden="true" size={19} strokeWidth={1.7} />
-                <span>60 minutes</span>
+                <span>30 or 60 minutes</span>
               </li>
               <li>
                 <Globe2 aria-hidden="true" size={19} strokeWidth={1.7} />
@@ -45,7 +46,9 @@ export default function Hero() {
                 <span>Google Meet</span>
               </li>
             </ul>
-            <BookingAction class="booking-preview__action" label="View live availability" />
+            <a className="button button--primary booking-preview__action" href="#consultation">
+              Compare the readings
+            </a>
           </div>
         </aside>
       </div>

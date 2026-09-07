@@ -1,51 +1,68 @@
 export const brandName = "Celestial Guidance";
 
 export const navigation = [
-  { label: "About", href: "/#about" },
-  { label: "The consultation", href: "/#consultation" },
+  { label: "Meet Nilima", href: "/#about" },
+  { label: "Readings", href: "/#consultation" },
   { label: "FAQs", href: "/#faqs" },
 ] as const;
 
 export const sessionFacts = [
-  "Private one-to-one session",
-  "60 minutes",
+  "Three focused readings",
+  "30 or 60 minutes",
   "Google Meet from anywhere",
-  "Payment through Razorpay in Cal ID",
+  "Secure online payment through Razorpay",
 ] as const;
 
 export const howItWorks = [
-  { title: "Choose a time", description: "Select an available time on the booking page." },
   {
-    title: "Share the requested details and complete payment",
-    description: "Complete the questions and payment within Cal ID.",
+    title: "Choose your reading",
+    description: "Compare the purpose, duration, price, and preparation for each option.",
   },
   {
-    title: "Meet privately",
-    description: "Receive the Google Meet invitation and join at the chosen time.",
+    title: "Share context and book",
+    description: "Complete the requested details and secure online payment through Razorpay in Cal ID.",
+  },
+  {
+    title: "Meet with Nilima",
+    description: "Receive the Google Meet invitation and join Nilima at the chosen time.",
   },
 ] as const;
 
 export const explorationTopics = [
-  "Patterns you are noticing",
-  "A decision or transition in view",
-  "Questions you want to explore",
+  "A personal question, decision, or transition",
+  "The dynamics and needs within a relationship",
+  "Supportive timing for a meaningful event",
 ] as const;
 
 export const faqItems = [
   {
-    question: "How do I confirm my booking?",
-    answer: "Cal ID shows the confirmation after the booking flow is complete and sends the meeting details to you.",
-  },
-  {
-    question: "Which timezone does the calendar use?",
-    answer: "The configured session timezone is Asia/Kolkata; the session is planned for 60 minutes.",
-  },
-  {
-    question: "Where does the session take place?",
-    answer: "The consultation takes place privately on Google Meet using the invitation from Cal ID.",
+    question: "Do I need an exact birth time?",
+    answer:
+      "Share the exact birth time when it is known. If it is not known, say so rather than estimating; Cal ID will show the details requested for your chosen reading.",
   },
   {
     question: "What should I prepare?",
-    answer: "Bring the questions or themes you would like to explore. Cal ID will show any details needed to complete the booking.",
+    answer:
+      "Each reading card lists what to have ready. Cal ID will collect the requested booking details; this website does not collect birth information.",
+  },
+  {
+    question: "How are booking and payment handled?",
+    answer:
+      "Availability, booking questions, and secure online payment through Razorpay are handled within Cal ID. A Google Meet invitation follows a confirmed booking.",
+  },
+  {
+    question: "Can I reschedule or cancel?",
+    answer:
+      "Cal ID manages rescheduling and cancellation. Please review the terms presented before confirming your booking.",
+  },
+  {
+    question: "Which reading should I choose first?",
+    answer:
+      "Choose the reading closest to the question you want to explore: personal context, a relationship, or the timing of an important event.",
+  },
+  {
+    question: "Does astrology replace professional advice?",
+    answer:
+      "No. These readings offer reflective guidance and do not replace medical, legal, financial, or mental-health advice.",
   },
 ] as const;

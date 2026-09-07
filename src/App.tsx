@@ -1,10 +1,11 @@
 import BaseLayout from "./layouts/BaseLayout";
-import AboutPractice from "./components/AboutPractice";
 import ConsultationOverview from "./components/ConsultationOverview";
 import FAQ from "./components/FAQ";
 import Hero from "./components/Hero";
 import HowItWorks from "./components/HowItWorks";
+import MeetNilima from "./components/MeetNilima";
 import Preparation from "./components/Preparation";
+import ServiceCards from "./components/ServiceCards";
 import BookPage from "./pages/BookPage";
 import "./styles/landing.css";
 
@@ -51,10 +52,11 @@ export default function App({ pathname }: AppProps) {
       ) : (
         <>
           <Hero />
-          <ConsultationOverview />
+          <ServiceCards />
+          <MeetNilima />
           <HowItWorks />
-          <AboutPractice />
           <Preparation />
+          <ConsultationOverview />
           <FAQ />
         </>
       )}
