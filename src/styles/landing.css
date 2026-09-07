@@ -1,0 +1,486 @@
+.booking-placeholder {
+  padding-block: var(--space-24);
+}
+
+.landing-hero {
+  padding-block: var(--space-16) var(--space-24);
+}
+
+.landing-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(540px, 1.08fr);
+  align-items: center;
+  gap: clamp(48px, 6vw, 88px);
+}
+
+.landing-hero__intro {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--color-ochre);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.landing-hero h1,
+.landing-section h2,
+.booking-preview h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.03;
+}
+
+.landing-hero h1 {
+  max-width: 10ch;
+  font-size: clamp(3rem, 5.25vw, 5.15rem);
+}
+
+.landing-hero__lede {
+  max-width: 48ch;
+  margin: var(--space-6) 0;
+  color: var(--color-text-muted);
+  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+  line-height: 1.7;
+}
+
+.trust-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-6);
+  margin: 0 0 var(--space-8);
+  padding: 0;
+  list-style: none;
+}
+
+.trust-row li,
+.booking-preview__facts li {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.trust-row svg {
+  flex: 0 0 auto;
+  margin-top: 0.2em;
+  color: var(--color-ochre);
+}
+
+.booking-preview {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+.booking-preview__image {
+  display: block;
+  width: 100%;
+  height: 310px;
+  object-fit: cover;
+  object-position: center 58%;
+}
+
+.booking-preview__body {
+  display: grid;
+  gap: var(--space-6);
+  padding: clamp(24px, 3vw, 40px);
+}
+
+.booking-preview h2 {
+  max-width: 12ch;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.booking-preview__status {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-ochre);
+  background: var(--color-surface-muted);
+  font-weight: 700;
+}
+
+.booking-preview__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-6) 0 0;
+  border-top: 1px solid var(--color-border);
+  list-style: none;
+}
+
+.booking-preview__facts svg {
+  flex: 0 0 auto;
+  color: var(--color-forest);
+}
+
+.booking-preview__action {
+  justify-self: start;
+}
+
+.landing-section {
+  scroll-margin-top: var(--space-6);
+  padding-block: var(--space-24);
+}
+
+.landing-section h2 {
+  max-width: 14ch;
+  font-size: clamp(2.5rem, 4.4vw, 4.25rem);
+}
+
+.landing-section h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.section-heading {
+  max-width: 640px;
+}
+
+.section-heading--wide {
+  max-width: 790px;
+}
+
+.section-heading--centered {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.section-heading--centered h2 {
+  margin-inline: auto;
+}
+
+.section-heading > p:last-child,
+.about-practice__copy,
+.consultation-overview__scope p,
+.process__steps p,
+.preparation__items p,
+.faq__intro > p:last-child,
+.faq__list p,
+.final-booking p {
+  color: var(--color-text-muted);
+}
+
+.section-heading > p:last-child {
+  max-width: 64ch;
+  margin: var(--space-6) 0 0;
+  font-size: 1.1rem;
+}
+
+.consultation-overview {
+  border-block: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.consultation-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(280px, 0.9fr);
+  gap: clamp(32px, 5vw, 72px);
+  margin-top: var(--space-16);
+}
+
+.lined-list {
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+  list-style: none;
+}
+
+.lined-list li {
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.consultation-overview__scope {
+  padding: var(--space-8);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-muted);
+}
+
+.consultation-overview__scope p:not(.eyebrow) {
+  margin: var(--space-4) 0 var(--space-6);
+}
+
+.process__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: var(--space-16) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.process__steps li {
+  min-width: 0;
+  padding: var(--space-2) clamp(24px, 4vw, 56px) var(--space-2) 0;
+}
+
+.process__steps li + li {
+  padding-left: clamp(24px, 4vw, 56px);
+  border-left: 1px solid var(--color-border);
+}
+
+.process__number {
+  display: block;
+  margin-bottom: var(--space-4);
+  color: var(--color-ochre);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.process__steps p {
+  margin: var(--space-3) 0 0;
+}
+
+.about-practice {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.about-practice__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(48px, 8vw, 120px);
+}
+
+.about-practice__copy {
+  color: #ded7cd;
+  font-size: clamp(1.1rem, 1.7vw, 1.3rem);
+}
+
+.about-practice__copy p {
+  margin: 0;
+}
+
+.about-practice__copy p + p {
+  margin-top: var(--space-6);
+}
+
+.preparation__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(48px, 8vw, 112px);
+  padding: clamp(32px, 5vw, 64px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+.preparation__items {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.preparation__items article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.preparation__items svg {
+  color: var(--color-forest);
+}
+
+.preparation__items p {
+  margin: var(--space-2) 0 0;
+}
+
+.faq {
+  padding-bottom: 0;
+}
+
+.faq__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  gap: clamp(48px, 8vw, 120px);
+}
+
+.faq__intro {
+  position: sticky;
+  top: var(--space-6);
+  align-self: start;
+}
+
+.faq__list {
+  border-top: 1px solid var(--color-border);
+}
+
+.faq__list details {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.faq__list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-2) var(--space-6) 0;
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+
+.faq__list summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__list summary svg {
+  flex: 0 0 auto;
+  color: var(--color-forest);
+  transition: transform 160ms ease;
+}
+
+.faq__list details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.faq__list p {
+  max-width: 65ch;
+  margin: 0;
+  padding: 0 var(--space-12) var(--space-6) 0;
+}
+
+.final-booking {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  margin-top: var(--space-24);
+  padding: clamp(32px, 5vw, 64px);
+  border-radius: var(--radius-panel);
+  background: var(--color-forest);
+  color: var(--color-surface);
+}
+
+.final-booking h2 {
+  max-width: 16ch;
+  font-size: clamp(2.25rem, 4vw, 3.75rem);
+}
+
+.final-booking p:last-child {
+  margin: var(--space-4) 0 0;
+  color: #e2e8e2;
+}
+
+.final-booking .button {
+  flex: 0 0 auto;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+@media (max-width: 960px) {
+  .landing-hero__grid,
+  .about-practice__grid,
+  .preparation__panel,
+  .faq__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero__grid {
+    gap: var(--space-12);
+  }
+
+  .landing-hero h1 {
+    max-width: 13ch;
+  }
+
+  .booking-preview__image {
+    height: auto;
+    aspect-ratio: 16 / 7;
+  }
+
+  .consultation-overview__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .consultation-overview__scope {
+    grid-column: 1 / -1;
+  }
+
+  .faq__intro {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --page-gutter: 24px;
+  }
+
+  .landing-hero {
+    padding-block: var(--space-12) var(--space-16);
+  }
+
+  .landing-hero h1 {
+    font-size: clamp(2.75rem, 14vw, 4rem);
+  }
+
+  .landing-section {
+    padding-block: var(--space-16);
+  }
+
+  .landing-section h2 {
+    font-size: clamp(2.25rem, 11vw, 3.15rem);
+  }
+
+  .trust-row,
+  .booking-preview__facts,
+  .consultation-overview__grid,
+  .process__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-preview__image {
+    aspect-ratio: 4 / 3;
+    object-position: 48% center;
+  }
+
+  .booking-preview__action,
+  .landing-hero__intro > .button,
+  .consultation-overview__scope .button,
+  .final-booking .button {
+    width: 100%;
+  }
+
+  .process__steps {
+    gap: var(--space-8);
+    margin-top: var(--space-12);
+  }
+
+  .process__steps li,
+  .process__steps li + li {
+    padding: 0 0 var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+    border-left: 0;
+  }
+
+  .consultation-overview__grid {
+    margin-top: var(--space-12);
+  }
+
+  .consultation-overview__scope,
+  .preparation__panel {
+    padding: var(--space-6);
+  }
+
+  .final-booking {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: var(--space-16);
+    padding: var(--space-8) var(--space-6);
+  }
+}

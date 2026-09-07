@@ -15,6 +15,15 @@ module.exports = {
     outDir: "../dist",
     emptyOutDir: true,
     rollupOptions: {
+      onwarn(warning, defaultHandler) {
+        const isLucideDirective =
+          warning.code === "MODULE_LEVEL_DIRECTIVE" &&
+          /[\\/]node_modules[\\/]lucide-react[\\/]/.test(warning.id ?? "");
+
+        if (!isLucideDirective) {
+          defaultHandler(warning);
+        }
+      },
       input: {
         main: resolve(srcRoot, "index.html"),
         book: resolve(srcRoot, "book/index.html"),

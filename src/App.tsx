@@ -1,4 +1,11 @@
 import BaseLayout from "./layouts/BaseLayout";
+import AboutPractice from "./components/AboutPractice";
+import ConsultationOverview from "./components/ConsultationOverview";
+import FAQ from "./components/FAQ";
+import Hero from "./components/Hero";
+import HowItWorks from "./components/HowItWorks";
+import Preparation from "./components/Preparation";
+import "./styles/landing.css";
 
 type AppProps = {
   pathname?: string;
@@ -34,9 +41,20 @@ export default function App({ pathname }: AppProps) {
 
   return (
     <BaseLayout description={page.description} title={page.title}>
-      <div className="container">
-        <h1>{isBookingPage ? "Book a consultation" : "Celestial Guidance"}</h1>
-      </div>
+      {isBookingPage ? (
+        <div className="container booking-placeholder">
+          <h1>Book a consultation</h1>
+        </div>
+      ) : (
+        <>
+          <Hero />
+          <ConsultationOverview />
+          <HowItWorks />
+          <AboutPractice />
+          <Preparation />
+          <FAQ />
+        </>
+      )}
     </BaseLayout>
   );
 }

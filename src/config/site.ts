@@ -16,7 +16,7 @@ export const sessionFacts = [
 export const howItWorks = [
   { title: "Choose a time", description: "Select an available time on the booking page." },
   {
-    title: "Share the requested details and pay securely",
+    title: "Share the requested details and complete payment",
     description: "Complete the questions and payment within Cal ID.",
   },
   {
