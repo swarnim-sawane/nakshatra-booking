@@ -11,10 +11,8 @@ The commands were run separately before browser QA and repeated separately after
 | Command | Result |
 | --- | --- |
 | `npm run check` | Exit 0; TypeScript emitted no diagnostics. |
-| `npm test` | Exit 0; production build completed, Node tests 5/5 passed, Vitest tests 18/18 passed. |
+| `npm test` | Exit 0; production build completed, Node tests 6/6 passed, Vitest tests 18/18 passed. |
 | `npm run build` | Exit 0; Vite transformed 1751 modules and emitted both `index.html` and `book/index.html`. |
-
-After the density fix, the focused CSS regression test also passed 1/1. The parent agent requested that no further full checks be run before the scoped commit; the full-gate counts above therefore record the immediately preceding separate run.
 
 The first preview attempt exposed an environment-specific Vite cache failure because the gitignored `node_modules` path is a junction outside this workspace. A failing regression test was recorded, `vite.config.cjs` was changed to use the local `.vite-cache`, and the focused Node test then passed 3/3. The persistent Vite server started successfully afterward.
 
@@ -29,7 +27,7 @@ The viewport capability controls the in-app browser's outer size. Its chrome and
 | `/` | Landing, post-density fix | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/landing-mobile-390x844.jpg` |
 | `/book/` | Safe unconfigured booking state | 390 × 844 | 375 × 812 | Pass | `docs/qa/screenshots/book-mobile-390x844.jpg` |
 
-The normalized visual comparison is `docs/qa/option-3-vs-landing-desktop.png`; its focused hero inspection is `docs/qa/option-3-vs-landing-hero-focus.png`. The initial P2 first-fold density drift was corrected and the second comparison found no remaining P0/P1/P2 issue. See the project-root `design-qa.md` for full findings and normalization details.
+The 1487 × 1058 source was centre-cropped at `x=0, y=23` to 1487 × 1012 and resized to match the implementation's native 1425 × 970 capture. The resulting comparison is `docs/qa/option-3-vs-landing-desktop.png`; its focused hero inspection is `docs/qa/option-3-vs-landing-hero-focus.png`. The initial P2 first-fold density drift was corrected and the regenerated comparison found no remaining P0/P1/P2 issue. See the project-root `design-qa.md` for full findings and normalization details.
 
 ## Interaction, responsive, console, and accessibility evidence
 

@@ -5,13 +5,13 @@ Date: 7 September 2026
 ## Comparison target
 
 - Source visual truth: `docs/design/option-3-booking-first-concierge.png`
-- Source pixels: 1488 × 1056.
+- Source pixels: 1487 × 1058.
 - Implementation screenshot: `docs/qa/screenshots/landing-desktop-1440x1024.jpg`
 - Route and state: `/`, light appearance, signed-out public landing page, first-load state; no live Cal ID event is configured.
 - Requested Codex in-app browser outer viewport: 1440 × 1024 CSS px.
 - Honest browser content capture: 1425 × 970 pixels. The in-app browser reserved 15 px for the vertical scrollbar and 54 px for browser chrome.
 - Density: one screenshot pixel per captured CSS pixel; no double-density scaling was applied.
-- Normalization: the source was centre-cropped from 1488 × 1056 to 1488 × 1013 and resized to 1425 × 970. The implementation remained at its native 1425 × 970 capture.
+- Normalization: the source was centre-cropped at `x=0, y=23` from 1487 × 1058 to 1487 × 1012, then resized to 1425 × 970. The implementation remained at its native 1425 × 970 capture.
 - Full comparison board: `docs/qa/option-3-vs-landing-desktop.png` (2850 × 970; normalized source left, implementation right).
 - Focused hero comparison: `docs/qa/option-3-vs-landing-hero-focus.png` (2850 × 700; source left, implementation right).
 
@@ -40,7 +40,7 @@ The focused comparison confirms readable heading wraps, aligned factual rows, co
 ### Pass 2 — passed
 
 - Post-fix evidence: `docs/qa/screenshots/landing-desktop-1440x1024.jpg` and `docs/qa/option-3-vs-landing-desktop.png`.
-- Result: the next consultation-section cue now begins around y≈843 in the honest capture, within the intended 850–900 px range. The hero remains spacious and the card, image, text, status, icons, and both primary actions remain fully visible.
+- Result: the next consultation-section cue now begins around y≈843 in the honest capture, restoring the intended first-fold rhythm near the requested 850–900 px target. The hero remains spacious and the card, image, text, status, icons, and both primary actions remain fully visible.
 - Mobile evidence: `docs/qa/screenshots/landing-mobile-390x844.jpg` confirms the 390 × 844 requested outer viewport still has a readable four-line heading, full-width primary action, visible Menu and Book controls, and no visible horizontal clipping.
 
 ## Interaction and accessibility evidence
