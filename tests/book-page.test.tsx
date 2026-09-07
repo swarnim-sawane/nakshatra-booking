@@ -1,6 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import App, { getRouteKind } from "../src/App";
 import BookPage from "../src/pages/BookPage";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("Cal ID booking page", () => {
   it("fails closed when no validated Cal ID event URL is available", () => {
@@ -32,5 +37,23 @@ describe("Cal ID booking page", () => {
     expect(html).toContain("Online booking is being connected");
     expect(html).not.toMatch(/<iframe\b/i);
     expect(html).not.toContain("https://example.com/consultation");
+  });
+
+  it("renders the booking route from pathname without touching or exposing an opaque token", () => {
+    const opaqueToken = "opaque-test-token";
+    vi.stubGlobal("window", {
+      location: {
+        pathname: "/book/",
+        get search() {
+          throw new Error("The booking route must not read window.location.search.");
+        },
+      },
+    });
+
+    const html = renderToStaticMarkup(<App />);
+
+    expect(getRouteKind("/book/")).toBe("booking");
+    expect(html).toContain("Book a time that feels right.");
+    expect(html).not.toContain(opaqueToken);
   });
 });

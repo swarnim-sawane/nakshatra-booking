@@ -12,7 +12,13 @@ export function parseCalIdBookingUrl(value: string): URL | null {
 
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && ["cal.id", "app.cal.id"].includes(url.hostname)
+    return (
+      url.protocol === "https:" &&
+      ["cal.id", "app.cal.id"].includes(url.hostname) &&
+      url.port === "" &&
+      url.username === "" &&
+      url.password === ""
+    )
       ? url
       : null;
   } catch {

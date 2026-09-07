@@ -4,6 +4,7 @@ const srcRoot = resolve(__dirname, "src");
 
 module.exports = {
   root: srcRoot,
+  envDir: __dirname,
   publicDir: "../public",
   envPrefix: ["VITE_", "PUBLIC_"],
   test: {

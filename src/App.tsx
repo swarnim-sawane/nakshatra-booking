@@ -31,13 +31,17 @@ function currentPathname(pathname?: string) {
   return pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname);
 }
 
+export function getRouteKind(pathname: string) {
+  return pathname === "/book/" || pathname === "/book" ? "booking" : "home";
+}
+
 export function getPageMetadata(pathname: string): PageMetadata {
-  return pathname === "/book/" || pathname === "/book" ? bookingPage : homePage;
+  return getRouteKind(pathname) === "booking" ? bookingPage : homePage;
 }
 
 export default function App({ pathname }: AppProps) {
   const activePathname = currentPathname(pathname);
-  const isBookingPage = activePathname === "/book/" || activePathname === "/book";
+  const isBookingPage = getRouteKind(activePathname) === "booking";
   const page = getPageMetadata(activePathname);
 
   return (
