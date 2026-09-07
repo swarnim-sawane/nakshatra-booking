@@ -120,13 +120,22 @@ summary {
 }
 
 .brand {
+  display: inline-flex;
   flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-3);
   font-family: var(--font-display);
   font-size: 1.45rem;
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1;
   text-decoration: none;
+}
+
+.brand__mark {
+  display: block;
+  width: 32px;
+  height: 32px;
 }
 
 .primary-navigation {
@@ -234,7 +243,13 @@ summary {
   }
 
   .brand {
+    gap: var(--space-2);
     font-size: 1.125rem;
+  }
+
+  .brand__mark {
+    width: 28px;
+    height: 28px;
   }
 
   .primary-navigation,
