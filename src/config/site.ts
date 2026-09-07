@@ -10,7 +10,7 @@ export const sessionFacts = [
   "Private one-to-one session",
   "60 minutes",
   "Google Meet from anywhere",
-  "Secure payment through Razorpay",
+  "Payment through Razorpay in Cal ID",
 ] as const;
 
 export const howItWorks = [
@@ -38,7 +38,7 @@ export const faqItems = [
   },
   {
     question: "Which timezone does the calendar use?",
-    answer: "The booking page shows times in your local timezone; the session is planned for 60 minutes.",
+    answer: "The configured session timezone is Asia/Kolkata; the session is planned for 60 minutes.",
   },
   {
     question: "Where does the session take place?",
