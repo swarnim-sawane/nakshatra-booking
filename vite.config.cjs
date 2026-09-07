@@ -5,6 +5,7 @@ const srcRoot = resolve(__dirname, "src");
 module.exports = {
   root: srcRoot,
   publicDir: "../public",
+  envPrefix: ["VITE_", "PUBLIC_"],
   test: {
     root: __dirname,
     include: ["tests/**/*.test.ts"],
