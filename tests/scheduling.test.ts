@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  getCalIdUrlForService,
   parseCalIdBookingUrl,
   resolveCalIdBookingUrl,
 } from "../src/config/scheduling";
+import { consultationServices } from "../src/config/services";
 
 describe("parseCalIdBookingUrl", () => {
   it("accepts an HTTPS Cal ID event URL", () => {
@@ -41,5 +43,55 @@ describe("resolveCalIdBookingUrl", () => {
 
   it("fails closed for an explicitly unsafe deployment override", () => {
     expect(resolveCalIdBookingUrl("https://example.com/fake-calendar")).toBeNull();
+  });
+});
+
+describe("getCalIdUrlForService", () => {
+  const [personal, relationship, bestDate] = consultationServices;
+
+  it("uses a valid event-specific Cal ID URL for the selected service", () => {
+    expect(
+      getCalIdUrlForService(personal, {
+        PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL:
+          "https://cal.id/nilima-sawane/personal-consultation",
+      })?.href,
+    ).toBe("https://cal.id/nilima-sawane/personal-consultation");
+
+    expect(
+      getCalIdUrlForService(relationship, {
+        PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL:
+          "https://app.cal.id/nilima-sawane/relationship-consultation",
+      })?.href,
+    ).toBe("https://app.cal.id/nilima-sawane/relationship-consultation");
+
+    expect(
+      getCalIdUrlForService(bestDate, {
+        PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL:
+          "https://cal.id/nilima-sawane/best-date-analysis",
+      })?.href,
+    ).toBe("https://cal.id/nilima-sawane/best-date-analysis");
+  });
+
+  it("uses the validated public profile when an event-specific URL is absent", () => {
+    expect(getCalIdUrlForService(personal, {})?.href).toBe(
+      "https://cal.id/nilima-sawane",
+    );
+    expect(
+      getCalIdUrlForService(relationship, {
+        PUBLIC_CAL_ID_BOOKING_URL: "https://cal.id/nilima-sawane",
+      })?.href,
+    ).toBe("https://cal.id/nilima-sawane");
+  });
+
+  it.each([
+    "http://cal.id/nilima-sawane/personal-consultation",
+    "https://evil.example/personal-consultation",
+    "https://cal.id:443/nilima-sawane/personal-consultation",
+  ])("rejects an explicitly invalid event-specific URL %s", (value) => {
+    expect(
+      getCalIdUrlForService(personal, {
+        PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL: value,
+      }),
+    ).toBeNull();
   });
 });

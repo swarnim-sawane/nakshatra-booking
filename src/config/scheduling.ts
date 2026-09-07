@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+import type { ConsultationService, ServiceSlug } from "./services";
+
 export type SchedulingConfig = {
   provider: "cal-id";
   bookingUrl: URL | null;
@@ -8,6 +10,21 @@ export type SchedulingConfig = {
 };
 
 export const DEFAULT_CAL_ID_BOOKING_URL = "https://cal.id/nilima-sawane";
+
+type CalIdEventEnvironmentKey =
+  | "PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL"
+  | "PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL"
+  | "PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL";
+
+export type CalIdServiceEnvironment = Partial<
+  Record<CalIdEventEnvironmentKey | "PUBLIC_CAL_ID_BOOKING_URL", string>
+>;
+
+const calIdEventEnvironmentKeys = {
+  "personal-consultation": "PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL",
+  "relationship-consultation": "PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL",
+  "best-date-analysis": "PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL",
+} as const satisfies Record<ServiceSlug, CalIdEventEnvironmentKey>;
 
 export function parseCalIdBookingUrl(value: string): URL | null {
   const rawValue = value.trim();
@@ -35,6 +52,17 @@ export function parseCalIdBookingUrl(value: string): URL | null {
 export function resolveCalIdBookingUrl(value: string | undefined): URL | null {
   const configuredValue = value?.trim();
   return parseCalIdBookingUrl(configuredValue || DEFAULT_CAL_ID_BOOKING_URL);
+}
+
+export function getCalIdUrlForService(
+  service: ConsultationService,
+  env: CalIdServiceEnvironment,
+): URL | null {
+  const eventUrl = env[calIdEventEnvironmentKeys[service.slug]]?.trim();
+
+  if (eventUrl) return parseCalIdBookingUrl(eventUrl);
+
+  return resolveCalIdBookingUrl(env.PUBLIC_CAL_ID_BOOKING_URL);
 }
 
 export const schedulingConfig: SchedulingConfig = {
