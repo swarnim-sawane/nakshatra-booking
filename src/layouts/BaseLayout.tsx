@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import "../styles/global.css";
@@ -10,12 +10,20 @@ type BaseLayoutProps = {
 };
 
 function PageMetadata({ title, description }: Pick<BaseLayoutProps, "title" | "description">) {
-  return (
-    <>
-      <title>{title}</title>
-      <meta content={description} name="description" />
-    </>
-  );
+  useEffect(() => {
+    document.title = title;
+    const existing = document.head.querySelector('meta[name="description"]');
+    const descriptionMeta = existing ?? document.createElement("meta");
+
+    descriptionMeta.setAttribute("name", "description");
+    descriptionMeta.setAttribute("content", description);
+
+    if (!existing) {
+      document.head.appendChild(descriptionMeta);
+    }
+  }, [description, title]);
+
+  return null;
 }
 
 export default function BaseLayout({ title, description, children }: BaseLayoutProps) {

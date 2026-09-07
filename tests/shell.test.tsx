@@ -1,6 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import App from "../src/App";
+import App, * as appModule from "../src/App";
+
+type MetadataSelectorModule = {
+  getPageMetadata?: (pathname: string) => { title: string; description: string };
+};
 
 describe("application shell", () => {
   it("keeps navigation and booking access available without unsafe client flow remnants", () => {
@@ -15,6 +19,12 @@ describe("application shell", () => {
     expect(html).not.toMatch(/rzp_test_|astrology123|Cal\.com|localStorage/i);
   });
 
+  it("keeps document-only metadata out of the server-rendered application body", () => {
+    const html = renderToStaticMarkup(<App pathname="/book/" />);
+
+    expect(html).not.toMatch(/<(?:title|meta)\b/i);
+  });
+
   it.each([
     [
       "/",
@@ -26,12 +36,10 @@ describe("application shell", () => {
       "Book | Celestial Guidance",
       "Choose a time for a private one-to-one astrology consultation.",
     ],
-  ])("renders the correct metadata for %s", (pathname, title, description) => {
-    const html = renderToStaticMarkup(<App pathname={pathname} />);
+  ])("selects the correct metadata for %s", (pathname, title, description) => {
+    const getPageMetadata = (appModule as MetadataSelectorModule).getPageMetadata;
 
-    expect(html).toContain(`<title>${title}</title>`);
-    expect(html).toMatch(
-      new RegExp(`<meta(?=[^>]*name="description")(?=[^>]*content="${description}")[^>]*/>`),
-    );
+    expect(getPageMetadata).toBeTypeOf("function");
+    expect(getPageMetadata?.(pathname)).toEqual({ title, description });
   });
 });
