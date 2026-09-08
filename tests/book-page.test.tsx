@@ -17,23 +17,21 @@ describe("Cal ID booking page", () => {
 
     expect(html).toContain("Online booking is being connected");
     expect(html).not.toMatch(/<iframe\b/i);
+    expect(html).not.toContain("Continue to secure booking");
     expect(html).not.toMatch(/razorpay_order_id|payment successful|localStorage/i);
   });
 
-  it("embeds only the supplied validated Cal ID URL with a safe direct fallback", () => {
+  it("hands the selected reading to the full Cal ID experience in the same tab", () => {
     const html = renderToStaticMarkup(
       <BookPage bookingUrl={new URL(DEFAULT_CAL_ID_BOOKING_URL)} />,
     );
 
-    expect(html).toContain('<iframe class="booking-embed__frame"');
-    expect(html).toContain('title="Book a private consultation with Celestial Guidance"');
-    expect(html).toContain('loading="lazy"');
-    expect(html).toContain('scrolling="no"');
-    expect(html).toContain(`src="${DEFAULT_CAL_ID_BOOKING_URL}"`);
     expect(html).toContain(`href="${DEFAULT_CAL_ID_BOOKING_URL}"`);
-    expect(html).toContain('target="_blank"');
-    expect(html).toContain('rel="noopener noreferrer"');
-    expect(html).toContain("Retry calendar");
+    expect(html).toContain("Continue to secure booking");
+    expect(html).toContain("Cal ID will handle availability, your booking details, and Razorpay payment");
+    expect(html).not.toMatch(/<iframe\b/i);
+    expect(html).not.toContain('target="_blank"');
+    expect(html).not.toContain("Retry calendar");
     expect(html).not.toMatch(/razorpay_order_id|payment successful|localStorage/i);
   });
 
@@ -82,8 +80,8 @@ describe("Cal ID booking page", () => {
       />,
     );
 
-    expect(html).toContain(`src="${eventUrl}"`);
     expect(html).toContain(`href="${eventUrl}"`);
+    expect(html).not.toMatch(/<iframe\b/i);
     expect(html).not.toContain(`${eventUrl}#best-date-analysis`);
   });
 
@@ -93,11 +91,9 @@ describe("Cal ID booking page", () => {
     );
 
     expect(html).toContain(
-      `src="${DEFAULT_CAL_ID_EVENT_URLS["relationship-consultation"]}"`,
-    );
-    expect(html).toContain(
       `href="${DEFAULT_CAL_ID_EVENT_URLS["relationship-consultation"]}"`,
     );
+    expect(html).not.toMatch(/<iframe\b/i);
   });
 
   it("fails closed when a caller supplies a URL outside Cal ID", () => {

@@ -64,7 +64,7 @@ For visual alignment:
 - Upload `public/brand/icon-512.png` as the Cal ID favicon; it has transparency and is below 1 MB.
 - Confirm the public profile no longer exposes unrelated event types.
 
-The current frontend uses a validated event-specific iframe fallback with `scrolling="no"`, a 960 px desktop viewport, and a 1500 px narrow-screen viewport so the main page owns scrolling. For the final production embed, copy each event's exact code from **Event Types → Edit → Embed → Inline → Get Code**. Do not guess the runtime API or widen the Content Security Policy before those snippets are reviewed.
+The website deliberately does not embed Cal ID. After a visitor chooses and reviews a service, **Continue to secure booking** opens that exact event as a full-page, same-tab Cal ID flow. This keeps the calendar, attendee form, and payment interface internally consistent and avoids a cross-origin iframe with a second scrollbar. The handoff URL is validated again at render time and fails closed if it is not an approved Cal ID address.
 
 ## What to test before launch
 
@@ -76,8 +76,8 @@ Run one controlled booking for each event and verify:
 - The booking appears in Nilima's Cal ID mobile dashboard and the attendee receives the correct confirmation.
 - A failed or cancelled payment creates no confirmed booking.
 - Rescheduling, cancellation, reminders, refunds, and timezone conversion behave according to the approved policy.
-- Mobile and desktop flows show the complete calendar and attendee form without a nested iframe scrollbar.
-- The three exact Inline embeds pass responsive QA before replacing the raw iframe fallback.
+- The same-tab handoff opens the correct Cal ID event on mobile and desktop, and the browser Back action returns to the selected service.
+- The website does not append the future WhatsApp `s` token or any other customer data to the Cal ID destination.
 
 Do not complete a real payment merely to prove the frontend is working. Use a controlled owner-approved transaction and reconcile it in both Razorpay and Cal ID.
 

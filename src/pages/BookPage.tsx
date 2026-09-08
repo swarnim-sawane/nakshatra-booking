@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import CalIdEmbed from "../components/CalIdEmbed";
+import CalIdHandoff from "../components/CalIdHandoff";
 import ServiceSelector from "../components/ServiceSelector";
 import {
   getCalIdUrlForService,
@@ -101,14 +101,12 @@ export default function BookPage({
           </p>
         </section>
       </div>
-      <div className="container booking-page__calendar">
-        <CalIdEmbed bookingUrl={activeBookingUrl} />
+      <div className="container booking-page__handoff">
+        <CalIdHandoff
+          bookingUrl={activeBookingUrl}
+          serviceName={activeService.name}
+        />
       </div>
-      <aside className="container booking-page__note">
-        <p>
-          Scheduling and payment happen within Cal ID. This website does not collect booking or payment details.
-        </p>
-      </aside>
     </section>
   );
 }

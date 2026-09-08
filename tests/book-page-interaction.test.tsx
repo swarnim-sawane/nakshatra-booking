@@ -20,8 +20,10 @@ function activeChoice() {
   );
 }
 
-function calendarFrame() {
-  return document.querySelector<HTMLIFrameElement>(".booking-embed__frame");
+function bookingLink() {
+  return screen.getByRole<HTMLAnchorElement>("link", {
+    name: /continue to secure booking/i,
+  });
 }
 
 describe("booking service interactions", () => {
@@ -42,7 +44,8 @@ describe("booking service interactions", () => {
     render(<BookPage serviceEnvironment={serviceEnvironment} />);
 
     expect(activeChoice()?.textContent).toContain("Personal Consultation");
-    expect(calendarFrame()?.src).toBe(serviceEnvironment.PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL);
+    expect(bookingLink().href).toBe(serviceEnvironment.PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL);
+    expect(document.querySelector("iframe")).toBeNull();
 
     await user.click(
       screen.getByRole("link", { name: /relationship consultation/i }),
@@ -52,7 +55,7 @@ describe("booking service interactions", () => {
       expect(window.location.hash).toBe("#relationship-consultation");
       expect(activeChoice()?.textContent).toContain("Relationship Consultation");
       expect(screen.getByRole("heading", { name: "Relationship Consultation" })).toBeTruthy();
-      expect(calendarFrame()?.src).toBe(
+      expect(bookingLink().href).toBe(
         serviceEnvironment.PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL,
       );
     });
@@ -64,7 +67,7 @@ describe("booking service interactions", () => {
 
     expect(activeChoice()?.textContent).toContain("Best Date Analysis");
     expect(screen.getByRole("heading", { name: "Best Date Analysis" })).toBeTruthy();
-    expect(calendarFrame()?.src).toBe(serviceEnvironment.PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL);
+    expect(bookingLink().href).toBe(serviceEnvironment.PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL);
 
     act(() => {
       window.location.hash = "#relationship-consultation";
@@ -73,10 +76,8 @@ describe("booking service interactions", () => {
 
     expect(activeChoice()?.textContent).toContain("Relationship Consultation");
     expect(document.body.textContent).not.toContain("opaque-test-token");
-    expect(calendarFrame()?.src).not.toContain("opaque-test-token");
-    expect(
-      screen.getByRole<HTMLAnchorElement>("link", { name: /open cal id/i }).href,
-    ).not.toContain("opaque-test-token");
+    expect(bookingLink().href).not.toContain("opaque-test-token");
+    expect(bookingLink().target).toBe("");
     expect(window.location.search).toBe("?s=opaque-test-token");
   });
 });

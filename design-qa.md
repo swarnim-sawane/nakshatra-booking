@@ -20,9 +20,9 @@ The final landing page retains the approved warm paper, ink, forest, and ochre s
 
 The generated Kundli mark initially became too faint at 32 px. A second Image Generation refinement and transparent export produced a materially darker, simpler mark. It was re-inspected in the 32 px mobile header and the 1440 px desktop header; the square and internal Kundli divisions now remain recognisable without behaving like a generic astrology glyph.
 
-The booking route has a clear two-stage hierarchy: select a reading, then review its duration, price, and preparation before the Cal ID calendar. The selected reading uses a forest inset rule and tinted surface rather than an exaggerated card animation. The desktop composition stays balanced at two columns; narrow screens stack the selector and summary without losing the active state.
+The booking route has a clear three-stage hierarchy: select a reading, review its duration, price, and preparation, then continue through one prominent secure-booking action. The selected reading uses a forest inset rule and tinted surface rather than an exaggerated card animation. The desktop composition stays balanced at two columns; narrow screens stack the selector and summary without losing the active state.
 
-The real Cal ID page remains dark because its dashboard Appearance setting has not yet been changed. That cross-origin content cannot inherit this site's CSS. The local wrapper now presents the exact event-specific booking page, suppresses the nested iframe scrollbar, and gives the event enough responsive height; the remaining colour mismatch is an external Cal ID configuration gate documented in the README.
+The mixed light-site/dark-calendar composition has been removed. Cal ID now opens as its own full-page experience in the same tab, where it can keep complete control of the calendar, attendee form, and Razorpay flow. The visual transition will be smoother after the external Cal ID Appearance settings are aligned with this site's palette.
 
 ## Responsive evidence
 
@@ -30,10 +30,10 @@ The following sizes were inspected with the in-app browser's viewport capability
 
 | Requested viewport | Captured client width | Landing result | Booking result |
 | ---: | ---: | --- | --- |
-| 375 × 812 | 360 px | Pass; single-column hero and three services present | Pass; stacked selector, exact event URL, no nested iframe scroll |
+| 375 × 812 | 360 px | Pass; single-column hero and three services present | Pass; stacked selector, selected summary, and full-width handoff action |
 | 768 × 900 | 753 px | Pass; three services present, no horizontal overflow | Pass; active service and direct event preserved |
 | 1024 × 900 | 1009 px | Pass; desktop hierarchy remains readable | Pass; selector and summary remain balanced |
-| 1440 × 1024 | 1425 px | Pass; compared directly with Starheal | Pass; full desktop booking composition and calendar render |
+| 1440 × 1024 | 1425 px | Pass; compared directly with Starheal | Pass; full desktop selection and handoff composition |
 
 At 375 px, the headline, compact brand mark, Menu, Book action, pricing facts, and forest active state remain legible. At 1440 px, the hero carries the intended premium editorial rhythm and the three service cards align cleanly.
 
@@ -42,10 +42,10 @@ At 375 px, the headline, compact brand mark, Menu, Book action, pricing facts, a
 - One H1 is present per route; headings, landmarks, lists, definitions, and FAQ disclosures remain semantic.
 - All controls retain at least 44 px target sizing and the existing high-contrast focus treatment.
 - The service choices are normal hash links and remain keyboard-operable without JavaScript-only semantics.
-- Clicking Best Date Analysis changed the hash to `#best-date-analysis`, updated the announced active state to 30 minutes and ₹500, and changed the iframe source to the exact Best Date event URL.
+- Clicking Best Date Analysis changed the hash to `#best-date-analysis`, updated the announced active state to 30 minutes and ₹500, and changed the same-tab action to the exact Best Date event URL.
 - `/book/?s=opaque-test-token#best-date-analysis` preserved the future WhatsApp token in the browser address while producing zero body-text matches and forwarding no token to Cal ID.
-- The iframe has `scrolling="no"`; the main document owns the visible scrollbar. It uses a 960 px desktop height and a 1500 px narrow-screen height for the current direct-event states.
-- The Relationship calendar, available time slots, and attendee-details form were opened at desktop and mobile widths without entering personal data or submitting a booking.
+- The booking route contains no iframe; only the website document scrolls before the visitor chooses to continue.
+- The handoff uses ordinary same-tab navigation, so browser Back returns to the website and retains the hash-selected service.
 - Local-origin browser diagnostics contained zero warnings or errors. Cal ID's own scripts emitted third-party accessibility and debug-console messages; those are external to this repository and are recorded in the local QA report.
 
 ## External launch gates
@@ -55,7 +55,6 @@ At 375 px, the headline, compact brand mark, Menu, Book action, pricing facts, a
 - Correct Personal Consultation from the observed ₹500 to ₹1,000.
 - Correct Best Date Analysis from the observed ₹1,000 to ₹500.
 - Supply a genuine portrait if the landing page should reach Starheal's level of practitioner visibility; no placeholder or synthetic Nilima portrait was added.
-- Supply the exact three Cal ID Inline embed snippets before replacing the validated raw-iframe fallback.
 - Complete one owner-approved end-to-end payment, Google Meet, confirmation, mobile-dashboard, failure, rescheduling, cancellation, and refund pass.
 
 These gates do not represent unresolved local layout defects. They require Cal ID dashboard access, real business decisions, or a controlled financial transaction.

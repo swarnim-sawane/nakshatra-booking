@@ -42,7 +42,7 @@ test("small ochre labels meet WCAG AA on paper and light surfaces", () => {
   assert.match(landingCss, /\.eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text\);/s);
   assert.match(
     bookingCss,
-    /\.booking-page__eyebrow,\s*\.booking-embed__eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text\);/s,
+    /\.booking-page__eyebrow,\s*\.booking-handoff__eyebrow\s*\{[^}]*color:\s*var\(--color-ochre-text\);/s,
   );
 });
 

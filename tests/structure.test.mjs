@@ -18,16 +18,3 @@ test("active app is Vite/React and the prototype is preserved", () => {
   assert.ok(existsSync("dist/book/index.html"));
   assert.ok(existsSync("legacy/calcom-prototype/index.html"));
 });
-
-test("the Cal ID fallback uses a compact desktop frame and a taller mobile frame", () => {
-  const bookingCss = readFileSync("src/styles/booking.css", "utf8");
-
-  assert.match(
-    bookingCss,
-    /\.booking-embed__frame\s*\{[^}]*height:\s*960px;/s,
-  );
-  assert.match(
-    bookingCss,
-    /@media \(max-width:\s*860px\)[\s\S]*?\.booking-embed__frame\s*\{[^}]*height:\s*1500px;/,
-  );
-});

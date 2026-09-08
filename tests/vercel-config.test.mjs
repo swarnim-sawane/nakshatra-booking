@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-test("Vercel headers preserve the narrow Cal ID embedding boundary", () => {
+test("Vercel headers block frames now that booking uses a full-page handoff", () => {
   const config = JSON.parse(readFileSync("vercel.json", "utf8"));
   const headers = Object.fromEntries(config.headers[0].headers.map(({ key, value }) => [key, value]));
 
@@ -15,5 +15,5 @@ test("Vercel headers preserve the narrow Cal ID embedding boundary", () => {
     .map((directive) => directive.trim())
     .find((directive) => directive.startsWith("frame-src "));
 
-  assert.equal(frameSource, "frame-src https://cal.id https://app.cal.id");
+  assert.equal(frameSource, "frame-src 'none'");
 });
