@@ -52,6 +52,34 @@ describe("Cal ID booking page", () => {
     );
   });
 
+  it("presents every reading as a numbered editorial choice with useful context", () => {
+    const html = renderToStaticMarkup(
+      <BookPage
+        bookingUrl={new URL(DEFAULT_CAL_ID_BOOKING_URL)}
+        initialHash="#personal-consultation"
+      />,
+    );
+
+    expect(html).toContain(
+      '<span class="service-selector__index" aria-hidden="true">01</span>',
+    );
+    expect(html).toContain(
+      '<span class="service-selector__index" aria-hidden="true">02</span>',
+    );
+    expect(html).toContain(
+      '<span class="service-selector__index" aria-hidden="true">03</span>',
+    );
+    expect(html).toContain(
+      "A one-to-one session for clarity, direction, and a deeper understanding",
+    );
+    expect(html).toContain(
+      "A clearer understanding of a relationship without deterministic compatibility scores",
+    );
+    expect(html).toContain(
+      "Choose supportive timing for an important event such as a marriage",
+    );
+  });
+
   it("repeats the selected reading's exact details before the scheduler", () => {
     const html = renderToStaticMarkup(
       <BookPage

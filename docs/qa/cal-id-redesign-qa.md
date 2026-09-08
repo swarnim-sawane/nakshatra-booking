@@ -9,7 +9,7 @@ Local preview: `http://127.0.0.1:4173/`
 | Command | Result |
 | --- | --- |
 | `npm run check` | Exit 0; TypeScript emitted no diagnostics. |
-| `npm test` | Exit 0; production build passed, Node tests 11/11 passed, Vitest tests 47/47 passed. |
+| `npm test` | Exit 0; production build passed, Node tests 11/11 passed, Vitest tests 48/48 passed. |
 | `npm run build` | Exit 0; Vite transformed 1,754 modules and emitted both HTML entries. |
 
 The suite covers the exact service catalogue, hash-only selection, click and history-style hash changes, URL validation, future-token isolation, direct-event resolution and defaults, same-tab booking handoff, shell/metadata, focus/contrast, production headers, Vite configuration, and every Kundli asset's PNG dimensions and alpha channel.

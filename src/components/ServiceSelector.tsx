@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import {
   consultationServices,
   type ConsultationService,
@@ -23,7 +24,7 @@ export default function ServiceSelector({
         <h2 id="service-selector-title">What would you like to explore?</h2>
       </div>
       <nav className="service-selector__options" aria-label="Available readings">
-        {consultationServices.map((service) => {
+        {consultationServices.map((service, index) => {
           const isActive = service.slug === activeService.slug;
 
           return (
@@ -34,9 +35,20 @@ export default function ServiceSelector({
               key={service.slug}
               onClick={() => onSelect(service)}
             >
-              <span className="service-selector__name">{service.name}</span>
-              <span className="service-selector__meta">
-                {service.durationMinutes} minutes · {formatPrice(service.priceInr)}
+              <span className="service-selector__index" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="service-selector__content">
+                <span className="service-selector__name">{service.name}</span>
+                <span className="service-selector__meta">
+                  {service.durationMinutes} minutes · {formatPrice(service.priceInr)}
+                </span>
+                <span className="service-selector__description">
+                  {service.purpose}
+                </span>
+              </span>
+              <span className="service-selector__cue" aria-hidden="true">
+                <ArrowRight size={20} strokeWidth={1.7} />
               </span>
             </a>
           );
