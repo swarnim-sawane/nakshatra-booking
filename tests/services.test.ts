@@ -35,36 +35,29 @@ describe("consultationServices", () => {
     ]);
   });
 
-  it("keeps the approved purpose, scope, and preparation with each reading", () => {
+  it("keeps the approved purpose with each reading without obsolete duplicate copy fields", () => {
     expect(consultationServices).toMatchObject([
       {
         slug: "personal-consultation",
         purpose:
-          "A one-to-one session for clarity, direction, and a deeper understanding of where you are in life right now.",
-        scope:
-          "Your birth chart: natural tendencies, strengths, recurring patterns, and the themes shaping your experiences. Upcoming transits can also be considered, with a focus on what may unfold over the next year.",
-        preparation:
-          "One person's birth date, exact birth time when known, birth place, and the main question or situation.",
+          "A private reading of your Kundli for a personal question, important decision or phase of life.",
       },
       {
         slug: "relationship-consultation",
         purpose:
-          "A clearer understanding of a relationship without deterministic compatibility scores or soulmate claims.",
-        scope:
-          "Both birth charts: natural tendencies, emotional needs, and ways of relating. The reading considers synastry—where there may be ease, attraction, tension, or misunderstanding—and the composite chart, which represents the relationship itself.",
-        preparation:
-          "Both people's birth dates, exact birth times when known, birth places, and one relationship question.",
+          "A thoughtful reading of two Kundlis to understand needs, recurring patterns and where the relationship feels easy or strained.",
       },
       {
         slug: "best-date-analysis",
         purpose:
-          "Choose supportive timing for an important event such as a marriage, business launch, contract, or major move.",
-        scope:
-          "Your birth chart and upcoming transits, considered against the event, date range, location, and goals you provide.",
-        preparation:
-          "Your birth details, event type, preferred date range, location, and constraints.",
+          "A Kundli-based review of suitable dates for a marriage, business launch, contract or important move.",
       },
     ]);
+
+    for (const service of consultationServices) {
+      expect(service).not.toHaveProperty("scope");
+      expect(service).not.toHaveProperty("preparation");
+    }
   });
 });
 

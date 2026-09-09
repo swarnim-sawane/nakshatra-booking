@@ -5,14 +5,17 @@
   --color-ink: #1c1915;
   --color-text-muted: #6d675f;
   --color-border: #d8cec0;
-  --color-forest: #2f5d50;
+  --color-accent: #684a73;
+  --color-accent-soft: #e8d5f4;
   --color-ochre: #a97835;
   --color-ochre-text: #875d24;
   --color-ochre-text-on-dark: #b5833b;
+  --color-gold-line: #c8aa78;
+  --color-gold-soft: #f1e7d5;
   --color-error: #a34a43;
 
-  --font-display: "Newsreader Variable", "Noto Serif Devanagari", Georgia, serif;
-  --font-body: "Manrope Variable", "Noto Sans Devanagari", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Cinzel", "Noto Serif Devanagari", "Palatino Linotype", serif;
+  --font-body: "Poppins", "Noto Sans Devanagari", "Trebuchet MS", sans-serif;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -29,5 +32,5 @@
   --page-gutter: 40px;
   --radius-pill: 999px;
   --radius-panel: 24px;
-  --focus-ring: 2px solid var(--color-forest);
+  --focus-ring: 2px solid var(--color-accent);
 }

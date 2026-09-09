@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-test("final booking action has a two-tone focus treatment on forest", () => {
+test("final booking action has a two-tone focus treatment on plum", () => {
   const css = readFileSync("src/styles/landing.css", "utf8");
   const rule = css.match(/\.final-booking \.button:focus-visible\s*\{([^}]*)\}/s);
 

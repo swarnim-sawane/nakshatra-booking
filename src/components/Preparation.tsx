@@ -1,34 +1,42 @@
-import { CalendarDays, NotebookPen } from "lucide-react";
+import { BookOpenText, MessagesSquare, NotebookPen } from "lucide-react";
 
 export default function Preparation() {
   return (
-    <section className="landing-section preparation" id="prepare" aria-labelledby="prepare-title">
+    <section className="landing-section preparation" id="experience" aria-labelledby="experience-title">
       <div className="container preparation__panel">
         <div className="section-heading">
-          <p className="eyebrow">Prepare for your session</p>
-          <h2 id="prepare-title">A little context is all you need</h2>
+          <p className="eyebrow">What to expect</p>
+          <h2 id="experience-title">Prepared before you meet. Explained with care.</h2>
           <p>
-            Keep your question simple and note any background that will help frame the conversation.
+            Your consultation is shaped around your Kundli, your questions and the time you have together.
           </p>
         </div>
         <div className="preparation__items">
           <article>
             <NotebookPen aria-hidden="true" size={24} strokeWidth={1.6} />
             <div>
-              <h3>Bring what feels relevant</h3>
-              <p>Write down the themes, changes, or decisions you would most like to explore.</p>
+              <h3>Before you meet</h3>
+              <p>Share your date, exact time—if known—and place of birth, along with what you would like to understand.</p>
             </div>
           </article>
           <article>
-            <CalendarDays aria-hidden="true" size={24} strokeWidth={1.6} />
+            <BookOpenText aria-hidden="true" size={24} strokeWidth={1.6} />
             <div>
-              <h3>Share birth details during booking</h3>
-              <p>
-                Cal ID may request your date, time, and place of birth so Nilima has the context for
-                your reading. This landing page does not collect those details.
-              </p>
+              <h3>Nilima prepares</h3>
+              <p>Nilima prepares and studies your Janam Kundli before the call. For a relationship reading, she studies both charts.</p>
             </div>
           </article>
+          <article>
+            <MessagesSquare aria-hidden="true" size={24} strokeWidth={1.6} />
+            <div>
+              <h3>During the conversation</h3>
+              <p>Nilima explains the relevant patterns in clear language, listens to your questions and discusses practical guidance or traditional nuskhe where appropriate.</p>
+            </div>
+          </article>
+        </div>
+        <div className="preparation__assurance" id="consultation-terms">
+          <strong>Guidance without fear</strong>
+          <p>Nilima does not use frightening predictions or present the future as fixed. Astrology is offered as reflective guidance and does not replace medical, legal, financial or mental-health advice.</p>
         </div>
       </div>
     </section>

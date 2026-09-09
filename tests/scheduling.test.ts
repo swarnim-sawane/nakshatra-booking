@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_CAL_ID_EVENT_URLS,
+  getCalIdEventPath,
   getCalIdUrlForService,
   parseCalIdBookingUrl,
   resolveCalIdBookingUrl,
 } from "../src/config/scheduling";
 import { consultationServices } from "../src/config/services";
+import * as schedulingModule from "../src/config/scheduling";
 
 describe("parseCalIdBookingUrl", () => {
   it("accepts an HTTPS Cal ID event URL", () => {
@@ -28,6 +30,32 @@ describe("parseCalIdBookingUrl", () => {
     "rejects unsafe value %s",
     (value) => expect(parseCalIdBookingUrl(value)).toBeNull(),
   );
+});
+
+describe("getCalIdEventPath", () => {
+  it("derives an embed-safe event path and drops query and hash data", () => {
+    expect(
+      getCalIdEventPath(
+        "https://cal.id/nilima-sawane/personal-consultation?duration=60#ignored",
+      ),
+    ).toBe("nilima-sawane/personal-consultation");
+  });
+
+  it("accepts a validated URL object", () => {
+    expect(
+      getCalIdEventPath(
+        new URL("https://app.cal.id/nilima-sawane/relationship-consultation"),
+      ),
+    ).toBe("nilima-sawane/relationship-consultation");
+  });
+
+  it.each([
+    "https://evil.example/nilima-sawane/personal-consultation",
+    "https://cal.id/",
+    "javascript:alert(1)",
+  ])("rejects an invalid or incomplete embed destination %s", (value) => {
+    expect(getCalIdEventPath(value)).toBeNull();
+  });
 });
 
 describe("resolveCalIdBookingUrl", () => {
@@ -96,6 +124,51 @@ describe("getCalIdUrlForService", () => {
       getCalIdUrlForService(personal, {
         PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL: value,
       }),
+    ).toBeNull();
+  });
+});
+
+describe("buildCalIdCheckoutUrl", () => {
+  it("creates an exact-slot Cal ID handoff without forwarding unrelated query or hash data", () => {
+    const buildCalIdCheckoutUrl = (
+      schedulingModule as unknown as Record<string, unknown>
+    ).buildCalIdCheckoutUrl;
+
+    expect(buildCalIdCheckoutUrl).toBeTypeOf("function");
+    if (typeof buildCalIdCheckoutUrl !== "function") return;
+
+    const result = buildCalIdCheckoutUrl(
+      new URL(
+        "https://cal.id/nilima-sawane/personal-consultation?duration=60&s=opaque-token#private",
+      ),
+      "2026-09-08T09:15:00.000Z",
+    ) as URL | null;
+
+    expect(result?.href).toBe(
+      "https://cal.id/nilima-sawane/personal-consultation?duration=60&slot=2026-09-08T09%3A15%3A00.000Z",
+    );
+    expect(result?.href).not.toContain("opaque-token");
+  });
+
+  it("fails closed for invalid Cal ID URLs and invalid slot timestamps", () => {
+    const buildCalIdCheckoutUrl = (
+      schedulingModule as unknown as Record<string, unknown>
+    ).buildCalIdCheckoutUrl;
+
+    expect(buildCalIdCheckoutUrl).toBeTypeOf("function");
+    if (typeof buildCalIdCheckoutUrl !== "function") return;
+
+    expect(
+      buildCalIdCheckoutUrl(
+        new URL("https://evil.example/personal-consultation"),
+        "2026-09-08T09:15:00.000Z",
+      ),
+    ).toBeNull();
+    expect(
+      buildCalIdCheckoutUrl(
+        new URL("https://cal.id/nilima-sawane/personal-consultation"),
+        "not-a-date",
+      ),
     ).toBeNull();
   });
 });

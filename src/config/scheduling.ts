@@ -57,6 +57,41 @@ export function parseCalIdBookingUrl(value: string): URL | null {
   }
 }
 
+export function getCalIdEventPath(value: URL | string): string | null {
+  const url = parseCalIdBookingUrl(
+    typeof value === "string" ? value : value.href,
+  );
+  if (!url) return null;
+
+  const eventPath = url.pathname.replace(/^\/+|\/+$/g, "");
+  return eventPath || null;
+}
+
+export function buildCalIdCheckoutUrl(
+  bookingUrl: URL | string,
+  slotStart: string,
+): URL | null {
+  const safeBookingUrl = parseCalIdBookingUrl(
+    typeof bookingUrl === "string" ? bookingUrl : bookingUrl.href,
+  );
+  const slotDate = new Date(slotStart);
+
+  if (!safeBookingUrl || Number.isNaN(slotDate.getTime())) return null;
+
+  const checkoutUrl = new URL(
+    safeBookingUrl.pathname,
+    `${safeBookingUrl.protocol}//${safeBookingUrl.host}`,
+  );
+  const duration = safeBookingUrl.searchParams.get("duration");
+
+  if (duration && /^\d{1,4}$/.test(duration)) {
+    checkoutUrl.searchParams.set("duration", duration);
+  }
+  checkoutUrl.searchParams.set("slot", slotDate.toISOString());
+
+  return checkoutUrl;
+}
+
 export function resolveCalIdBookingUrl(value: string | undefined): URL | null {
   const configuredValue = value?.trim();
   return parseCalIdBookingUrl(configuredValue || DEFAULT_CAL_ID_BOOKING_URL);

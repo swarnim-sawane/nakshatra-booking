@@ -1,69 +1,70 @@
-export const brandName = "Celestial Guidance";
+export const brandName = "Nakshatra";
 
 export const navigation = [
-  { label: "Meet Nilima", href: "/#about" },
-  { label: "Readings", href: "/#consultation" },
+  { label: "About Nilima", href: "/#about" },
+  { label: "Consultations", href: "/#consultation" },
+  { label: "What to expect", href: "/#experience" },
   { label: "FAQs", href: "/#faqs" },
 ] as const;
 
-export const sessionFacts = [
-  "Three focused readings",
-  "30 or 60 minutes",
-  "Google Meet from anywhere",
-  "Secure online payment through Razorpay",
+// Replace only these destinations when the real social profiles are available.
+export const socialProfiles = [
+  { label: "Instagram", href: "https://www.instagram.com/nakshatra.placeholder/", icon: "instagram" },
+  { label: "Facebook", href: "https://www.facebook.com/nakshatra.placeholder/", icon: "facebook" },
 ] as const;
 
-export const howItWorks = [
+export const consultationFaqItems = [
   {
-    title: "Choose your reading",
-    description: "Compare the purpose, duration, price, and preparation for each option.",
+    question: "What kind of question is suitable for a consultation?",
+    answer:
+      "A focused question about a decision, recurring pattern, relationship, period of change or important date gives Nilima useful context. You do not need to know which astrological technique applies.",
   },
   {
-    title: "Share context and book",
-    description:
-      "Complete the requested details, choose an available time, and pay securely online through Razorpay.",
+    question: "What can a Kundli reading clarify—and what can it not decide for me?",
+    answer:
+      "A reading can help you understand patterns, timing and the considerations around a choice. It does not remove your agency, replace professional medical, legal or financial advice, or guarantee a particular outcome.",
   },
   {
-    title: "Meet with Nilima",
-    description: "Receive the Google Meet invitation and join Nilima at the chosen time.",
+    question: "What if my birth time is uncertain?",
+    answer:
+      "Share the most accurate information you have and say clearly when the time is uncertain. Nilima will explain which parts of the reading can be approached responsibly and which conclusions would be unreliable.",
+  },
+  {
+    question: "How does Nilima prepare before we speak?",
+    answer:
+      "Nilima prepares your Janam Kundli herself and reviews the question or situation submitted with the booking. This allows the consultation to begin with context rather than spending most of the call gathering background.",
+  },
+  {
+    question: "Can I discuss a sensitive personal or relationship matter privately?",
+    answer:
+      "Yes. Share only what is relevant and what you are comfortable discussing. Birth details and questions are submitted through the secure booking flow and used to prepare and conduct the consultation.",
+  },
+  {
+    question: "Will the consultation tell me exactly what will happen?",
+    answer:
+      "No responsible reading can promise a fixed future. Nilima explains the tendencies and timing she sees, including uncertainty, so you can make a more considered decision.",
+  },
+  {
+    question: "Are traditional remedies or nuskhe guaranteed to work?",
+    answer:
+      "No. Where relevant, Nilima may suggest a traditional nuska or practical step as guidance. It is not presented as a guaranteed result or a substitute for professional care.",
   },
 ] as const;
 
-export const explorationTopics = [
-  "A personal question, decision, or transition",
-  "The dynamics and needs within a relationship",
-  "Supportive timing for a meaningful event",
-] as const;
-
-export const faqItems = [
+export const bookingFaqItems = [
   {
-    question: "Do I need an exact birth time?",
+    question: "What happens after I choose a consultation time?",
     answer:
-      "Share the exact birth time when it is known. If it is not known, say so rather than estimating; Cal ID will show the details requested for your chosen reading.",
+      "You continue to the secure Cal ID booking page, provide the requested birth details and questions, and complete payment through Razorpay. The confirmed booking includes the online meeting information.",
   },
   {
-    question: "What should I prepare?",
+    question: "How do I change or cancel a booking?",
     answer:
-      "Each reading card lists what to have ready. Cal ID will collect the requested booking details; this website does not collect birth information.",
+      "Use the booking-management link in the confirmation email. Any cancellation or refund follows the terms shown before payment.",
   },
   {
-    question: "How are booking and payment handled?",
+    question: "What should I do if live times do not load on this website?",
     answer:
-      "Availability, booking questions, and secure online payment through Razorpay are handled within Cal ID. A Google Meet invitation follows a confirmed booking.",
-  },
-  {
-    question: "Can I reschedule or cancel?",
-    answer:
-      "Cal ID manages rescheduling and cancellation. Please review the terms presented before confirming your booking.",
-  },
-  {
-    question: "Which reading should I choose first?",
-    answer:
-      "Choose the reading closest to the question you want to explore: personal context, a relationship, or the timing of an important event.",
-  },
-  {
-    question: "Does astrology replace professional advice?",
-    answer:
-      "No. These readings offer reflective guidance and do not replace medical, legal, financial, or mental-health advice.",
+      "Use the secure booking button shown in the calendar panel. It opens the same consultation on Cal ID, where you can view current availability and continue normally.",
   },
 ] as const;

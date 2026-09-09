@@ -1,17 +1,33 @@
 import { brandName } from "../config/site";
-import BookingAction from "./BookingAction";
+import SocialLinks from "./SocialLinks";
 
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="container site-footer__inner">
         <div>
-          <a className="brand" href="/">
-            {brandName}
+          <a className="brand" href="/" aria-label={brandName}>
+            <img
+              alt=""
+              aria-hidden="true"
+              className="brand__mark"
+              height="32"
+              src="/brand/icon-192.png"
+              width="32"
+            />
+            <span className="brand__wordmark">{brandName}</span>
           </a>
-          <p>Three focused readings with Nilima, with a clear path to booking online.</p>
+          <p>Personal Kundli consultations with Nilima Sawane · Hindi and Marathi · Online</p>
+          <SocialLinks className="site-footer__socials" label="Follow Nakshatra" />
         </div>
-        <BookingAction class="site-footer__booking" />
+        <nav className="site-footer__links" aria-label="Practice information">
+          <a href="/#about">About Nilima</a>
+          <a href="/#consultation">Consultations</a>
+          <a href="/#faqs">FAQs</a>
+          <a href="/#privacy">Privacy</a>
+          <a href="/#booking-policies">Booking policies</a>
+          <a href="/#consultation-terms">Consultation scope</a>
+        </nav>
       </div>
     </footer>
   );

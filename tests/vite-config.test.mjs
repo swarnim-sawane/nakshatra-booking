@@ -14,7 +14,23 @@ test("keeps Vite's development cache outside the dependency junction", () => {
   assert.equal(viteConfig.cacheDir, resolve(process.cwd(), ".vite-cache"));
 });
 
-test("suppresses only lucide-react module directive warnings", () => {
+test("builds a static 404 document", () => {
+  assert.match(viteConfig.build.rollupOptions.input.notFound, /src[\\/]404\.html$/);
+});
+
+test("deduplicates React for third-party embed packages", () => {
+  assert.deepEqual(viteConfig.resolve.dedupe, ["react", "react-dom"]);
+});
+
+test("serves the private Cal ID availability proxy during local development", () => {
+  const plugin = viteConfig.plugins.find(
+    (candidate) => candidate.name === "nakshatra-cal-id-api",
+  );
+
+  assert.equal(typeof plugin?.configureServer, "function");
+});
+
+test("suppresses only known package module directive warnings", () => {
   const forwarded = [];
   const onwarn = viteConfig.build.rollupOptions.onwarn;
   const forward = (warning) => forwarded.push(warning);
@@ -23,6 +39,13 @@ test("suppresses only lucide-react module directive warnings", () => {
     {
       code: "MODULE_LEVEL_DIRECTIVE",
       id: "C:/workspace/node_modules/lucide-react/dist/esm/Icon.js",
+    },
+    forward,
+  );
+  onwarn(
+    {
+      code: "MODULE_LEVEL_DIRECTIVE",
+      id: "C:/workspace/node_modules/framer-motion/dist/es/motion/index.mjs",
     },
     forward,
   );

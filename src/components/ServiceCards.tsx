@@ -1,4 +1,5 @@
 import { consultationServices } from "../config/services";
+import { motion } from "motion/react";
 
 function formatPrice(priceInr: number) {
   return `₹${priceInr.toLocaleString("en-IN")}`;
@@ -9,19 +10,29 @@ export default function ServiceCards() {
     <section className="landing-section service-cards" id="consultation" aria-labelledby="services-title">
       <div className="container">
         <div className="section-heading section-heading--wide">
-          <p className="eyebrow">Choose your reading</p>
-          <h2 id="services-title">Three readings, each with a clear focus</h2>
+          <p className="eyebrow">Consultations</p>
+          <h2 id="services-title">Choose what you would like to understand</h2>
           <p>
-            Compare what each consultation is designed to explore, what to prepare, and the full
-            price before continuing to the calendar.
+            You do not need to know which chart or technique applies. Begin with the question that
+            matters to you.
           </p>
         </div>
 
         <div className="service-cards__grid">
-          {consultationServices.map((service) => (
-            <article className="service-card" key={service.slug} aria-labelledby={`${service.slug}-title`}>
+          {consultationServices.map((service, index) => (
+            <motion.article
+              aria-labelledby={`${service.slug}-title`}
+              className="service-card"
+              initial={{ opacity: 0, y: 16 }}
+              key={service.slug}
+              transition={{ delay: index * 0.07, duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ amount: 0.18, once: true }}
+              whileInView={{ opacity: 1, y: 0 }}
+            >
+              <div className="service-card__visual" aria-hidden="true">
+                <img alt="" loading="lazy" src={service.imageSrc} />
+              </div>
               <div className="service-card__header">
-                <p className="service-card__duration">{service.durationMinutes} minutes</p>
                 <h3 id={`${service.slug}-title`}>{service.name}</h3>
                 <p>{service.purpose}</p>
               </div>
@@ -37,23 +48,12 @@ export default function ServiceCards() {
                 </div>
               </dl>
 
-              <div className="service-card__detail">
-                <h4>What we can consider</h4>
-                <p>{service.scope}</p>
-              </div>
-              <div className="service-card__detail">
-                <h4>Please prepare</h4>
-                <p>{service.preparation}</p>
-              </div>
-
               <a className="button button--primary service-card__action" href={`/book/${service.hash}`}>
-                Choose {service.name}
+                View available times
               </a>
-            </article>
+            </motion.article>
           ))}
         </div>
-
-        <p className="service-cards__payment">Secure online payment through Razorpay.</p>
       </div>
     </section>
   );

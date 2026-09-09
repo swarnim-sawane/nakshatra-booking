@@ -14,8 +14,11 @@ describe("application shell", () => {
     expect(html).toContain('aria-label="Primary navigation"');
     expect(html).toContain('href="/book/"');
     expect(html).toContain(
-      'class="button button--primary header-booking-action header-booking-action--mobile" href="/book/">Book</a>',
+      'class="button button--primary header-booking-action header-booking-action--mobile" href="/book/">Book a consultation</a>',
     );
+    for (const label of ["About Nilima", "Consultations", "What to expect", "FAQs"]) {
+      expect(html).toContain(label);
+    }
     expect(html).not.toMatch(/rzp_test_|astrology123|Cal\.com|localStorage/i);
   });
 
@@ -25,21 +28,59 @@ describe("application shell", () => {
     expect(html).not.toMatch(/<(?:title|meta)\b/i);
   });
 
+  it("renders a branded recovery page for an unknown path", () => {
+    const html = renderToStaticMarkup(<App pathname="/missing-page" />);
+
+    expect(html).toContain("Page not found");
+    expect(html).toContain('href="/">Return home</a>');
+    expect(html).toContain('href="/#consultation">View consultations</a>');
+    expect(html.match(/src="\/brand\/icon-192\.png"/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+  });
+
   it.each([
     [
       "/",
-      "Celestial Guidance",
-      "Private astrology consultations with Nilima Sawane for personal insight, relationships, and meaningful timing.",
+      "Nakshatra | Personal Kundli consultations with Nilima Sawane",
+      "Personal Kundli readings prepared by Nilima Sawane for individual questions, relationships and important dates. Consultations in Hindi and Marathi.",
     ],
     [
       "/book/",
-      "Book | Celestial Guidance",
-      "Choose a reading and book a private Google Meet consultation with Nilima Sawane.",
+      "Book a Kundli consultation | Nakshatra",
+      "Choose a personal, relationship or best-date reading with Nilima Sawane and view available consultation times.",
     ],
   ])("selects the correct metadata for %s", (pathname, title, description) => {
     const getPageMetadata = (appModule as MetadataSelectorModule).getPageMetadata;
 
     expect(getPageMetadata).toBeTypeOf("function");
     expect(getPageMetadata?.(pathname)).toEqual({ title, description });
+  });
+
+  it("uses the Nakshatra brand throughout the rendered shell", () => {
+    const html = renderToStaticMarkup(<App pathname="/" />);
+
+    expect(html).toContain('aria-label="Nakshatra"');
+    expect(html.match(/class="brand__mark"/g)).toHaveLength(2);
+    expect(html.match(/src="\/brand\/icon-192.png"/g)).toHaveLength(2);
+    expect(html.match(/class="brand__wordmark"/g)).toHaveLength(2);
+    expect(html.match(/Nakshatra/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(html).not.toContain("Celestial Guidance");
+  });
+
+  it("shows real social icons with configured destinations in the header and footer", () => {
+    const html = renderToStaticMarkup(<App pathname="/" />);
+
+    expect(html.match(/aria-label="Instagram"/g)).toHaveLength(3);
+    expect(html.match(/aria-label="Facebook"/g)).toHaveLength(3);
+    expect(html).toContain('href="https://www.instagram.com/nakshatra.placeholder/"');
+    expect(html).toContain('href="https://www.facebook.com/nakshatra.placeholder/"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noreferrer noopener"');
+    expect(html).not.toContain("Coming soon");
+    expect(html).toContain(
+      'aria-label="Social profiles" class="social-links header-socials header-socials--mobile" role="group"',
+    );
+    expect(html).not.toContain(
+      '<nav aria-label="Social profiles" class="social-links header-socials header-socials--mobile"',
+    );
   });
 });

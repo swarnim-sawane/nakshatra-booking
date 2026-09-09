@@ -1,12 +1,11 @@
 import BaseLayout from "./layouts/BaseLayout";
-import ConsultationOverview from "./components/ConsultationOverview";
 import FAQ from "./components/FAQ";
 import Hero from "./components/Hero";
-import HowItWorks from "./components/HowItWorks";
 import MeetNilima from "./components/MeetNilima";
 import Preparation from "./components/Preparation";
 import ServiceCards from "./components/ServiceCards";
 import BookPage from "./pages/BookPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import "./styles/landing.css";
 
 type AppProps = {
@@ -19,14 +18,21 @@ type PageMetadata = {
 };
 
 const homePage: PageMetadata = {
-  title: "Celestial Guidance",
+  title: "Nakshatra | Personal Kundli consultations with Nilima Sawane",
   description:
-    "Private astrology consultations with Nilima Sawane for personal insight, relationships, and meaningful timing.",
+    "Personal Kundli readings prepared by Nilima Sawane for individual questions, relationships and important dates. Consultations in Hindi and Marathi.",
 };
 
 const bookingPage: PageMetadata = {
-  title: "Book | Celestial Guidance",
-  description: "Choose a reading and book a private Google Meet consultation with Nilima Sawane.",
+  title: "Book a Kundli consultation | Nakshatra",
+  description:
+    "Choose a personal, relationship or best-date reading with Nilima Sawane and view available consultation times.",
+};
+
+const notFoundPage: PageMetadata = {
+  title: "Page not found | Nakshatra",
+  description:
+    "The requested Nakshatra page could not be found. Return home or view consultations with Nilima Sawane.",
 };
 
 function currentPathname(pathname?: string) {
@@ -34,30 +40,36 @@ function currentPathname(pathname?: string) {
 }
 
 export function getRouteKind(pathname: string) {
-  return pathname === "/book/" || pathname === "/book" ? "booking" : "home";
+  if (pathname === "/") return "home" as const;
+  if (pathname === "/book" || pathname === "/book/") return "booking" as const;
+  return "not-found" as const;
 }
 
 export function getPageMetadata(pathname: string): PageMetadata {
-  return getRouteKind(pathname) === "booking" ? bookingPage : homePage;
+  const routeKind = getRouteKind(pathname);
+
+  if (routeKind === "booking") return bookingPage;
+  if (routeKind === "not-found") return notFoundPage;
+  return homePage;
 }
 
 export default function App({ pathname }: AppProps) {
   const activePathname = currentPathname(pathname);
-  const isBookingPage = getRouteKind(activePathname) === "booking";
+  const routeKind = getRouteKind(activePathname);
   const page = getPageMetadata(activePathname);
 
   return (
     <BaseLayout description={page.description} title={page.title}>
-      {isBookingPage ? (
+      {routeKind === "booking" ? (
         <BookPage />
+      ) : routeKind === "not-found" ? (
+        <NotFoundPage />
       ) : (
         <>
           <Hero />
-          <ServiceCards />
           <MeetNilima />
-          <HowItWorks />
+          <ServiceCards />
           <Preparation />
-          <ConsultationOverview />
           <FAQ />
         </>
       )}

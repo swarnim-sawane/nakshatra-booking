@@ -17,7 +17,8 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-size: 16px;
-  line-height: 1.6;
+  font-weight: 300;
+  line-height: 1.7;
 }
 
 button,
@@ -79,8 +80,11 @@ summary {
   gap: var(--space-2);
   padding: var(--space-3) var(--space-6);
   border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.045em;
   line-height: 1.25;
   text-align: center;
   text-decoration: none;
@@ -93,7 +97,7 @@ summary {
 }
 
 .button--primary:hover {
-  background: var(--color-forest);
+  background: var(--color-accent);
 }
 
 .button--secondary {
@@ -103,13 +107,50 @@ summary {
 }
 
 .button--secondary:hover {
-  border-color: var(--color-forest);
-  color: var(--color-forest);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.button--quiet {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.button--quiet:hover {
+  border-color: var(--color-ink);
+  background: var(--color-surface-muted);
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.social-link {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.social-link:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  transform: translateY(-1px);
 }
 
 .site-header {
   border-bottom: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-paper) 92%, transparent);
+  background: var(--color-paper);
 }
 
 .site-header__inner {
@@ -123,19 +164,24 @@ summary {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--space-3);
+  gap: 11px;
   font-family: var(--font-display);
   font-size: 1.45rem;
   font-weight: 500;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.025em;
   line-height: 1;
   text-decoration: none;
 }
 
 .brand__mark {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.brand__wordmark {
+  transform: translateY(-0.02em);
 }
 
 .primary-navigation {
@@ -146,11 +192,13 @@ summary {
 }
 
 .primary-navigation a,
-.mobile-navigation a {
+.mobile-navigation > nav > a {
   display: inline-flex;
   align-items: center;
-  font-size: 0.9375rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.035em;
   text-decoration: none;
 }
 
@@ -167,7 +215,8 @@ summary {
 }
 
 .header-booking-action--mobile,
-.mobile-navigation {
+.mobile-navigation,
+.header-socials--mobile {
   display: none;
 }
 
@@ -181,15 +230,16 @@ summary {
   justify-content: center;
   cursor: pointer;
   list-style: none;
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
 .mobile-navigation summary::-webkit-details-marker {
   display: none;
 }
 
-.mobile-navigation nav {
+.mobile-navigation > nav {
   position: absolute;
   z-index: 10;
   top: calc(100% + var(--space-2));
@@ -205,6 +255,49 @@ summary {
 
 .site-main {
   min-height: 60vh;
+}
+
+.not-found {
+  display: grid;
+  min-height: min(70vh, 760px);
+  place-items: center;
+  padding: var(--space-16) var(--page-gutter);
+}
+
+.not-found__panel {
+  width: min(720px, 100%);
+  padding: clamp(2rem, 6vw, 5rem);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.not-found__panel > img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.not-found__panel h1 {
+  margin: var(--space-4) 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7vw, 5.5rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.not-found__panel > p:not(.eyebrow) {
+  max-width: 48ch;
+  margin-inline: auto;
+  color: var(--color-text-muted);
+}
+
+.not-found__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
 }
 
 .site-footer {
@@ -228,8 +321,31 @@ summary {
   color: var(--color-text-muted);
 }
 
+.site-footer__socials {
+  margin-top: var(--space-5);
+}
+
 .site-footer__booking {
   flex: 0 0 auto;
+}
+
+.site-footer__links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: var(--space-2) var(--space-8);
+}
+
+.site-footer__links a {
+  color: var(--color-text-muted);
+  text-decoration-color: transparent;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+}
+
+.site-footer__links a:hover {
+  color: var(--color-accent);
 }
 
 @media (max-width: 760px) {
@@ -243,17 +359,18 @@ summary {
   }
 
   .brand {
-    gap: var(--space-2);
-    font-size: 1.125rem;
+    gap: 9px;
+    font-size: 1.35rem;
   }
 
   .brand__mark {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .primary-navigation,
-  .header-booking-action--desktop {
+  .header-booking-action--desktop,
+  .header-socials--desktop {
     display: none;
   }
 
@@ -262,10 +379,18 @@ summary {
     display: block;
   }
 
+  .header-socials--mobile {
+    display: flex;
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
   .header-booking-action--mobile {
     min-height: 44px;
-    padding-inline: var(--space-4);
-    font-size: 0.875rem;
+    padding-inline: 10px;
+    font-size: 0.68rem;
+    letter-spacing: 0.025em;
   }
 
   .site-footer {
@@ -277,6 +402,33 @@ summary {
     align-items: flex-start;
     flex-direction: column;
     padding-block: var(--space-8);
+  }
+
+  .site-footer__links {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header__inner {
+    gap: var(--space-2);
+  }
+
+  .site-header .brand {
+    gap: 6px;
+    font-size: 1.05rem;
+  }
+
+  .site-header .brand__mark {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 380px) {
+  .site-header .brand__wordmark {
+    display: none;
   }
 }
 
