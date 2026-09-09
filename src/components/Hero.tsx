@@ -36,7 +36,7 @@ export default function Hero() {
 
         <div className="landing-hero__supporting">
           <ul className="landing-hero__facts" aria-label="Consultation facts">
-            <li><strong>5+ years</strong><span>Experience</span></li>
+            <li><strong>8+ years</strong><span>Experience</span></li>
             <li><strong>Hindi &amp; Marathi</strong><span>Languages</span></li>
           </ul>
         </div>

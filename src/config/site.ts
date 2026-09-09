@@ -4,6 +4,7 @@ export const navigation = [
   { label: "About Nilima", href: "/#about" },
   { label: "What she reads", href: "/#consultation" },
   { label: "How it works", href: "/#experience" },
+  { label: "FAQs", href: "/#faqs" },
   { label: "Get in touch", href: "/#contact" },
 ] as const;
 

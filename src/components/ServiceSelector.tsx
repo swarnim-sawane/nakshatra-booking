@@ -63,6 +63,10 @@ export default function ServiceSelector({
           );
         })}
       </nav>
+      <p className="service-selector__guidance">
+        Not sure which one? Start with a Personal Consultation — Nilima can guide the rest from
+        there.
+      </p>
     </section>
   );
 }

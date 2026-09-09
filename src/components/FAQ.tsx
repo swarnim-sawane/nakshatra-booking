@@ -1,6 +1,5 @@
 import { ChevronDown } from "lucide-react";
 import { bookingFaqItems, consultationFaqItems } from "../config/site";
-import BookingAction from "./BookingAction";
 import Reveal from "./Reveal";
 
 export default function FAQ() {
@@ -39,14 +38,6 @@ export default function FAQ() {
             </div>
           </section>
         </Reveal>
-      </div>
-      <div className="container final-booking">
-        <div>
-          <p className="eyebrow">Book your consultation</p>
-          <h2>Choose the chart work that matches your question</h2>
-          <p>You will see the duration and price before selecting an available time.</p>
-        </div>
-        <BookingAction />
       </div>
     </section>
   );

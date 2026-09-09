@@ -1,5 +1,6 @@
 import BaseLayout from "./layouts/BaseLayout";
 import Contact from "./components/Contact";
+import FAQ from "./components/FAQ";
 import Hero from "./components/Hero";
 import MeetNilima from "./components/MeetNilima";
 import Preparation from "./components/Preparation";
@@ -26,7 +27,7 @@ const homePage: PageMetadata = {
 const bookingPage: PageMetadata = {
   title: "Book a Kundli consultation | Nakshatra",
   description:
-    "Choose a personal, relationship or best-date reading with Nilima Sawane and view available consultation times.",
+    "Choose a personal consultation, Kundli Milan or Muhurat reading with Nilima Sawane and view available consultation times.",
 };
 
 const notFoundPage: PageMetadata = {
@@ -70,6 +71,7 @@ export default function App({ pathname }: AppProps) {
           <MeetNilima />
           <ServiceCards />
           <Preparation />
+          <FAQ />
           <Contact />
         </>
       )}

@@ -25,6 +25,7 @@ export default function Footer() {
           <a href="/#consultation">What she reads</a>
           <a href="/#experience">How it works</a>
           <a href="/#approach">Approach</a>
+          <a href="/#faqs">FAQs</a>
           <a href="/#contact">Get in touch</a>
         </nav>
       </div>

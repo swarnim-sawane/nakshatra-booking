@@ -81,6 +81,15 @@
   margin-top: var(--space-6);
 }
 
+.service-selector__guidance {
+  max-width: 64ch;
+  margin: var(--space-8) auto 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+  text-align: center;
+}
+
 .service-selector__card {
   display: grid;
   grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);

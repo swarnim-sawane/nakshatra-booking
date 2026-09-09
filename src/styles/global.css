@@ -480,6 +480,7 @@ summary {
   .site-header .brand {
     gap: 6px;
     font-size: 1.05rem;
+    justify-content: center;
   }
 
   .site-header .brand__mark {

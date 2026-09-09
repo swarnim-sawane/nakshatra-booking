@@ -8,7 +8,7 @@ export type ConsultationService = Readonly<{
   hash: `#${ServiceSlug}`;
   name: string;
   durationMinutes: 30 | 60;
-  priceInr: 500 | 1_000;
+  priceInr: 499 | 1_099 | 1_499;
   purpose: string;
   imageSrc: `/images/${string}`;
 }>;
@@ -19,7 +19,7 @@ export const consultationServices = [
     hash: "#personal-consultation",
     name: "Personal Consultation",
     durationMinutes: 60,
-    priceInr: 1_000,
+    priceInr: 1_099,
     imageSrc: "/images/consultation-desk.webp",
     purpose:
       "A full personal consultation for when you don't have one specific question — a detailed look at what your chart shows.",
@@ -27,9 +27,9 @@ export const consultationServices = [
   {
     slug: "relationship-consultation",
     hash: "#relationship-consultation",
-    name: "Relationship Consultation",
+    name: "Relationship Consultation (Kundli Milan)",
     durationMinutes: 60,
-    priceInr: 1_000,
+    priceInr: 1_499,
     imageSrc: "/images/relationship-consultation.webp",
     purpose:
       "A compatibility reading that looks at where two charts align and where they may need attention.",
@@ -37,9 +37,9 @@ export const consultationServices = [
   {
     slug: "best-date-analysis",
     hash: "#best-date-analysis",
-    name: "Best Date Analysis",
+    name: "Muhurat",
     durationMinutes: 30,
-    priceInr: 500,
+    priceInr: 499,
     imageSrc: "/images/best-date-analysis.webp",
     purpose:
       "Timing for weddings, ceremonies, and other important dates.",

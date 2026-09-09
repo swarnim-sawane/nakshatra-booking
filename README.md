@@ -4,9 +4,9 @@ Nakshatra is a responsive, Nilima-led astrology consultation website with three 
 
 | Reading | Duration | Price |
 | --- | ---: | ---: |
-| Personal Consultation | 60 minutes | ₹1,000 |
-| Relationship Consultation | 60 minutes | ₹1,000 |
-| Best Date Analysis | 30 minutes | ₹500 |
+| Personal Consultation | 60 minutes | ₹1,099 |
+| Relationship Consultation (Kundli Milan) | 60 minutes | ₹1,499 |
+| Muhurat | 30 minutes | ₹499 |
 
 Visitors can see a Nakshatra-designed Personal Consultation calendar directly in the landing-page hero and compare three concise readings. On `/book/`, each full-width service row goes straight to that service's exact event page; there is no second scheduler after the choices. The hero reads live availability through a server-only Cal ID proxy, then sends the selected slot to Cal ID for attendee details, Razorpay payment, confirmation, and Google Meet. The website never collects birth, attendee, or payment details.
 

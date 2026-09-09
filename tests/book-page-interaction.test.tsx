@@ -36,7 +36,7 @@ describe("booking service interactions", () => {
       name: /relationship consultation/i,
     });
     const bestDate = screen.getByRole<HTMLAnchorElement>("link", {
-      name: /best date analysis/i,
+      name: /muhurat/i,
     });
 
     expect(personal.href).toBe(serviceEnvironment.PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL);

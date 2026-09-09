@@ -17,6 +17,9 @@ describe("Cal ID booking page", () => {
     expect(html).toContain(`href="${DEFAULT_CAL_ID_EVENT_URLS["best-date-analysis"]}"`);
     expect(html.match(/class="service-selector__card/g)).toHaveLength(3);
     expect(html.match(/View times and book/g)).toHaveLength(3);
+    expect(html).toContain(
+      "Not sure which one? Start with a Personal Consultation — Nilima can guide the rest from there.",
+    );
     expect(html).not.toContain('target="_blank"');
     expect(html).not.toContain("aria-current");
   });
@@ -87,7 +90,7 @@ describe("Cal ID booking page", () => {
 
     expect(getRouteKind("/book/")).toBe("booking");
     expect(html).toContain("Book a Consultation");
-    expect(html).toContain("Relationship Consultation");
+    expect(html).toContain("Relationship Consultation (Kundli Milan)");
     expect(html).not.toContain(opaqueToken);
   });
 

@@ -46,7 +46,7 @@ describe("application shell", () => {
     [
       "/book/",
       "Book a Kundli consultation | Nakshatra",
-      "Choose a personal, relationship or best-date reading with Nilima Sawane and view available consultation times.",
+      "Choose a personal consultation, Kundli Milan or Muhurat reading with Nilima Sawane and view available consultation times.",
     ],
   ])("selects the correct metadata for %s", (pathname, title, description) => {
     const getPageMetadata = (appModule as MetadataSelectorModule).getPageMetadata;
