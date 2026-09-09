@@ -1,7 +1,7 @@
 {
   "name": "Nakshatra Admin",
   "short_name": "Nakshatra",
-  "description": "A sample mobile appointments prototype for Nakshatra.",
+  "description": "Private consultation schedule for Nakshatra.",
   "start_url": "/admin/",
   "scope": "/admin/",
   "display": "standalone",

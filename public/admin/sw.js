@@ -1,4 +1,4 @@
-const CACHE_NAME = "nakshatra-admin-prototype-v1";
+const CACHE_NAME = "nakshatra-admin-v2";
 const ADMIN_ASSETS = [
   "/admin/",
   "/admin/manifest.webmanifest",
@@ -49,6 +49,34 @@ self.addEventListener("fetch", (event) => {
         const cached = await caches.match(event.request);
         return cached ?? caches.match("/admin/");
       }),
+  );
+});
+
+self.addEventListener("push", (event) => {
+  const allowedTitles = new Set([
+    "New consultation booked",
+    "Consultation payment confirmed",
+    "Consultation rescheduled",
+    "Consultation cancelled",
+    "Nakshatra notifications are ready",
+  ]);
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = {};
+  }
+  const title = allowedTitles.has(data.title) ? data.title : "Consultation update";
+  const tag = typeof data.tag === "string" ? data.tag.slice(0, 80) : "nakshatra-booking-update";
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: "Open Nakshatra Admin for details.",
+      data: { url: "/admin/" },
+      icon: "/brand/icon-192.png",
+      badge: "/brand/favicon-32.png",
+      tag,
+    }),
   );
 });
 

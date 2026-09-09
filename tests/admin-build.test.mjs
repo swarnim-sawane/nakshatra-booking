@@ -22,15 +22,19 @@ test("admin manifest and worker stay inside the admin boundary", () => {
   );
   assert.match(worker, /pathname\.startsWith\("\/admin\/"\)/);
   assert.match(worker, /openWindow\("\/admin\/"\)/);
+  assert.match(worker, /addEventListener\("push"/);
+  assert.match(worker, /Open Nakshatra Admin for details\./);
+  assert.doesNotMatch(worker, /customerFirstName|email|phone|meetingUrl/);
   assert.match(vite, /admin:\s*resolve\(srcRoot, "admin\/index\.html"\)/);
 });
 
-test("admin HTML identifies the prototype and loads only its own entry", () => {
+test("admin HTML identifies the private app and loads only its own entry", () => {
   const html = readFileSync("src/admin/index.html", "utf8");
 
   assert.match(html, /href="\/admin\/manifest\.webmanifest"/);
   assert.match(html, /src="\/admin\/main\.tsx"/);
   assert.match(html, /content="#29483b"/);
+  assert.doesNotMatch(html, /prototype|sample/i);
   assert.equal(html.includes('src="/main.tsx"'), false);
 });
 

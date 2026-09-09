@@ -2,6 +2,7 @@ export const ADMIN_TIME_ZONE = "Asia/Kolkata" as const;
 
 export type BookingStatus =
   | "confirmed"
+  | "paid"
   | "rescheduled"
   | "cancelled"
   | "completed";
@@ -17,7 +18,7 @@ export type AdminBooking = {
   timezone: typeof ADMIN_TIME_ZONE;
   status: BookingStatus;
   meetingUrl?: string;
-  isSample: true;
+  isSample?: boolean;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", {
@@ -110,7 +111,7 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       serviceName: "Muhurat",
       dayOffset: -1,
       hour: 16,
-      durationMinutes: 30,
+      durationMinutes: 10,
       status: "completed",
     }),
     sampleBooking(dayStart, {
@@ -119,7 +120,7 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       serviceName: "Relationship Consultation",
       dayOffset: 0,
       hour: 9,
-      durationMinutes: 60,
+      durationMinutes: 20,
       status: "completed",
     }),
     sampleBooking(dayStart, {
@@ -129,7 +130,7 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       dayOffset: 0,
       hour: 13,
       minute: 30,
-      durationMinutes: 60,
+      durationMinutes: 30,
       status: "confirmed",
       meetingUrl: "https://meet.google.com/abc-defg-hij",
     }),
@@ -139,7 +140,7 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       serviceName: "Personal Consultation",
       dayOffset: 1,
       hour: 16,
-      durationMinutes: 60,
+      durationMinutes: 30,
       status: "rescheduled",
       meetingUrl: "https://meet.google.com/klm-nopq-rst",
     }),
@@ -149,7 +150,7 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       serviceName: "Muhurat",
       dayOffset: 3,
       hour: 11,
-      durationMinutes: 30,
+      durationMinutes: 10,
       status: "cancelled",
       meetingUrl: "https://meet.google.com/uvw-xyza-bcd",
     }),
@@ -159,7 +160,7 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       serviceName: "Relationship Consultation",
       dayOffset: 5,
       hour: 18,
-      durationMinutes: 60,
+      durationMinutes: 20,
       status: "confirmed",
       meetingUrl: "https://meet.google.com/efg-hijk-lmn",
     }),
@@ -190,7 +191,9 @@ export function findNextBooking(bookings: AdminBooking[], now = new Date()) {
   return bookings.find(
     (booking) =>
       new Date(booking.startsAt).getTime() >= now.getTime() &&
-      (booking.status === "confirmed" || booking.status === "rescheduled"),
+      (booking.status === "confirmed" ||
+        booking.status === "paid" ||
+        booking.status === "rescheduled"),
   );
 }
 

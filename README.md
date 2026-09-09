@@ -31,6 +31,12 @@ The active local preview is `http://127.0.0.1:4173/`. The production build is wr
 
 The committed `package-lock.json` keeps installs reproducible.
 
+## Private admin schedule
+
+The installable `/admin/` PWA reads sanitized Cal ID lifecycle events from a protected same-origin API. Production never falls back to sample appointments. Sample data is available only during development when `PUBLIC_ADMIN_DEMO_MODE=true`, and the screen labels it clearly.
+
+Setup instructions for Supabase, the single-owner session, Cal ID webhooks and private Android Web Push are in [docs/admin-cal-id-setup.md](docs/admin-cal-id-setup.md).
+
 ## Cal ID configuration
 
 The three verified direct-event URLs are safe defaults in the application, so a clean deployment keeps exact service routing. Create an ignored `.env.local` from `.env.example` only when you need to override them. These are public scheduling URLs, not secrets:

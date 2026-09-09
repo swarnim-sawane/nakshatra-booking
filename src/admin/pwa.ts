@@ -1,19 +1,12 @@
+import { AdminApiError } from "./api";
+
 export type NotificationRequestResult = NotificationPermission | "unsupported";
-export type TestNotificationResult =
-  | "sent"
-  | "denied"
-  | "unsupported"
-  | "unavailable";
+export type PushActionResult = "enabled" | "disabled" | "sent" | "unsupported" | "denied";
 
 export async function registerAdminServiceWorker() {
-  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
-    return null;
-  }
-
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return null;
   try {
-    return await navigator.serviceWorker.register("/admin/sw.js", {
-      scope: "/admin/",
-    });
+    return await navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" });
   } catch {
     return null;
   }
@@ -26,7 +19,6 @@ export async function requestNotificationPermission(): Promise<NotificationReque
   ) {
     return "unsupported";
   }
-
   try {
     return await Notification.requestPermission();
   } catch {
@@ -34,24 +26,93 @@ export async function requestNotificationPermission(): Promise<NotificationReque
   }
 }
 
-export async function sendTestNotification(
+function applicationServerKey(value: string) {
+  const padded = value
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(value.length / 4) * 4, "=");
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+async function pushRequest(path: string, init: RequestInit = {}) {
+  let response: Response;
+  try {
+    response = await fetch(path, { credentials: "same-origin", ...init });
+  } catch {
+    throw new AdminApiError("offline", "The notification service could not be reached.");
+  }
+  if (response.status === 401) {
+    throw new AdminApiError("unauthorized", "Your admin session has expired.");
+  }
+  if (!response.ok) {
+    throw new AdminApiError("unavailable", "The notification service is temporarily unavailable.");
+  }
+  return response;
+}
+
+export async function getPushSubscription(
   registration: ServiceWorkerRegistration | null,
-): Promise<TestNotificationResult> {
-  if (typeof Notification === "undefined") return "unsupported";
-  if (Notification.permission !== "granted") return "denied";
-  if (!registration || typeof registration.showNotification !== "function") {
-    return "unavailable";
+) {
+  if (!registration || !("pushManager" in registration)) return null;
+  return registration.pushManager.getSubscription();
+}
+
+export async function enablePushNotifications(
+  registration: ServiceWorkerRegistration | null,
+): Promise<PushActionResult> {
+  if (!registration || !("pushManager" in registration) || typeof Notification === "undefined") {
+    return "unsupported";
+  }
+  let permission: NotificationPermission | "unsupported" = Notification.permission;
+  if (permission !== "granted") permission = await requestNotificationPermission();
+  if (permission === "unsupported") return "unsupported";
+  if (permission !== "granted") return "denied";
+
+  const configResponse = await pushRequest("/api/admin/push-subscription");
+  const config = (await configResponse.json()) as { publicKey?: unknown };
+  if (typeof config.publicKey !== "string") {
+    throw new AdminApiError("invalid", "The notification configuration was invalid.");
   }
 
-  try {
-    await registration.showNotification("Nakshatra Admin test", {
-      body: "Sample notifications work on this device. Live booking alerts are not connected yet.",
-      data: { url: "/admin/" },
-      icon: "/brand/icon-192.png",
-      tag: "nakshatra-admin-test",
-    });
-    return "sent";
-  } catch {
-    return "unavailable";
-  }
+  const existing = await registration.pushManager.getSubscription();
+  const subscription = existing ?? await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: applicationServerKey(config.publicKey),
+  });
+  await pushRequest("/api/admin/push-subscription", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(subscription.toJSON()),
+  });
+  return "enabled";
+}
+
+export async function disablePushNotifications(
+  registration: ServiceWorkerRegistration | null,
+): Promise<PushActionResult> {
+  const subscription = await getPushSubscription(registration);
+  if (!subscription) return "disabled";
+  await pushRequest("/api/admin/push-subscription", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ endpoint: subscription.endpoint }),
+  });
+  await subscription.unsubscribe();
+  return "disabled";
+}
+
+export async function sendTestNotification(
+  registration: ServiceWorkerRegistration | null,
+): Promise<PushActionResult> {
+  if (typeof Notification === "undefined") return "unsupported";
+  if (Notification.permission !== "granted") return "denied";
+  const subscription = await getPushSubscription(registration);
+  if (!subscription) return "unsupported";
+  await pushRequest("/api/admin/test-notification", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ endpoint: subscription.endpoint }),
+  });
+  return "sent";
 }

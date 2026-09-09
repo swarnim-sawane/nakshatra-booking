@@ -101,6 +101,99 @@ a:focus-visible {
   text-align: center;
 }
 
+.admin-signout {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid #d2c7b7;
+  border-radius: 11px;
+  background: #fffdf8;
+  color: #29483b;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.admin-login-main {
+  display: grid;
+  min-height: calc(100vh - 158px);
+  padding: clamp(30px, 8vw, 72px) clamp(16px, 5vw, 34px);
+  place-items: start center;
+}
+
+.admin-login {
+  width: min(100%, 480px);
+  padding: clamp(24px, 7vw, 40px);
+  border: 1px solid #dbd1c1;
+  border-radius: 24px;
+  background: #fffdf8;
+  box-shadow: 0 20px 48px rgb(66 52 32 / 8%);
+}
+
+.admin-login h2 {
+  margin: 0;
+  font-family: "Cinzel", "Palatino Linotype", serif;
+  font-size: clamp(1.55rem, 7vw, 2.1rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.admin-login > p:not(.admin-eyebrow, .admin-login__message) {
+  margin: 12px 0 0;
+  color: #6d665d;
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
+.admin-login form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.admin-login label {
+  display: grid;
+  gap: 7px;
+  color: #5f594f;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-login input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid #cfc4b3;
+  border-radius: 11px;
+  background: #fffefa;
+  color: #1e211d;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.admin-login input:focus {
+  border-color: #986a2d;
+  outline: 3px solid rgb(211 154 69 / 24%);
+}
+
+.admin-login .admin-button {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.admin-login__message {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #a35349;
+  background: #f4e3df;
+  color: #733c35;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
 .admin-main {
   display: grid;
   gap: 18px;
@@ -233,6 +326,11 @@ a:focus-visible {
 .admin-status--rescheduled {
   background: #f4e6c9;
   color: #76501e;
+}
+
+.admin-status--paid {
+  background: #e0eee5;
+  color: #285a3f;
 }
 
 .admin-status--cancelled {
@@ -404,6 +502,11 @@ a:focus-visible {
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+.admin-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
 }
 
 .admin-button--primary {
