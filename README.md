@@ -35,7 +35,7 @@ The committed `package-lock.json` keeps installs reproducible.
 
 The installable `/admin/` PWA reads sanitized Cal ID lifecycle events from a protected same-origin API. Production never falls back to sample appointments. Sample data is available only during development when `PUBLIC_ADMIN_DEMO_MODE=true`, and the screen labels it clearly.
 
-Setup instructions for Supabase, the single-owner session, Cal ID webhooks and private Android Web Push are in [docs/admin-cal-id-setup.md](docs/admin-cal-id-setup.md).
+Setup instructions for Neon Postgres through Vercel, the single-owner session, Cal ID webhooks, short data retention and private Android Web Push are in [docs/admin-cal-id-setup.md](docs/admin-cal-id-setup.md).
 
 ## Cal ID configuration
 

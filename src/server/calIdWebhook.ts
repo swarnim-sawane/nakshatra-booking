@@ -52,7 +52,7 @@ export type BookingLifecycleRecord = Readonly<{
   updatedAt: string;
 }>;
 
-export type CalIdWebhookStoreResult = "applied" | "duplicate";
+export type CalIdWebhookStoreResult = "applied" | "duplicate" | "suppressed";
 
 export interface CalIdWebhookStore {
   applyEvent(event: CalIdWebhookEvent): Promise<CalIdWebhookStoreResult>;
@@ -356,8 +356,12 @@ export async function handleCalIdWebhookRequest({
 
   try {
     const result = await store.applyEvent(projected.event);
-    if (notifier) await notifier.notify(projected.event);
-    return jsonResponse(200, { received: true, duplicate: result === "duplicate" });
+    if (result !== "suppressed" && notifier) await notifier.notify(projected.event);
+    return jsonResponse(200, {
+      received: true,
+      duplicate: result === "duplicate",
+      ...(result === "suppressed" ? { suppressed: true } : {}),
+    });
   } catch {
     return jsonResponse(503, { error: "Webhook processing is temporarily unavailable." });
   }

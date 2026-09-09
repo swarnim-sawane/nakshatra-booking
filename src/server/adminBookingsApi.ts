@@ -1,13 +1,14 @@
 import {
   authenticateAdminRequest,
+  isSameOriginMutation,
   type AdminAuthEnvironment,
 } from "./adminAuth";
-import { jsonResponse } from "./adminHttp";
-import type { SupabaseAdminStore } from "./supabaseAdminStore";
+import { isRecord, jsonResponse, readLimitedJson } from "./adminHttp";
+import type { AdminDataStore } from "./neonAdminStore";
 
 type AdminBookingsHandlerOptions = {
   environment: AdminAuthEnvironment;
-  store: SupabaseAdminStore | null;
+  store: AdminDataStore | null;
   now?: () => Date;
 };
 
@@ -17,8 +18,8 @@ export function createAdminBookingsHandler({
   now = () => new Date(),
 }: AdminBookingsHandlerOptions) {
   return async function handleAdminBookings(request: Request) {
-    if (request.method !== "GET") {
-      return jsonResponse(405, { error: "Method not allowed." }, { Allow: "GET" });
+    if (request.method !== "GET" && request.method !== "DELETE") {
+      return jsonResponse(405, { error: "Method not allowed." }, { Allow: "GET, DELETE" });
     }
     const auth = await authenticateAdminRequest(request, environment, now());
     if (auth === "unconfigured") {
@@ -31,10 +32,43 @@ export function createAdminBookingsHandler({
       return jsonResponse(503, { error: "Booking storage is not configured." });
     }
 
+    if (request.method === "GET") {
+      try {
+        return jsonResponse(200, { bookings: await store.listBookings(now()) });
+      } catch {
+        return jsonResponse(503, { error: "Appointments are temporarily unavailable." });
+      }
+    }
+
+    if (!isSameOriginMutation(request)) {
+      return jsonResponse(403, { error: "Request origin is not allowed." });
+    }
+    let body: unknown;
     try {
-      return jsonResponse(200, { bookings: await store.listBookings() });
+      body = await readLimitedJson(request);
     } catch {
-      return jsonResponse(503, { error: "Appointments are temporarily unavailable." });
+      return jsonResponse(400, { error: "Invalid removal request." });
+    }
+    const bookingUid = isRecord(body) && typeof body.bookingUid === "string"
+      ? body.bookingUid.trim()
+      : "";
+    if (!/^[A-Za-z0-9_-]{1,200}$/.test(bookingUid)) {
+      return jsonResponse(400, { error: "Invalid removal request." });
+    }
+
+    try {
+      const result = await store.deleteBooking(bookingUid, now());
+      if (result === "active") {
+        return jsonResponse(409, {
+          error: "Active future appointments cannot be removed.",
+        });
+      }
+      if (result === "not_found") {
+        return jsonResponse(404, { error: "Appointment was not found." });
+      }
+      return jsonResponse(200, { removed: true });
+    } catch {
+      return jsonResponse(503, { error: "The appointment could not be removed." });
     }
   };
 }

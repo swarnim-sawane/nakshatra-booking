@@ -1,45 +1,96 @@
 # Cal ID to Nakshatra Admin setup
 
-The code is complete locally, but the live connection remains deliberately inactive until the owner supplies the server credentials and applies the database migration. None of these values may use a `PUBLIC_` or `VITE_` prefix.
+The code is complete locally, but the live connection remains inactive until the owner creates the database, applies the migration and adds the server secrets. None of these values may use a `PUBLIC_` or `VITE_` prefix.
 
-## 1. Create the private database
+## 1. Add the free Neon database through Vercel
 
-1. Create or select a Supabase project.
-2. Run `supabase/migrations/202609090001_calid_admin_pipeline.sql` in the SQL editor.
-3. Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to Vercel.
+1. Open the `nilima` project in Vercel.
+2. Open **Storage** or **Marketplace**, select **Neon — Serverless Postgres**, and choose the plan that starts at **$0**.
+3. Connect the resource to the Production environment. Preview can be enabled later if isolated preview databases are wanted.
+4. Open the created project in Neon and use its SQL Editor to create the restricted application role. Replace the placeholder with a generated password kept in the owner's password manager:
 
-The migration enables row-level security, grants access only to `service_role`, deduplicates webhook deliveries, applies lifecycle changes in one transaction and keeps a durable push-delivery outbox. It does not create columns for birth details, private questions, attendee email, phone number or raw webhook payloads.
+   ```sql
+   create role nakshatra_runtime login password '<strong-generated-password>';
+   ```
 
-## 2. Create the owner sign-in and notification keys
+   Create this role with SQL, not the Neon Console's **New role** button. Do not grant it table, schema-owner, database-owner or administrative privileges.
+5. In the Neon/Vercel integration settings, select `nakshatra_runtime` as the role for the application connection and select the production database. The integration should inject one server-only variable named `DATABASE_URL`.
+6. Confirm the hostname in `DATABASE_URL` contains `-pooler` and redeploy after all setup steps are complete. Do not copy this variable into frontend code.
 
-Run:
+Neon roles made through the Console/API inherit `neon_superuser`, while SQL-created roles do not. The migration refuses to continue if `nakshatra_runtime` has that membership, then grants only permission to execute the narrow `nakshatra_admin` functions used by the application. It grants no direct table access.
+
+## 2. Apply the database migration
+
+Run the migration as the Neon database owner, not as `nakshatra_runtime`. In the Neon SQL Editor, open and run:
+
+`db/migrations/202609090001_calid_admin_pipeline.sql`
+
+With `psql` on PowerShell, the equivalent command is:
+
+```powershell
+$env:NEON_OWNER_DATABASE_URL = "<temporary owner connection string>"
+psql "$env:NEON_OWNER_DATABASE_URL" -v ON_ERROR_STOP=1 -f ".\db\migrations\202609090001_calid_admin_pipeline.sql"
+Remove-Item Env:NEON_OWNER_DATABASE_URL
+```
+
+`NEON_OWNER_DATABASE_URL` is temporary local migration access. Do not add it to Vercel. The deployed application uses only the pooled, restricted `DATABASE_URL` injected by the integration.
+
+The migration creates private tables and security-definer functions for atomic webhook deduplication, lifecycle ordering, manual deletion, retention cleanup and the push outbox. It never creates columns for birth details, questions, attendee email, phone number, raw webhook bodies or notification text.
+
+## 3. Create the owner sign-in and notification keys
+
+Run locally:
 
 ```bash
 npm run setup:admin
 ```
 
-Store the generated password in the owner's password manager. Add the printed `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET`, `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` values to Vercel. Replace `VAPID_SUBJECT` with a monitored owner email in `mailto:` form.
+Store the generated password in the owner's password manager. Add these server-only values to the Vercel Production environment:
 
-The admin session uses a signed `Secure`, `HttpOnly`, `SameSite=Strict` cookie. No password, session secret or service-role key is sent to the frontend or stored in local storage.
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD_HASH`
+- `ADMIN_SESSION_SECRET`
+- `VAPID_PUBLIC_KEY`
+- `VAPID_PRIVATE_KEY`
+- `VAPID_SUBJECT` — a monitored owner email in `mailto:` form
+- `CALID_WEBHOOK_SECRET`
+- `CALID_API_KEY`
+- `CALID_PERSONAL_EVENT_TYPE_ID`
+- `CALID_RELATIONSHIP_EVENT_TYPE_ID`
+- `CALID_MUHURAT_EVENT_TYPE_ID`
 
-## 3. Configure the Cal ID webhook
+`DATABASE_URL` is supplied by the Neon Marketplace integration. Do not create a second browser-visible database variable.
+
+The admin session uses a signed `Secure`, `HttpOnly`, `SameSite=Strict` cookie. Passwords, session secrets, database credentials and private VAPID keys are never sent to the frontend or stored in browser storage.
+
+## 4. Configure the Cal ID webhook
 
 In Cal ID, open **Settings → Webhooks** at `/settings/webhooks` and create one account-level webhook:
 
-- Subscriber URL: `https://<production-domain>/api/cal-id-webhook`
-- Secret: a new random secret also stored in Vercel as `CALID_WEBHOOK_SECRET`
+- Subscriber URL: `https://nilima.vercel.app/api/cal-id-webhook`
+- Secret: the same random value stored in Vercel as `CALID_WEBHOOK_SECRET`
 - Triggers: `BOOKING_CREATED`, `BOOKING_PAID`, `BOOKING_RESCHEDULED`, `BOOKING_CANCELLED`
-- Active: enabled only after the Supabase migration and Vercel variables are ready
+- Active: enable only after the Neon migration and all Vercel variables are ready
 
-The verified event IDs are already safe defaults. They may be set explicitly as `CALID_PERSONAL_EVENT_TYPE_ID=108657`, `CALID_RELATIONSHIP_EVENT_TYPE_ID=108655` and `CALID_MUHURAT_EVENT_TYPE_ID=108656`.
+The verified event IDs are safe defaults. They may be set explicitly as `CALID_PERSONAL_EVENT_TYPE_ID=108657`, `CALID_RELATIONSHIP_EVENT_TYPE_ID=108655` and `CALID_MUHURAT_EVENT_TYPE_ID=108656`.
 
 Cal ID signs the exact request body with HMAC-SHA256 in `X-Cal-Signature-256`. The receiver rejects an invalid signature, an oversized body, unsupported event types and unavailable durable storage.
 
-## 4. Keep customer reminders in Cal ID
+## 5. Retention and manual removal
 
-For each of the three event types, keep exactly one customer email reminder scheduled **1 hour before** the consultation. Remove or disable any 24-hour reminder. Do not add a WhatsApp reminder in this release. The Nakshatra Web Push alerts are private owner notifications and do not replace the customer's Cal ID email.
+- Customer-bearing appointment rows are removed seven days after the appointment ends.
+- Cancelled appointment rows are removed seven days after cancellation, even if the former appointment date is later.
+- A signed-in owner can remove a completed or cancelled appointment immediately from its details. Active future appointments cannot be removed through this housekeeping control; Postgres rechecks this rule.
+- Minimal webhook delivery IDs and push-outbox rows remain for 30 days. This prevents a Cal ID retry from recreating a customer record or resending an already handled alert after the visible appointment was removed.
+- Push subscriptions remain until the owner disables them, their declared expiry passes, or the push service rejects them as expired.
 
-## 5. Owner activation check
+Cleanup is idempotent and runs opportunistically during a valid webhook ingestion or authenticated admin schedule read. No paid cron or scheduler is required. If the site receives no legitimate request at the exact deadline, cleanup occurs on the next legitimate request.
+
+## 6. Keep customer reminders in Cal ID
+
+For each of the three event types, keep exactly one customer email reminder scheduled **1 hour before** the consultation. Remove or disable any 24-hour reminder. Do not add a WhatsApp reminder in this release. Nakshatra Web Push alerts are private owner notifications and do not replace the customer's Cal ID email.
+
+## 7. Owner activation check
 
 After deployment over HTTPS:
 
@@ -48,6 +99,7 @@ After deployment over HTTPS:
 3. Select **Enable alerts**, then **Send private test**.
 4. Create one controlled test booking without completing an unnecessary real payment.
 5. Confirm a single sanitized record appears, a privacy-safe alert arrives and no name or appointment detail appears on the lock screen.
-6. Reschedule and cancel the controlled booking, checking that the record advances without duplicating or regressing.
+6. Reschedule and cancel the controlled booking, checking that the record advances without duplication or regression.
+7. Remove the cancelled test booking in the admin app and confirm it disappears while a future active booking cannot be removed.
 
-Do not expose `/admin/` credentials, Supabase service-role credentials, VAPID private keys or Cal ID webhook secrets in screenshots, browser storage, public environment variables or client bundles.
+Do not expose `/admin/` credentials, `DATABASE_URL`, migration-owner access, VAPID private keys or Cal ID webhook secrets in screenshots, browser storage, public environment variables or client bundles.

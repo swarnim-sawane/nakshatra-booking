@@ -5,9 +5,9 @@ import type {
   CalIdWebhookTrigger,
 } from "./calIdWebhook";
 import type {
+  AdminDataStore,
   StoredPushSubscription,
-  SupabaseAdminStore,
-} from "./supabaseAdminStore";
+} from "./neonAdminStore";
 
 export type VapidEnvironment = Readonly<{
   VAPID_PUBLIC_KEY?: string;
@@ -231,7 +231,7 @@ export async function sendWebPush(
 
 export class DurablePushNotifier implements CalIdWebhookNotifier {
   constructor(
-    private readonly store: SupabaseAdminStore,
+    private readonly store: AdminDataStore,
     private readonly config: VapidConfig,
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}

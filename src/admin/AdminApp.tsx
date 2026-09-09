@@ -15,10 +15,12 @@ import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } fro
 import {
   adminErrorKind,
   loadConfiguredBookings,
+  removeAdminBooking,
   signInAdmin,
   signOutAdmin,
 } from "./api";
 import {
+  canRemoveBooking,
   filterBookings,
   findNextBooking,
   formatBookingDate,
@@ -45,6 +47,7 @@ type AdminAppProps = {
   loadBookings?: () => Promise<AdminBooking[]>;
   signIn?: (username: string, password: string) => Promise<void>;
   signOut?: () => Promise<void>;
+  removeBooking?: (bookingUid: string) => Promise<void>;
   now?: Date;
   serviceWorkerRegistration?: ServiceWorkerRegistration | null;
 };
@@ -156,6 +159,7 @@ export default function AdminApp({
   loadBookings = loadConfiguredBookings,
   signIn = signInAdmin,
   signOut = signOutAdmin,
+  removeBooking = removeAdminBooking,
   now,
   serviceWorkerRegistration,
 }: AdminAppProps) {
@@ -168,6 +172,9 @@ export default function AdminApp({
   const [reloadCount, setReloadCount] = useState(0);
   const [filter, setFilter] = useState<BookingFilter>("upcoming");
   const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(null);
+  const [confirmingRemoval, setConfirmingRemoval] = useState(false);
+  const [removalBusy, setRemovalBusy] = useState(false);
+  const [removalMessage, setRemovalMessage] = useState("");
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(serviceWorkerRegistration ?? null);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean | null>(null);
   const [notificationBusy, setNotificationBusy] = useState(false);
@@ -223,6 +230,8 @@ export default function AdminApp({
 
   useEffect(() => {
     if (!selectedBooking) return;
+    setConfirmingRemoval(false);
+    setRemovalMessage("");
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSelectedBooking(null);
     };
@@ -308,6 +317,34 @@ export default function AdminApp({
     setInstallPrompt(null);
   };
 
+  const handleRemoveBooking = async () => {
+    if (!selectedBooking) return;
+    setRemovalBusy(true);
+    setRemovalMessage("");
+    try {
+      await removeBooking(selectedBooking.id);
+      setBookings((records) => records?.filter(({ id }) => id !== selectedBooking.id) ?? null);
+      setSelectedBooking(null);
+      setConfirmingRemoval(false);
+    } catch (error) {
+      const kind = adminErrorKind(error);
+      if (kind === "unauthorized") {
+        setBookings(null);
+        setSelectedBooking(null);
+        setSessionExpired(true);
+        setScreen("login");
+      } else if (kind === "conflict") {
+        setRemovalMessage("This appointment is still active and cannot be removed.");
+      } else if (kind === "offline") {
+        setRemovalMessage("You are offline. Reconnect before removing this appointment.");
+      } else {
+        setRemovalMessage("The appointment could not be removed. Please try again.");
+      }
+    } finally {
+      setRemovalBusy(false);
+    }
+  };
+
   const visibleBookings = useMemo(() => bookings ? filterBookings(bookings, filter, referenceNow) : [], [bookings, filter, referenceNow]);
   const nextBooking = useMemo(() => bookings ? findNextBooking(bookings, referenceNow) : undefined, [bookings, referenceNow]);
   const todayCount = bookings ? filterBookings(bookings, "today", referenceNow).length : 0;
@@ -315,6 +352,9 @@ export default function AdminApp({
     ? filterBookings(bookings, "upcoming", referenceNow).filter(({ status }) => status === "confirmed" || status === "paid" || status === "rescheduled").length
     : 0;
   const demoMode = Boolean(bookings?.some((booking) => booking.isSample));
+  const selectedBookingCanBeRemoved = Boolean(
+    selectedBooking && canRemoveBooking(selectedBooking, referenceNow),
+  );
 
   return (
     <div className="admin-shell">
@@ -404,7 +444,21 @@ export default function AdminApp({
               <div><dt>Status</dt><dd><StatusPill status={selectedBooking.status} /></dd></div><div><dt>Booking reference</dt><dd>{selectedBooking.id.toUpperCase()}</dd></div>
             </dl>
             <MeetingLink booking={selectedBooking} compact />
-            <p className="admin-dialog__privacy">Only the operational details needed for the appointment are shown here. Birth details and private questions are not stored by this website.</p>
+            <p className="admin-dialog__privacy">Only the operational details needed for the appointment are shown here. Birth details and private questions are not stored by this website. Appointment records are removed automatically after the short retention period.</p>
+            {selectedBookingCanBeRemoved && !demoMode ? (
+              confirmingRemoval ? (
+                <div className="admin-removal-confirmation" role="alert">
+                  <p>Remove this appointment from Nakshatra Admin now? This cannot be undone.</p>
+                  <div>
+                    <button className="admin-button admin-button--secondary" disabled={removalBusy} onClick={() => setConfirmingRemoval(false)} type="button">Keep appointment</button>
+                    <button className="admin-button admin-button--danger" disabled={removalBusy} onClick={() => void handleRemoveBooking()} type="button">{removalBusy ? "Removing…" : "Remove permanently"}</button>
+                  </div>
+                </div>
+              ) : (
+                <button className="admin-remove-link" onClick={() => setConfirmingRemoval(true)} type="button">Remove from admin</button>
+              )
+            ) : null}
+            {removalMessage ? <p className="admin-removal-message" role="alert">{removalMessage}</p> : null}
           </section>
         </div>
       ) : null}

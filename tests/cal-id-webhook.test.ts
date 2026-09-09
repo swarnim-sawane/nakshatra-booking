@@ -71,6 +71,31 @@ describe("Cal ID webhook receiver", () => {
     expect(store.events).toHaveLength(1);
   });
 
+  it("does not recreate a removed customer row when Cal ID retries the retained delivery", async () => {
+    const store = new MemoryWebhookStore();
+    const body = webhookBody("BOOKING_CANCELLED", "2026-09-09T10:00:00.000Z");
+    expect((await signedRequest(store, body)).body).toEqual({ received: true, duplicate: false });
+    store.bookings.delete("booking_uid_123");
+    expect((await signedRequest(store, body)).body).toEqual({ received: true, duplicate: true });
+    expect(store.bookings.has("booking_uid_123")).toBe(false);
+  });
+
+  it("does not send an alert when retention suppresses a late lifecycle event", async () => {
+    const body = webhookBody("BOOKING_PAID", "2026-09-09T10:05:00.000Z");
+    const rawBody = encoder.encode(body);
+    const notifier = { notify: vi.fn() };
+    const response = await handleCalIdWebhookRequest({
+      method: "POST",
+      rawBody,
+      signature: await createCalIdWebhookSignature(secret, rawBody),
+      secret,
+      store: { applyEvent: vi.fn().mockResolvedValue("suppressed") },
+      notifier,
+    });
+    expect(response.body).toEqual({ received: true, duplicate: false, suppressed: true });
+    expect(notifier.notify).not.toHaveBeenCalled();
+  });
+
   it("does not regress when payment arrives before creation", async () => {
     const store = new MemoryWebhookStore();
     await signedRequest(store, webhookBody("BOOKING_PAID", "2026-09-09T10:05:00.000Z"));

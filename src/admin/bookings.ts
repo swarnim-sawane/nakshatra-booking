@@ -197,6 +197,14 @@ export function findNextBooking(bookings: AdminBooking[], now = new Date()) {
   );
 }
 
+export function canRemoveBooking(booking: AdminBooking, now = new Date()) {
+  return (
+    booking.status === "cancelled" ||
+    booking.status === "completed" ||
+    new Date(booking.endsAt).getTime() <= now.getTime()
+  );
+}
+
 export function formatBookingDate(startsAt: string) {
   return dateFormatter.format(new Date(startsAt));
 }

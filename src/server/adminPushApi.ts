@@ -6,14 +6,14 @@ import {
 } from "./adminAuth";
 import { isRecord, jsonResponse, readLimitedJson } from "./adminHttp";
 import type {
+  AdminDataStore,
   StoredPushSubscription,
-  SupabaseAdminStore,
-} from "./supabaseAdminStore";
+} from "./neonAdminStore";
 import { sendWebPush, type VapidConfig } from "./webPush";
 
 type PushHandlerOptions = {
   environment: AdminAuthEnvironment;
-  store: SupabaseAdminStore | null;
+  store: AdminDataStore | null;
   vapid: VapidConfig | null;
   now?: () => Date;
   fetchImpl?: typeof fetch;

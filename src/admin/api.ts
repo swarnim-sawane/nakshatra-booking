@@ -1,6 +1,11 @@
 import { loadDemoBookings, type AdminBooking } from "./bookings";
 
-export type AdminApiErrorKind = "unauthorized" | "offline" | "unavailable" | "invalid";
+export type AdminApiErrorKind =
+  | "unauthorized"
+  | "offline"
+  | "unavailable"
+  | "invalid"
+  | "conflict";
 
 export class AdminApiError extends Error {
   constructor(public readonly kind: AdminApiErrorKind, message: string) {
@@ -38,6 +43,9 @@ async function apiRequest(path: string, init: RequestInit = {}) {
   }
   if (response.status === 401) {
     throw new AdminApiError("unauthorized", "Your admin session has expired.");
+  }
+  if (response.status === 409) {
+    throw new AdminApiError("conflict", "This appointment is still active.");
   }
   if (!response.ok) {
     throw new AdminApiError("unavailable", "The admin service is temporarily unavailable.");
@@ -81,6 +89,14 @@ export async function signInAdmin(username: string, password: string) {
 
 export async function signOutAdmin() {
   await apiRequest("/api/admin/session", { method: "DELETE" });
+}
+
+export async function removeAdminBooking(bookingUid: string) {
+  await apiRequest("/api/admin/bookings", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bookingUid }),
+  });
 }
 
 export function adminErrorKind(error: unknown): AdminApiErrorKind {

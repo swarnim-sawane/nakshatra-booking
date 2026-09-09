@@ -669,6 +669,51 @@ a:focus-visible {
   line-height: 1.55;
 }
 
+.admin-remove-link {
+  margin-top: 16px;
+  padding: 5px 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: #7e3f36;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.admin-removal-confirmation {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #dfc5be;
+  border-radius: 14px;
+  background: #fbf1ed;
+}
+
+.admin-removal-confirmation p,
+.admin-removal-message {
+  margin: 0;
+  color: #704038;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.admin-removal-confirmation > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.admin-button--danger {
+  border-color: #82473d;
+  background: #82473d;
+  color: #fffdf8;
+}
+
+.admin-removal-message {
+  margin-top: 12px;
+}
+
 @keyframes admin-spin {
   to { transform: rotate(360deg); }
 }

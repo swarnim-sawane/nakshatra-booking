@@ -55,6 +55,28 @@ describe("Nakshatra Admin", () => {
     expect(screen.queryByText(/email|phone|birth time/i)).toBeNull();
   });
 
+  it("requires confirmation before removing a cancelled appointment", async () => {
+    const user = userEvent.setup();
+    const removeBooking = vi.fn().mockResolvedValue(undefined);
+    const cancelled = { ...realBooking(), status: "cancelled" as const };
+    render(<AdminApp loadBookings={async () => [cancelled]} removeBooking={removeBooking} now={now} serviceWorkerRegistration={null} />);
+
+    await user.click(await screen.findByRole("button", { name: "View Ananya details" }));
+    await user.click(screen.getByRole("button", { name: "Remove from admin" }));
+    expect(screen.getByText(/cannot be undone/i)).toBeTruthy();
+    expect(removeBooking).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Remove permanently" }));
+    await waitFor(() => expect(removeBooking).toHaveBeenCalledWith("booking-123"));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "View Ananya details" })).toBeNull());
+  });
+
+  it("does not offer housekeeping removal for an active future appointment", async () => {
+    const user = userEvent.setup();
+    render(<AdminApp loadBookings={async () => [realBooking()]} now={now} serviceWorkerRegistration={null} />);
+    await user.click(await screen.findByRole("button", { name: "View Ananya details" }));
+    expect(screen.queryByRole("button", { name: "Remove from admin" })).toBeNull();
+  });
+
   it("presents sign-in when the protected API returns 401", async () => {
     const loadBookings = vi.fn()
       .mockRejectedValueOnce(new AdminApiError("unauthorized", "expired"))

@@ -4,7 +4,7 @@ import {
   type CalIdWebhookNotifier,
   type CalIdWebhookStore,
 } from "../src/server/calIdWebhook.js";
-import { createSupabaseAdminStore } from "../src/server/supabaseAdminStore.js";
+import { createNeonAdminStore } from "../src/server/neonAdminStore.js";
 import { DurablePushNotifier, readVapidConfig } from "../src/server/webPush.js";
 
 declare const process: { env: Record<string, string | undefined> };
@@ -37,7 +37,7 @@ export function createCalIdWebhookFetchHandler({
   eventTypeIdMap = readEventTypeIdMap(environment),
   fetchImpl = fetch,
 }: WebhookHandlerOptions = {}) {
-  const configuredStore = createSupabaseAdminStore(environment, fetchImpl);
+  const configuredStore = createNeonAdminStore(environment);
   const durableStore = store === undefined ? configuredStore : store;
   const vapid = readVapidConfig(environment);
   const durableNotifier = notifier ?? (

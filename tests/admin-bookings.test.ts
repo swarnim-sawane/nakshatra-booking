@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canRemoveBooking,
   filterBookings,
   findNextBooking,
   formatBookingDate,
@@ -50,5 +51,17 @@ describe("admin booking domain", () => {
     expect(safeMeetingUrl(active)?.protocol).toBe("https:");
     expect(safeMeetingUrl(cancelled)).toBeNull();
     expect(safeMeetingUrl({ ...active, meetingUrl: "javascript:alert(1)" })).toBeNull();
+  });
+
+  it("allows housekeeping only after an appointment ends or is cancelled", async () => {
+    const bookings = await loadDemoBookings(now);
+    const active = bookings.find((booking) => booking.customerFirstName === "Ananya")!;
+    const cancelled = bookings.find((booking) => booking.status === "cancelled")!;
+    const endedAtBoundary = { ...active, endsAt: now.toISOString() };
+
+    expect(canRemoveBooking(active, now)).toBe(false);
+    expect(canRemoveBooking(cancelled, now)).toBe(true);
+    expect(canRemoveBooking(endedAtBoundary, now)).toBe(true);
+    expect(canRemoveBooking({ ...endedAtBoundary, endsAt: new Date(now.getTime() + 1).toISOString() }, now)).toBe(false);
   });
 });
