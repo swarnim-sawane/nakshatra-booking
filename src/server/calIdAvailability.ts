@@ -1,4 +1,4 @@
-import { consultationServices, type ServiceSlug } from "../config/services";
+import { consultationServices, type ServiceSlug } from "../config/services.js";
 
 const CAL_ID_API_ORIGIN = "https://api.cal.id";
 const MAX_RANGE_MILLISECONDS = 42 * 24 * 60 * 60 * 1_000;

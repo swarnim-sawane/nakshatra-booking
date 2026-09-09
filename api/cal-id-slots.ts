@@ -1,4 +1,4 @@
-import { handleCalIdAvailabilityRequest } from "../src/server/calIdAvailability";
+import { handleCalIdAvailabilityRequest } from "../src/server/calIdAvailability.js";
 
 declare const process: {
   env: Record<string, string | undefined>;
