@@ -76,7 +76,7 @@ test("keeps the full approved booking action usable in the narrow header", () =>
   );
   assert.match(
     css,
-    /@media \(max-width: 380px\)[\s\S]*?\.site-header \.brand__wordmark\s*\{[^}]*display:\s*none;/s,
+    /@media \(max-width: 480px\)[\s\S]*?\.site-header \.brand__wordmark\s*\{[^}]*display:\s*none;/s,
     "the icon-only brand treatment should preserve room for the exact CTA on the narrowest screens",
   );
 });

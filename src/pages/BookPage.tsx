@@ -29,11 +29,11 @@ export default function BookPage({
   return (
     <section className="booking-page">
       <div className="container booking-page__intro">
-        <p className="booking-page__eyebrow">Consultations with Nilima Sawane</p>
-        <h1>Choose what you would like to explore.</h1>
+        <p className="booking-page__eyebrow">Get in Touch</p>
+        <h1>Book a Consultation</h1>
         <p className="booking-page__lede">
-          Each reading is prepared personally from the birth details and context you share. Select
-          one to view available times.
+          To book a reading, share your birth details and a short note on what you'd like the
+          session to cover.
         </p>
       </div>
       <div className="container booking-page__services">

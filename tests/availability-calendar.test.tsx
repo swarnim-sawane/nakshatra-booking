@@ -67,11 +67,14 @@ describe("Nakshatra availability calendar", () => {
     });
     expect(
       screen.getByText(
-        "After choosing a time, you’ll share your birth details and complete the booking.",
+        "After choosing a time, you’ll share your birth details and questions, review the fee and complete payment securely.",
       ),
     ).toBeTruthy();
-    expect(screen.getByText("Secure online booking")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "View all available times" })).toBeTruthy();
+    expect(screen.getByText("Times shown in your timezone")).toBeTruthy();
+    const otherConsultations = screen.getByRole<HTMLAnchorElement>("link", {
+      name: "Other consultations",
+    });
+    expect(otherConsultations.href).toBe("http://localhost:3000/book/");
   });
 
   it("keeps the direct Cal ID path available if live availability cannot load", async () => {
@@ -88,12 +91,12 @@ describe("Nakshatra availability calendar", () => {
       />,
     );
 
-    await screen.findByText("You can still book your consultation.");
+    await screen.findByText("If the calendar is interrupted, you can still continue.");
     expect(screen.queryByText("September 2026")).toBeNull();
     expect(screen.queryByRole("button", { name: "Previous month" })).toBeNull();
     expect(document.querySelector(".availability-calendar__footer")).toBeNull();
     const fallback = screen.getByRole<HTMLAnchorElement>("link", {
-      name: "Choose a time securely",
+      name: "Continue booking",
     });
     expect(fallback.href).toBe(
       "https://cal.id/nilima-sawane/personal-consultation?duration=60&s=private-token",
@@ -120,15 +123,15 @@ describe("Nakshatra availability calendar", () => {
       />,
     );
 
-    await screen.findByText("No appointments are available this month.");
+    await screen.findByText("Nilima has no open appointments in this month.");
     const checkNextMonth = screen.getByRole("button", { name: "Check next month" });
-    const viewAll = screen.getAllByRole<HTMLAnchorElement>("link", {
-      name: "View all available times",
+    const otherConsultations = screen.getAllByRole<HTMLAnchorElement>("link", {
+      name: "Other consultations",
     })[0];
 
     expect(checkNextMonth.className).toContain("button--secondary");
-    expect(viewAll.className).toContain("button--primary");
-    expect(viewAll.href).toBe(personalBookingUrl.href);
+    expect(otherConsultations.className).toContain("button--primary");
+    expect(otherConsultations.href).toBe("http://localhost:3000/book/");
 
     await user.click(checkNextMonth);
     expect(await screen.findByText("October 2026")).toBeTruthy();
@@ -152,8 +155,8 @@ describe("Nakshatra availability calendar", () => {
       />,
     );
 
-    expect(screen.getByText("Prepare for your consultation.")).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Choose a time securely" })).toBeNull();
+    expect(screen.getByText("Have these details ready before booking.")).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Continue booking" })).toBeNull();
     expect(
       [...document.querySelectorAll<HTMLAnchorElement>("a")].some((link) =>
         link.href.startsWith("https://cal.id/"),
@@ -176,7 +179,7 @@ describe("Nakshatra availability calendar", () => {
     );
 
     const overflow = getComputedStyle(
-      screen.getByText("Prepare for your consultation.").closest("section")!,
+      screen.getByText("Have these details ready before booking.").closest("section")!,
     ).overflow;
     expect(["visible", "clip"]).toContain(overflow);
 

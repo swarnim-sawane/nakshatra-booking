@@ -1,5 +1,5 @@
 import BaseLayout from "./layouts/BaseLayout";
-import FAQ from "./components/FAQ";
+import Contact from "./components/Contact";
 import Hero from "./components/Hero";
 import MeetNilima from "./components/MeetNilima";
 import Preparation from "./components/Preparation";
@@ -20,7 +20,7 @@ type PageMetadata = {
 const homePage: PageMetadata = {
   title: "Nakshatra | Personal Kundli consultations with Nilima Sawane",
   description:
-    "Personal Kundli readings prepared by Nilima Sawane for individual questions, relationships and important dates. Consultations in Hindi and Marathi.",
+    "A personal astrology consultation built around your birth chart for questions about marriage, career, family and important decisions.",
 };
 
 const bookingPage: PageMetadata = {
@@ -70,7 +70,7 @@ export default function App({ pathname }: AppProps) {
           <MeetNilima />
           <ServiceCards />
           <Preparation />
-          <FAQ />
+          <Contact />
         </>
       )}
     </BaseLayout>

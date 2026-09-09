@@ -26,7 +26,13 @@ export default function Header() {
         </nav>
         <div className="header-actions">
           <details className="mobile-navigation">
-            <summary>Menu</summary>
+            <summary aria-label="Open navigation menu">
+              <span className="mobile-navigation__icon" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+            </summary>
             <nav aria-label="Mobile navigation">
               {navigation.map((item) => (
                 <a href={item.href} key={item.href}>

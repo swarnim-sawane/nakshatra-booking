@@ -8,11 +8,12 @@ export default function Hero() {
     <section className="landing-hero" aria-labelledby="hero-title">
       <div className="container landing-hero__grid">
         <div className="landing-hero__intro">
-          <p className="eyebrow">Personal Kundli consultations with Nilima Sawane</p>
-          <h1 id="hero-title">Your Kundli, studied before we meet.</h1>
+          <p className="eyebrow">Nakshatra</p>
+          <h1 id="hero-title">Kundli readings by Nilima Sawane</h1>
           <p className="landing-hero__lede">
-            Nilima prepares your Janam Kundli before the call, so your time together can focus on
-            the questions that matter to you.
+            A personal astrology consultation, built around your birth chart — for the questions
+            that matter to you: marriage, career, family, and the timing of important decisions.
+            Consultations by phone, video, or WhatsApp, in Hindi and Marathi.
           </p>
           <div className="landing-hero__actions">
             <a className="button button--primary" href="#book-personal">
@@ -20,7 +21,7 @@ export default function Hero() {
               <ArrowDownRight aria-hidden="true" size={18} strokeWidth={1.8} />
             </a>
             <a className="button button--secondary landing-hero__secondary-action" href="#consultation">
-              Explore consultations
+              What she reads
               <ArrowRight aria-hidden="true" size={17} strokeWidth={1.8} />
             </a>
           </div>
@@ -35,8 +36,8 @@ export default function Hero() {
 
         <div className="landing-hero__supporting">
           <ul className="landing-hero__facts" aria-label="Consultation facts">
-            <li><span>Experience</span><strong>8+ years of practice</strong></li>
-            <li><span>Languages</span><strong>Hindi &amp; Marathi</strong></li>
+            <li><strong>5+ years</strong><span>Experience</span></li>
+            <li><strong>Hindi &amp; Marathi</strong><span>Languages</span></li>
           </ul>
         </div>
       </div>

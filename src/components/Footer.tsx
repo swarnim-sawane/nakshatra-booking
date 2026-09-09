@@ -22,11 +22,10 @@ export default function Footer() {
         </div>
         <nav className="site-footer__links" aria-label="Practice information">
           <a href="/#about">About Nilima</a>
-          <a href="/#consultation">Consultations</a>
-          <a href="/#faqs">FAQs</a>
-          <a href="/#privacy">Privacy</a>
-          <a href="/#booking-policies">Booking policies</a>
-          <a href="/#consultation-terms">Consultation scope</a>
+          <a href="/#consultation">What she reads</a>
+          <a href="/#experience">How it works</a>
+          <a href="/#approach">Approach</a>
+          <a href="/#contact">Get in touch</a>
         </nav>
       </div>
     </footer>

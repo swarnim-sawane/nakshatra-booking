@@ -2,9 +2,9 @@ export const brandName = "Nakshatra";
 
 export const navigation = [
   { label: "About Nilima", href: "/#about" },
-  { label: "Consultations", href: "/#consultation" },
-  { label: "What to expect", href: "/#experience" },
-  { label: "FAQs", href: "/#faqs" },
+  { label: "What she reads", href: "/#consultation" },
+  { label: "How it works", href: "/#experience" },
+  { label: "Get in touch", href: "/#contact" },
 ] as const;
 
 // Replace only these destinations when the real social profiles are available.
@@ -47,7 +47,7 @@ export const consultationFaqItems = [
   {
     question: "Are traditional remedies or nuskhe guaranteed to work?",
     answer:
-      "No. Where relevant, Nilima may suggest a traditional nuska or practical step as guidance. It is not presented as a guaranteed result or a substitute for professional care.",
+      "No. Where relevant, Nilima may suggest a traditional nuskha or practical step as guidance. It is not presented as a guaranteed result or a substitute for professional care.",
   },
 ] as const;
 
@@ -55,16 +55,16 @@ export const bookingFaqItems = [
   {
     question: "What happens after I choose a consultation time?",
     answer:
-      "You continue to the secure Cal ID booking page, provide the requested birth details and questions, and complete payment through Razorpay. The confirmed booking includes the online meeting information.",
+      "You provide the requested birth details and questions, review the fee and complete payment securely. Your confirmation email includes the meeting link and booking details.",
   },
   {
     question: "How do I change or cancel a booking?",
     answer:
-      "Use the booking-management link in the confirmation email. Any cancellation or refund follows the terms shown before payment.",
+      "Use the manage-booking link in your confirmation email. Any cancellation or refund follows the terms shown before payment.",
   },
   {
     question: "What should I do if live times do not load on this website?",
     answer:
-      "Use the secure booking button shown in the calendar panel. It opens the same consultation on Cal ID, where you can view current availability and continue normally.",
+      "Use the continue-booking button shown in the calendar panel. You can view the complete schedule and continue your booking there.",
   },
 ] as const;

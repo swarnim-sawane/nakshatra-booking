@@ -7,7 +7,7 @@ describe("booking-first landing journey", () => {
     const html = renderToStaticMarkup(<App pathname="/" />);
 
     expect(html.match(/<h1\b/g)).toHaveLength(1);
-    for (const sectionId of ["about", "consultation", "experience", "faqs"]) {
+    for (const sectionId of ["about", "consultation", "experience", "approach", "contact"]) {
       expect(html).toContain(`id="${sectionId}"`);
     }
     expect(html.indexOf('id="about"')).toBeLessThan(html.indexOf('id="consultation"'));

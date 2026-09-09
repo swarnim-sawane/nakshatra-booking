@@ -24,37 +24,20 @@ export default function MeetNilima() {
             whileInView={{ opacity: 1, y: 0 }}
           >
             <span className="meet-nilima__name">Nilima Sawane</span>
-            <span className="meet-nilima__role">Kundli astrologer · Hindi and Marathi consultations</span>
+            <span className="meet-nilima__role">Personal Kundli consultations in Hindi and Marathi</span>
           </motion.figcaption>
         </figure>
         <Reveal className="meet-nilima__story" delay={0.08}>
-          <p className="eyebrow">About Nilima</p>
-          <h2 id="meet-nilima-title">I study your Kundli before we speak.</h2>
-          <dl className="meet-nilima__credentials" aria-label="Nilima's experience and languages">
-            <div>
-              <dt>Experience</dt>
-              <dd>8+ years of Kundli reading</dd>
-            </div>
-            <div>
-              <dt>Languages</dt>
-              <dd>Hindi and Marathi</dd>
-            </div>
-          </dl>
+          <p className="eyebrow">About</p>
+          <h2 id="meet-nilima-title">Nilima Sawane</h2>
           <p>
-            I have been reading Kundlis for more than eight years. Before every consultation, I
-            prepare the chart myself and study the question or situation you have shared, so our
-            time is not spent starting from the beginning.
-          </p>
-          <p>
-            During the call, I explain the patterns I see in clear language and leave room for you
-            to question, reflect and go deeper. Where it is appropriate, I may also suggest
-            practical steps or traditional nuskhe—always as guidance, never as a promise.
-          </p>
-          <p className="meet-nilima__language-note">
-            You can speak with me in Hindi or Marathi—whichever feels most natural.
+            Nilima Sawane has been reading birth charts for over five years, working directly with
+            individuals and families on the questions that matter most to them. Each consultation
+            is built around your specific kundli, and she takes the time to explain what she sees
+            in plain, clear language.
           </p>
           <a className="button button--secondary meet-nilima__link" href="#consultation">
-            View consultations
+            What she reads
           </a>
         </Reveal>
       </div>

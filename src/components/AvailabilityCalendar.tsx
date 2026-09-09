@@ -143,10 +143,14 @@ async function fetchAvailability({
 
 function CalendarSkeleton() {
   return (
-    <div className="availability-calendar__skeleton" aria-label="Loading available times">
-      <span />
-      <span />
-      <span />
+    <div
+      className="availability-calendar__skeleton"
+      aria-label="Loading available times"
+      aria-live="polite"
+      role="status"
+    >
+      <img alt="" aria-hidden="true" height="48" src="/brand/icon-192.png" width="48" />
+      <p>Loading available times</p>
     </div>
   );
 }
@@ -171,7 +175,7 @@ function CalendarAlternateState({
       <header className="availability-calendar__header">
         <div>
           <p className="eyebrow">{service.name}</p>
-          <h2>{isError ? "Choose your time" : "Booking availability"}</h2>
+          <h2>{isError ? "Select a time" : "Booking details"}</h2>
         </div>
         <div className="availability-calendar__service-meta">
           <strong>{service.durationMinutes} min</strong>
@@ -180,15 +184,15 @@ function CalendarAlternateState({
       </header>
       <div className="availability-calendar__alternate-body">
         <img alt="" aria-hidden="true" height="48" src="/brand/icon-192.png" width="48" />
-        <p className="eyebrow">Your consultation journey</p>
+        <p className="eyebrow">Booking information</p>
         <h3>
           {isError
-            ? "You can still book your consultation."
-            : "Prepare for your consultation."}
+            ? "If the calendar is interrupted, you can still continue."
+            : "Have these details ready before booking."}
         </h3>
         <p>
           {isError
-            ? "Continue to Nilima's secure booking page to choose a suitable time. The remaining steps are simple:"
+            ? "Open the complete booking page to choose a time and share the information Nilima needs to prepare."
             : "Keep your birth date, exact birth time—if known—birth place and main questions ready."}
         </p>
         {isError ? (
@@ -201,7 +205,7 @@ function CalendarAlternateState({
         <div className="availability-calendar__alternate-actions">
           {bookingUrl ? (
             <a className="button button--primary" href={bookingUrl.href}>
-              Choose a time securely
+              Continue booking
             </a>
           ) : (
             <a className="button button--primary" href="/#consultation">
@@ -216,7 +220,7 @@ function CalendarAlternateState({
         </div>
         {isError ? (
           <p className="availability-calendar__alternate-note">
-            Payment is completed through Razorpay. Your booking confirmation includes the online meeting details.
+            Payment is completed securely. Your confirmation email includes the meeting link and options to manage your booking.
           </p>
         ) : null}
       </div>
@@ -327,11 +331,15 @@ export default function AvailabilityCalendar({
   }
 
   return (
-    <section className="availability-calendar" aria-label={`${service.name} availability`}>
+    <section
+      className="availability-calendar"
+      aria-busy={requestState === "loading"}
+      aria-label={`${service.name} availability`}
+    >
       <header className="availability-calendar__header">
         <div>
           <p className="eyebrow">{service.name}</p>
-          <h2>Choose your time</h2>
+          <h2>Select an available time</h2>
         </div>
         <div className="availability-calendar__service-meta">
           <strong>{service.durationMinutes} min</strong>
@@ -379,7 +387,6 @@ export default function AvailabilityCalendar({
               );
             })}
           </div>
-          {requestState === "loading" && <CalendarSkeleton />}
         </div>
 
         <div className="availability-calendar__times" aria-live="polite">
@@ -398,36 +405,37 @@ export default function AvailabilityCalendar({
                 })}
               </div>
               <p className="availability-calendar__handoff-note">
-                After choosing a time, you’ll share your birth details and complete the booking.
+                After choosing a time, you’ll share your birth details and questions, review the fee and complete payment securely.
               </p>
             </>
           ) : requestState === "ready" ? (
             <div className="availability-calendar__message">
-              <h3>No appointments are available this month.</h3>
-              <p>Please check the next month for a suitable time.</p>
+              <h3>Nilima has no open appointments in this month.</h3>
+              <p>Check the next month or explore another type of consultation.</p>
               <div className="availability-calendar__message-actions">
                 <button className="button button--secondary" onClick={() => moveMonth(1)} type="button">
                   Check next month
                 </button>
-                <a className="button button--primary" href={safeBookingUrl.href}>
-                  View all available times
+                <a className="button button--primary" href="/book/">
+                  Other consultations
                 </a>
               </div>
             </div>
           ) : (
             <div className="availability-calendar__message availability-calendar__message--loading">
-              <p>Checking Nilima’s available times…</p>
+              <p>Preparing Nilima’s available times…</p>
             </div>
           )}
         </div>
       </div>
 
       <footer className="availability-calendar__footer">
-        <span className="availability-calendar__privacy">Secure online booking</span>
-        <a className="availability-calendar__fallback" href={safeBookingUrl.href}>
-          View all available times
+        <span className="availability-calendar__privacy">Times shown in your timezone</span>
+        <a className="availability-calendar__fallback" href="/book/">
+          Other consultations
         </a>
       </footer>
+      {requestState === "loading" && <CalendarSkeleton />}
     </section>
   );
 }

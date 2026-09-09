@@ -22,7 +22,7 @@ export const consultationServices = [
     priceInr: 1_000,
     imageSrc: "/images/consultation-desk.webp",
     purpose:
-      "A private reading of your Kundli for a personal question, important decision or phase of life.",
+      "A full personal consultation for when you don't have one specific question — a detailed look at what your chart shows.",
   },
   {
     slug: "relationship-consultation",
@@ -32,7 +32,7 @@ export const consultationServices = [
     priceInr: 1_000,
     imageSrc: "/images/relationship-consultation.webp",
     purpose:
-      "A thoughtful reading of two Kundlis to understand needs, recurring patterns and where the relationship feels easy or strained.",
+      "A compatibility reading that looks at where two charts align and where they may need attention.",
   },
   {
     slug: "best-date-analysis",
@@ -42,7 +42,7 @@ export const consultationServices = [
     priceInr: 500,
     imageSrc: "/images/best-date-analysis.webp",
     purpose:
-      "A Kundli-based review of suitable dates for a marriage, business launch, contract or important move.",
+      "Timing for weddings, ceremonies, and other important dates.",
   },
 ] as const satisfies readonly ConsultationService[];
 

@@ -9,8 +9,8 @@ export default function FAQ() {
       <div className="container faq__grid">
         <Reveal className="section-heading faq__intro">
           <p className="eyebrow">Frequently asked questions</p>
-          <h2 id="faq-title">Before you book</h2>
-          <p>A few helpful answers about your reading and consultation.</p>
+          <h2 id="faq-title">Details worth knowing before you pay</h2>
+          <p>Birth time, privacy, predictions, remedies, payment and changing an appointment.</p>
         </Reveal>
         <Reveal className="faq__groups" delay={0.08}>
           <section aria-labelledby="consultation-questions-title">
@@ -42,9 +42,9 @@ export default function FAQ() {
       </div>
       <div className="container final-booking">
         <div>
-          <p className="eyebrow">When you’re ready</p>
-          <h2>Choose your consultation time</h2>
-          <p>Select the consultation closest to your question, then choose a time that works for you.</p>
+          <p className="eyebrow">Book your consultation</p>
+          <h2>Choose the chart work that matches your question</h2>
+          <p>You will see the duration and price before selecting an available time.</p>
         </div>
         <BookingAction />
       </div>

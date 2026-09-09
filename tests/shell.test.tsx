@@ -16,7 +16,7 @@ describe("application shell", () => {
     expect(html).toContain(
       'class="button button--primary header-booking-action header-booking-action--mobile" href="/book/">Book a consultation</a>',
     );
-    for (const label of ["About Nilima", "Consultations", "What to expect", "FAQs"]) {
+    for (const label of ["About Nilima", "What she reads", "How it works", "Get in touch"]) {
       expect(html).toContain(label);
     }
     expect(html).not.toMatch(/rzp_test_|astrology123|Cal\.com|localStorage/i);
@@ -41,7 +41,7 @@ describe("application shell", () => {
     [
       "/",
       "Nakshatra | Personal Kundli consultations with Nilima Sawane",
-      "Personal Kundli readings prepared by Nilima Sawane for individual questions, relationships and important dates. Consultations in Hindi and Marathi.",
+      "A personal astrology consultation built around your birth chart for questions about marriage, career, family and important decisions.",
     ],
     [
       "/book/",
@@ -60,7 +60,7 @@ describe("application shell", () => {
 
     expect(html).toContain('aria-label="Nakshatra"');
     expect(html.match(/class="brand__mark"/g)).toHaveLength(2);
-    expect(html.match(/src="\/brand\/icon-192.png"/g)).toHaveLength(2);
+    expect(html.match(/src="\/brand\/icon-192.png"/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
     expect(html.match(/class="brand__wordmark"/g)).toHaveLength(2);
     expect(html.match(/Nakshatra/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
     expect(html).not.toContain("Celestial Guidance");

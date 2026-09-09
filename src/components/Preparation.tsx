@@ -1,42 +1,45 @@
-import { BookOpenText, MessagesSquare, NotebookPen } from "lucide-react";
+import { BookOpenText, MessagesSquare, NotebookPen, PhoneCall } from "lucide-react";
 
 export default function Preparation() {
   return (
     <section className="landing-section preparation" id="experience" aria-labelledby="experience-title">
       <div className="container preparation__panel">
         <div className="section-heading">
-          <p className="eyebrow">What to expect</p>
-          <h2 id="experience-title">Prepared before you meet. Explained with care.</h2>
-          <p>
-            Your consultation is shaped around your Kundli, your questions and the time you have together.
-          </p>
+          <h2 className="eyebrow" id="experience-title">How a Consultation Works</h2>
         </div>
         <div className="preparation__items">
           <article>
             <NotebookPen aria-hidden="true" size={24} strokeWidth={1.6} />
             <div>
-              <h3>Before you meet</h3>
-              <p>Share your date, exact time—if known—and place of birth, along with what you would like to understand.</p>
+              <h3>Share your birth details</h3>
+              <p>Date, time, and place of birth, along with a short note on what you'd like the session to cover.</p>
             </div>
           </article>
           <article>
             <BookOpenText aria-hidden="true" size={24} strokeWidth={1.6} />
             <div>
-              <h3>Nilima prepares</h3>
-              <p>Nilima prepares and studies your Janam Kundli before the call. For a relationship reading, she studies both charts.</p>
+              <h3>Nilima prepares your chart</h3>
+              <p>Ahead of the session, so the time you spend together goes toward your questions.</p>
             </div>
           </article>
           <article>
             <MessagesSquare aria-hidden="true" size={24} strokeWidth={1.6} />
             <div>
-              <h3>During the conversation</h3>
-              <p>Nilima explains the relevant patterns in clear language, listens to your questions and discusses practical guidance or traditional nuskhe where appropriate.</p>
+              <h3>You talk it through together</h3>
+              <p>By phone, video call, or WhatsApp, whichever is easiest for you.</p>
+            </div>
+          </article>
+          <article>
+            <PhoneCall aria-hidden="true" size={24} strokeWidth={1.6} />
+            <div>
+              <h3>You leave with a clear sense of what your chart shows and why it matters</h3>
+              <p>For your situation.</p>
             </div>
           </article>
         </div>
-        <div className="preparation__assurance" id="consultation-terms">
-          <strong>Guidance without fear</strong>
-          <p>Nilima does not use frightening predictions or present the future as fixed. Astrology is offered as reflective guidance and does not replace medical, legal, financial or mental-health advice.</p>
+        <div className="preparation__assurance" id="approach">
+          <strong>Approach</strong>
+          <p>Every reading is specific to your chart and your question. Sessions are unhurried and private, conducted in Hindi or Marathi — whichever language you're most comfortable in.</p>
         </div>
       </div>
     </section>

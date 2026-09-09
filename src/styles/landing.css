@@ -77,6 +77,20 @@
   line-height: 1.05;
 }
 
+.landing-hero .landing-hero__intro > .eyebrow {
+  max-width: 18ch;
+  font-size: clamp(2.65rem, 3.8vw, 4rem);
+  letter-spacing: -0.018em;
+  line-height: 1.05;
+}
+
+.landing-hero .landing-hero__intro > h1 {
+  max-width: 42ch;
+  font-size: clamp(0.88rem, 0.95vw, 1rem);
+  letter-spacing: 0.085em;
+  line-height: 1.4;
+}
+
 .landing-hero__lede {
   max-width: 42ch;
   margin: var(--space-4) 0;
@@ -100,37 +114,38 @@
 .landing-hero__facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: var(--space-3) 0 0;
-  padding: var(--space-2) 0 0;
-  border-top: 1px solid var(--color-border);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  border-block: 1px solid rgb(84 74 64 / 18%);
   list-style: none;
 }
 
 .landing-hero__facts li {
   display: grid;
-  gap: 3px;
-  margin-right: var(--space-3);
-  padding: 0.7rem 0.9rem;
-  border: 1px solid rgb(200 170 120 / 52%);
-  border-top: 2px solid var(--color-gold-line);
-  background: rgb(255 253 248 / 64%);
-  box-shadow: 0 8px 24px rgb(70 49 24 / 5%);
-  line-height: 1.25;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 1rem 1.25rem 1rem 0;
+}
+
+.landing-hero__facts li + li {
+  border-left: 1px solid rgb(84 74 64 / 18%);
+  padding-left: 1.25rem;
 }
 
 .landing-hero__facts span {
-  color: var(--color-ochre-text);
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.065em;
+  color: var(--color-text-muted);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
 .landing-hero__facts strong {
   color: var(--color-ink);
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.65vw, 1.55rem);
+  font-weight: 500;
+  line-height: 1.15;
 }
 
 .landing-hero__booking {
@@ -283,6 +298,9 @@
 }
 
 .service-cards { border-block: 1px solid var(--color-border); background: linear-gradient(180deg, var(--color-surface), color-mix(in srgb, var(--color-gold-soft) 24%, var(--color-surface))); }
+.service-cards .section-heading--wide > .eyebrow { font-size: clamp(1.95rem, 2.85vw, 2.9rem); line-height: 1.08; }
+.service-cards .section-heading--wide > h2 { max-width: 34ch; font-size: clamp(0.88rem, 0.95vw, 1rem); line-height: 1.4; }
+.service-cards .section-heading > .eyebrow { font-size: clamp(1.95rem, 2.85vw, 2.9rem); line-height: 1.08; }
 .service-cards__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; gap: var(--space-6); margin-top: var(--space-8); }
 .service-card { display: flex; min-width: 0; height: 100%; overflow: hidden; flex-direction: column; border: 1px solid color-mix(in srgb, var(--color-gold-line) 58%, var(--color-border)); background: var(--color-paper); box-shadow: 0 12px 36px rgb(70 49 24 / 5%); transition: transform 180ms ease, box-shadow 180ms ease; }
 .service-card:hover { transform: translateY(-4px); box-shadow: 0 20px 46px rgb(40 31 28 / 8%); }
@@ -312,7 +330,15 @@
 .meet-nilima__portrait figcaption { display: grid; justify-content: start; gap: 0.2rem; margin-top: var(--space-3); }
 .meet-nilima__name { color: var(--color-ink); font-family: var(--font-display); font-size: clamp(1.05rem, 1.5vw, 1.3rem); font-style: italic; letter-spacing: 0.02em; }
 .meet-nilima__role { color: var(--color-text-muted); font-size: 0.78rem; }
-.meet-nilima__story h2 { max-width: 11ch; }
+.landing-section .meet-nilima__story > .eyebrow {
+  font-size: clamp(1.95rem, 2.85vw, 2.9rem);
+  line-height: 1.08;
+}
+.landing-section .meet-nilima__story h2 {
+  max-width: 34ch;
+  font-size: clamp(0.88rem, 0.95vw, 1rem);
+  line-height: 1.4;
+}
 .meet-nilima__story > p:not(.eyebrow) { max-width: 56ch; color: var(--color-text-muted); font-size: clamp(1.05rem, 1.45vw, 1.22rem); }
 .meet-nilima__story > p + p { margin-top: var(--space-5, 20px); }
 .meet-nilima__credentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-6) 0; }
@@ -466,6 +492,18 @@
 
 .final-booking .eyebrow {
   color: var(--color-surface);
+}
+
+.contact .final-booking {
+  margin-top: 0;
+}
+
+.contact__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: flex-end;
 }
 
 .final-booking .button {

@@ -36,19 +36,19 @@ describe("Cal ID booking page", () => {
     expect(html.match(/src="\/images\/consultation-desk\.webp"/g)).toHaveLength(1);
     expect(html).toContain('src="/images/relationship-consultation.webp"');
     expect(html).toContain('src="/images/best-date-analysis.webp"');
-    expect(html).toContain("A private reading of your Kundli for a personal question");
-    expect(html).toContain("A thoughtful reading of two Kundlis to understand needs");
-    expect(html).toContain("A Kundli-based review of suitable dates for a marriage");
+    expect(html).toContain("A full personal consultation for when you");
+    expect(html).toContain("A compatibility reading that looks at where two charts align");
+    expect(html).toContain("Timing for weddings, ceremonies, and other important dates.");
     expect(html).not.toMatch(/>\s*PRO\s*</i);
   });
 
   it("uses one booking-page introduction without a repeated selector heading or kicker", () => {
     const html = renderToStaticMarkup(<BookPage />);
 
-    expect(html).toContain("Consultations with Nilima Sawane");
-    expect(html).toContain("Choose what you would like to explore.");
+    expect(html).toContain("Get in Touch");
+    expect(html).toContain("Book a Consultation");
     expect(html).toContain(
-      "Each reading is prepared personally from the birth details and context you share. Select one to view available times.",
+      "To book a reading, share your birth details and a short note on what you",
     );
     expect(html.match(/<h1\b/g)).toHaveLength(1);
     expect(html).not.toContain("service-selector__heading");
@@ -86,7 +86,7 @@ describe("Cal ID booking page", () => {
     const html = renderToStaticMarkup(<App />);
 
     expect(getRouteKind("/book/")).toBe("booking");
-    expect(html).toContain("Choose what you would like to explore.");
+    expect(html).toContain("Book a Consultation");
     expect(html).toContain("Relationship Consultation");
     expect(html).not.toContain(opaqueToken);
   });
