@@ -34,6 +34,8 @@ import {
   enablePushNotifications,
   getPushSubscription,
   registerAdminServiceWorker,
+  refreshPushSubscription,
+  revokeAllPushNotifications,
   sendTestNotification,
 } from "./pwa";
 import "./admin.css";
@@ -216,7 +218,34 @@ export default function AdminApp({
 
   useEffect(() => {
     if (screen !== "schedule") return;
-    void getPushSubscription(registration).then((subscription) => setNotificationsEnabled(Boolean(subscription)));
+    let active = true;
+    void getPushSubscription(registration).then(async (subscription) => {
+      if (!active) return;
+      if (!subscription) {
+        setNotificationsEnabled(false);
+        return;
+      }
+      try {
+        const result = await refreshPushSubscription(registration);
+        if (active) setNotificationsEnabled(result === "enabled");
+      } catch (error) {
+        if (!active) return;
+        const kind = adminErrorKind(error);
+        if (kind === "unauthorized") {
+          setBookings(null);
+          setSessionExpired(true);
+          setScreen("login");
+        } else {
+          setNotificationsEnabled(false);
+          setNotificationMessage(
+            kind === "offline"
+              ? "You are offline. Reconnect to renew notification access."
+              : "Notification access could not be renewed on this device.",
+          );
+        }
+      }
+    });
+    return () => { active = false; };
   }, [registration, screen]);
 
   useEffect(() => {
@@ -303,6 +332,20 @@ export default function AdminApp({
     try {
       await sendTestNotification(registration);
       setNotificationMessage("A private test alert was sent to this device.");
+    } catch (error) {
+      handleNotificationError(error);
+    } finally {
+      setNotificationBusy(false);
+    }
+  };
+
+  const handleRevokeAllNotifications = async () => {
+    setNotificationBusy(true);
+    setNotificationMessage("");
+    try {
+      await revokeAllPushNotifications(registration);
+      setNotificationsEnabled(false);
+      setNotificationMessage("Booking alerts are disabled on every registered device.");
     } catch (error) {
       handleNotificationError(error);
     } finally {
@@ -420,6 +463,7 @@ export default function AdminApp({
                   <div className="admin-device__actions">
                     <button className="admin-button admin-button--primary" disabled={notificationBusy || notificationsEnabled === null} onClick={() => void handleNotificationToggle()} type="button"><Bell aria-hidden="true" size={18} />{notificationsEnabled ? "Disable alerts" : "Enable alerts"}</button>
                     {notificationsEnabled ? <button className="admin-button admin-button--secondary" disabled={notificationBusy} onClick={() => void handleTestNotification()} type="button">Send private test</button> : null}
+                    <button className="admin-button admin-button--secondary" disabled={notificationBusy || notificationsEnabled === null} onClick={() => void handleRevokeAllNotifications()} type="button">Disable alerts on every device</button>
                     {installPrompt ? <button className="admin-button admin-button--secondary" onClick={() => void handleInstall()} type="button"><Download aria-hidden="true" size={18} />Install app</button> : null}
                   </div>
                   {notificationMessage ? <p className="admin-device__message" role="status">{notificationMessage}</p> : null}

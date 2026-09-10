@@ -50,6 +50,7 @@ Store the generated password in the owner's password manager. Add these server-o
 - `ADMIN_USERNAME`
 - `ADMIN_PASSWORD_HASH`
 - `ADMIN_SESSION_SECRET`
+- `ADMIN_RATE_LIMIT_SECRET`
 - `VAPID_PUBLIC_KEY`
 - `VAPID_PRIVATE_KEY`
 - `VAPID_SUBJECT` — a monitored owner email in `mailto:` form
@@ -61,7 +62,7 @@ Store the generated password in the owner's password manager. Add these server-o
 
 `DATABASE_URL` is supplied by the Neon Marketplace integration. Do not create a second browser-visible database variable.
 
-The admin session uses a signed `Secure`, `HttpOnly`, `SameSite=Strict` cookie. Passwords, session secrets, database credentials and private VAPID keys are never sent to the frontend or stored in browser storage.
+The admin session uses a signed `Secure`, `HttpOnly`, `SameSite=Strict` cookie. Before password verification, every sign-in attempt is checked against atomic Neon-backed limits of five attempts per source and 30 attempts account-wide within 15 minutes. The source address is HMAC-hashed with `ADMIN_RATE_LIMIT_SECRET`; the database never stores the raw address. If Neon or the rate limiter is unavailable, sign-in fails closed without running PBKDF2. Passwords, session secrets, database credentials and private VAPID keys are never sent to the frontend or stored in browser storage.
 
 ## 4. Configure the Cal ID webhook
 
@@ -74,15 +75,15 @@ In Cal ID, open **Settings → Webhooks** at `/settings/webhooks` and create one
 
 The verified event IDs are safe defaults. They may be set explicitly as `CALID_PERSONAL_EVENT_TYPE_ID=108657`, `CALID_RELATIONSHIP_EVENT_TYPE_ID=108655` and `CALID_MUHURAT_EVENT_TYPE_ID=108656`.
 
-Cal ID signs the exact request body with HMAC-SHA256 in `X-Cal-Signature-256`. The receiver rejects an invalid signature, an oversized body, unsupported event types and unavailable durable storage.
+Cal ID signs the exact request body with HMAC-SHA256 in `X-Cal-Signature-256`. The receiver rejects an oversized declared body before reading it and stops a streamed body as soon as it exceeds 256 KiB. The exact accepted bytes are then used for signature verification. Invalid signatures, unsupported event types and unavailable durable storage fail closed.
 
 ## 5. Retention and manual removal
 
 - Customer-bearing appointment rows are removed seven days after the appointment ends.
 - Cancelled appointment rows are removed seven days after cancellation, even if the former appointment date is later.
 - A signed-in owner can remove a completed or cancelled appointment immediately from its details. Active future appointments cannot be removed through this housekeeping control; Postgres rechecks this rule.
-- Minimal webhook delivery IDs and push-outbox rows remain for 30 days. This prevents a Cal ID retry from recreating a customer record or resending an already handled alert after the visible appointment was removed.
-- Push subscriptions remain until the owner disables them, their declared expiry passes, or the push service rejects them as expired.
+- Minimal webhook delivery IDs remain while their appointment record exists, then for at least 30 days after the appointment record is removed. This prevents a Cal ID retry from recreating a customer record or resending an already handled alert after the visible appointment was removed.
+- Push subscriptions expire after 30 days without authenticated use, at their declared provider expiry, or when the push service rejects them as expired. Opening the signed-in admin app renews the current device. Use **Disable alerts on every device** to revoke all registered phones and browsers after a device is lost, shared or replaced.
 
 Cleanup is idempotent and runs opportunistically during a valid webhook ingestion or authenticated admin schedule read. No paid cron or scheduler is required. If the site receives no legitimate request at the exact deadline, cleanup occurs on the next legitimate request.
 

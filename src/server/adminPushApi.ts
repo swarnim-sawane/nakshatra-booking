@@ -102,10 +102,25 @@ export function createAdminPushSubscriptionHandler({
       const subscription = normalizeSubscription(body);
       if (!subscription) return jsonResponse(400, { error: "Invalid push subscription." });
       try {
+        if (isRecord(body) && body.renewal === true) {
+          const renewed = await store.renewPushSubscription(subscription);
+          return renewed
+            ? jsonResponse(200, { enabled: true })
+            : jsonResponse(200, { enabled: false, revoked: true });
+        }
         await store.savePushSubscription(subscription);
         return jsonResponse(200, { enabled: true });
       } catch {
         return jsonResponse(503, { error: "Could not save this notification subscription." });
+      }
+    }
+
+    if (isRecord(body) && body.all === true) {
+      try {
+        await store.deleteAllPushSubscriptions();
+        return jsonResponse(200, { enabled: false, allDevices: true });
+      } catch {
+        return jsonResponse(503, { error: "Could not disable notifications on every device." });
       }
     }
 

@@ -29,6 +29,7 @@ console.log(
   `ADMIN_PASSWORD_HASH=pbkdf2_sha256$${iterations}$${base64url(salt)}$${base64url(passwordHash)}`,
 );
 console.log(`ADMIN_SESSION_SECRET=${base64url(randomBytes(48))}`);
+console.log(`ADMIN_RATE_LIMIT_SECRET=${base64url(randomBytes(48))}`);
 console.log(`VAPID_PUBLIC_KEY=${base64url(publicKey)}`);
 console.log(`VAPID_PRIVATE_KEY=${jwk.d}`);
 console.log("VAPID_SUBJECT=mailto:replace-with-owner-email@example.com");

@@ -102,6 +102,33 @@ export async function disablePushNotifications(
   return "disabled";
 }
 
+export async function refreshPushSubscription(
+  registration: ServiceWorkerRegistration | null,
+): Promise<PushActionResult> {
+  const subscription = await getPushSubscription(registration);
+  if (!subscription) return "disabled";
+  const response = await pushRequest("/api/admin/push-subscription", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...subscription.toJSON(), renewal: true }),
+  });
+  const result = (await response.json()) as { enabled?: unknown };
+  return result.enabled === true ? "enabled" : "disabled";
+}
+
+export async function revokeAllPushNotifications(
+  registration: ServiceWorkerRegistration | null,
+): Promise<PushActionResult> {
+  const subscription = await getPushSubscription(registration);
+  await pushRequest("/api/admin/push-subscription", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ all: true }),
+  });
+  if (subscription) await subscription.unsubscribe();
+  return "disabled";
+}
+
 export async function sendTestNotification(
   registration: ServiceWorkerRegistration | null,
 ): Promise<PushActionResult> {

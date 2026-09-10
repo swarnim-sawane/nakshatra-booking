@@ -46,3 +46,16 @@ test("the production build emits the independent admin page and browser assets",
   assert.equal(existsSync("dist/index.html"), true);
   assert.equal(existsSync("dist/book/index.html"), true);
 });
+
+test("admin setup documents and generates the server-only rate-limit secret", () => {
+  const environmentTemplate = readFileSync(".env.example", "utf8");
+  const generator = readFileSync("scripts/generate-admin-secrets.mjs", "utf8");
+  const setup = readFileSync("docs/admin-cal-id-setup.md", "utf8");
+
+  assert.match(environmentTemplate, /^ADMIN_RATE_LIMIT_SECRET=$/m);
+  assert.match(generator, /ADMIN_RATE_LIMIT_SECRET=/);
+  assert.match(setup, /ADMIN_RATE_LIMIT_SECRET/);
+  assert.match(setup, /rate limit/i);
+  assert.match(setup, /30 days after the appointment record is removed/i);
+  assert.match(setup, /Disable alerts on every device/i);
+});

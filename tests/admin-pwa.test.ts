@@ -5,7 +5,9 @@ import {
   disablePushNotifications,
   enablePushNotifications,
   registerAdminServiceWorker,
+  refreshPushSubscription,
   requestNotificationPermission,
+  revokeAllPushNotifications,
   sendTestNotification,
 } from "../src/admin/pwa";
 
@@ -62,6 +64,49 @@ describe("admin PWA notifications", () => {
 
     expect(await disablePushNotifications(registration)).toBe("disabled");
     expect(fetchMock).toHaveBeenCalledWith("/api/admin/push-subscription", expect.objectContaining({ method: "DELETE" }));
+    expect(active.unsubscribe).toHaveBeenCalled();
+  });
+
+  it("renews an existing device subscription after authenticated app use", async () => {
+    const active = subscription();
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ enabled: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const registration = { pushManager: { getSubscription: vi.fn().mockResolvedValue(active) } } as unknown as ServiceWorkerRegistration;
+
+    expect(await refreshPushSubscription(registration)).toBe("enabled");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/admin/push-subscription",
+      expect.objectContaining({ method: "POST", credentials: "same-origin" }),
+    );
+  });
+
+  it("keeps a centrally revoked device disabled during background renewal", async () => {
+    const active = subscription();
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ enabled: false, revoked: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const registration = { pushManager: { getSubscription: vi.fn().mockResolvedValue(active) } } as unknown as ServiceWorkerRegistration;
+
+    expect(await refreshPushSubscription(registration)).toBe("disabled");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/admin/push-subscription",
+      expect.objectContaining({ body: expect.stringContaining('"renewal":true') }),
+    );
+  });
+
+  it("revokes every durable device before unsubscribing the current browser", async () => {
+    const active = subscription();
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ enabled: false, allDevices: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const registration = { pushManager: { getSubscription: vi.fn().mockResolvedValue(active) } } as unknown as ServiceWorkerRegistration;
+
+    expect(await revokeAllPushNotifications(registration)).toBe("disabled");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/admin/push-subscription",
+      expect.objectContaining({
+        method: "DELETE",
+        body: JSON.stringify({ all: true }),
+      }),
+    );
     expect(active.unsubscribe).toHaveBeenCalled();
   });
 

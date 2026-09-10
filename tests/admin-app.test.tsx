@@ -46,6 +46,38 @@ describe("Nakshatra Admin", () => {
     expect(screen.queryByText("Development demo")).toBeNull();
   });
 
+  it("renews the current device subscription when the protected schedule opens", async () => {
+    const active = {
+      endpoint: "https://push.example.test/active-device",
+      toJSON: () => ({
+        endpoint: "https://push.example.test/active-device",
+        expirationTime: null,
+        keys: { p256dh: "public-key", auth: "auth-key" },
+      }),
+    } as unknown as PushSubscription;
+    const registration = {
+      pushManager: { getSubscription: vi.fn().mockResolvedValue(active) },
+    } as unknown as ServiceWorkerRegistration;
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ enabled: true }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <AdminApp
+        loadBookings={async () => [realBooking()]}
+        now={now}
+        serviceWorkerRegistration={registration}
+      />,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Next consultation" })).toBeTruthy();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/admin/push-subscription",
+      expect.objectContaining({ method: "POST", credentials: "same-origin" }),
+    ));
+  });
+
   it("opens minimized live booking details", async () => {
     const user = userEvent.setup();
     render(<AdminApp loadBookings={async () => [realBooking()]} now={now} serviceWorkerRegistration={null} />);

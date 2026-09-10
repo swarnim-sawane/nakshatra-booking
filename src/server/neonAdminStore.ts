@@ -32,20 +32,27 @@ export type StoredPushSubscription = Readonly<{
 
 export type BookingRemovalResult = "deleted" | "active" | "not_found";
 
+export type AdminLoginRateLimitResult = Readonly<{
+  allowed: boolean;
+  retryAfterSeconds: number;
+}>;
+
 export interface AdminDataStore extends CalIdWebhookStore {
-  listBookings(now?: Date): Promise<StoredAdminBooking[]>;
-  deleteBooking(bookingUid: string, now?: Date): Promise<BookingRemovalResult>;
+  listBookings(): Promise<StoredAdminBooking[]>;
+  deleteBooking(bookingUid: string): Promise<BookingRemovalResult>;
   savePushSubscription(subscription: StoredPushSubscription): Promise<void>;
+  renewPushSubscription(subscription: StoredPushSubscription): Promise<boolean>;
   deletePushSubscription(endpoint: string): Promise<void>;
+  deleteAllPushSubscriptions(): Promise<void>;
   getPushSubscription(endpoint: string): Promise<StoredPushSubscription | null>;
-  listPushSubscriptions(now?: Date): Promise<StoredPushSubscription[]>;
-  claimPushDelivery(eventId: string, now?: Date): Promise<CalIdWebhookTrigger | null>;
+  listPushSubscriptions(): Promise<StoredPushSubscription[]>;
+  claimPushDelivery(eventId: string): Promise<CalIdWebhookTrigger | null>;
   completePushDelivery(
     eventId: string,
     delivered: boolean,
     errorCode?: string,
-    now?: Date,
   ): Promise<void>;
+  consumeAdminLoginAttempt(sourceKey: string): Promise<AdminLoginRateLimitResult>;
 }
 
 type QueryRow = Record<string, unknown>;
@@ -156,7 +163,7 @@ export class NeonAdminStore implements AdminDataStore {
       `select nakshatra_admin.apply_calid_webhook_event(
         $1::text, $2::text, $3::text, $4::text, $5::text,
         $6::timestamptz, $7::timestamptz, $8::text,
-        $9::timestamptz, $10::timestamptz, $11::text
+        $9::timestamptz, $10::text
       ) as result`,
       [
         event.eventId,
@@ -168,18 +175,14 @@ export class NeonAdminStore implements AdminDataStore {
         event.endsAt,
         event.meetingUrl ?? null,
         event.occurredAt,
-        event.receivedAt,
         event.rescheduledFromUid ?? null,
       ],
     );
     return singleResult(rows, ["applied", "duplicate", "suppressed"]) as CalIdWebhookStoreResult;
   }
 
-  async listBookings(now = new Date()): Promise<StoredAdminBooking[]> {
-    const rows = await this.query(
-      "select * from nakshatra_admin.list_admin_bookings($1::timestamptz)",
-      [now.toISOString()],
-    );
+  async listBookings(): Promise<StoredAdminBooking[]> {
+    const rows = await this.query("select * from nakshatra_admin.list_admin_bookings()");
 
     return rows.map((row) => {
       const slug = row.event_type_slug as keyof typeof serviceNames;
@@ -203,10 +206,10 @@ export class NeonAdminStore implements AdminDataStore {
     });
   }
 
-  async deleteBooking(bookingUid: string, now = new Date()): Promise<BookingRemovalResult> {
+  async deleteBooking(bookingUid: string): Promise<BookingRemovalResult> {
     const rows = await this.query(
-      "select nakshatra_admin.remove_admin_booking($1::text, $2::timestamptz) as result",
-      [bookingUid, now.toISOString()],
+      "select nakshatra_admin.remove_admin_booking($1::text) as result",
+      [bookingUid],
     );
     return singleResult(rows, ["deleted", "active", "not_found"]) as BookingRemovalResult;
   }
@@ -227,23 +230,45 @@ export class NeonAdminStore implements AdminDataStore {
     );
   }
 
+  async renewPushSubscription(subscription: StoredPushSubscription) {
+    const rows = await this.query(
+      `select nakshatra_admin.renew_admin_push_subscription(
+        $1::text, $2::timestamptz, $3::text, $4::text
+      ) as renewed`,
+      [
+        subscription.endpoint,
+        subscription.expirationTime
+          ? new Date(subscription.expirationTime).toISOString()
+          : null,
+        subscription.keys.p256dh,
+        subscription.keys.auth,
+      ],
+    );
+    const renewed = rows[0]?.renewed;
+    if (typeof renewed !== "boolean") {
+      throw new Error("Neon returned an invalid push-renewal result");
+    }
+    return renewed;
+  }
+
   async deletePushSubscription(endpoint: string) {
     await this.query("select nakshatra_admin.delete_admin_push_subscription($1::text)", [endpoint]);
   }
 
+  async deleteAllPushSubscriptions() {
+    await this.query("select nakshatra_admin.delete_all_admin_push_subscriptions()");
+  }
+
   async getPushSubscription(endpoint: string) {
     const rows = await this.query(
-      "select * from nakshatra_admin.get_admin_push_subscription($1::text, $2::timestamptz)",
-      [endpoint, new Date().toISOString()],
+      "select * from nakshatra_admin.get_admin_push_subscription($1::text)",
+      [endpoint],
     );
     return rows[0] ? this.mapPushSubscription(rows[0]) : null;
   }
 
-  async listPushSubscriptions(now = new Date()) {
-    const rows = await this.query(
-      "select * from nakshatra_admin.list_admin_push_subscriptions($1::timestamptz)",
-      [now.toISOString()],
-    );
+  async listPushSubscriptions() {
+    const rows = await this.query("select * from nakshatra_admin.list_admin_push_subscriptions()");
     return rows.map((row) => this.mapPushSubscription(row));
   }
 
@@ -265,10 +290,10 @@ export class NeonAdminStore implements AdminDataStore {
     return subscription;
   }
 
-  async claimPushDelivery(eventId: string, now = new Date()): Promise<CalIdWebhookTrigger | null> {
+  async claimPushDelivery(eventId: string): Promise<CalIdWebhookTrigger | null> {
     const rows = await this.query(
-      "select * from nakshatra_admin.claim_admin_push_delivery($1::text, $2::timestamptz)",
-      [eventId, now.toISOString()],
+      "select * from nakshatra_admin.claim_admin_push_delivery($1::text)",
+      [eventId],
     );
     const trigger = rows[0]?.trigger;
     return typeof trigger === "string" ? (trigger as CalIdWebhookTrigger) : null;
@@ -278,13 +303,30 @@ export class NeonAdminStore implements AdminDataStore {
     eventId: string,
     delivered: boolean,
     errorCode?: string,
-    now = new Date(),
   ) {
     await this.query(
       `select nakshatra_admin.complete_admin_push_delivery(
-        $1::text, $2::boolean, $3::text, $4::timestamptz
+        $1::text, $2::boolean, $3::text
       )`,
-      [eventId, delivered, errorCode?.slice(0, 80) ?? null, now.toISOString()],
+      [eventId, delivered, errorCode?.slice(0, 80) ?? null],
     );
+  }
+
+  async consumeAdminLoginAttempt(sourceKey: string): Promise<AdminLoginRateLimitResult> {
+    const rows = await this.query(
+      "select * from nakshatra_admin.consume_admin_login_attempt($1::text)",
+      [sourceKey],
+    );
+    const allowed = rows[0]?.allowed;
+    const retryAfter = rows[0]?.retry_after_seconds;
+    const retryAfterSeconds = typeof retryAfter === "number"
+      ? retryAfter
+      : typeof retryAfter === "string"
+        ? Number(retryAfter)
+        : Number.NaN;
+    if (typeof allowed !== "boolean" || !Number.isInteger(retryAfterSeconds)) {
+      throw new Error("Neon returned an invalid login rate-limit result");
+    }
+    return { allowed, retryAfterSeconds };
   }
 }

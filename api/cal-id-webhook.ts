@@ -1,10 +1,15 @@
 import {
   handleCalIdWebhookRequest,
+  MAX_WEBHOOK_BODY_BYTES,
   type CalIdEventTypeSlug,
   type CalIdWebhookNotifier,
   type CalIdWebhookStore,
 } from "../src/server/calIdWebhook.js";
 import { createNeonAdminStore } from "../src/server/neonAdminStore.js";
+import {
+  readLimitedBody,
+  RequestBodyTooLargeError,
+} from "../src/server/adminHttp.js";
 import { DurablePushNotifier, readVapidConfig } from "../src/server/webPush.js";
 
 declare const process: { env: Record<string, string | undefined> };
@@ -16,6 +21,23 @@ type WebhookHandlerOptions = {
   eventTypeIdMap?: ReadonlyMap<number, CalIdEventTypeSlug>;
   fetchImpl?: typeof fetch;
 };
+
+function bodyErrorResponse(status: number, error: string) {
+  return new Response(JSON.stringify({ error }), {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      "Content-Type": "application/json; charset=utf-8",
+    },
+  });
+}
+
+export async function readWebhookBody(
+  request: Request,
+  maximumBytes = MAX_WEBHOOK_BODY_BYTES,
+) {
+  return readLimitedBody(request, maximumBytes);
+}
 
 function readEventTypeIdMap(environment: Record<string, string | undefined>) {
   const values = [
@@ -49,9 +71,16 @@ export function createCalIdWebhookFetchHandler({
   );
 
   return async function handleWebhook(request: Request) {
-    const rawBody = request.method === "POST"
-      ? new Uint8Array(await request.arrayBuffer())
-      : new Uint8Array();
+    let rawBody = new Uint8Array();
+    if (request.method === "POST") {
+      try {
+        rawBody = await readWebhookBody(request);
+      } catch (error) {
+        return error instanceof RequestBodyTooLargeError
+          ? bodyErrorResponse(413, "Webhook body is too large.")
+          : bodyErrorResponse(400, "Webhook body could not be read.");
+      }
+    }
     const result = await handleCalIdWebhookRequest({
       method: request.method,
       rawBody,

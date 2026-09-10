@@ -158,6 +158,55 @@ describe("Cal ID webhook receiver", () => {
     expect(notifier.notify).toHaveBeenCalledWith(expect.objectContaining({ trigger: "BOOKING_PAID" }));
   });
 
+  it("rejects an oversized declared body before buffering it", async () => {
+    const store = new MemoryWebhookStore();
+    const handler = createCalIdWebhookFetchHandler({
+      environment: { CALID_WEBHOOK_SECRET: secret },
+      store,
+    });
+    const request = new Request("https://nilima.example/api/cal-id-webhook", {
+      method: "POST",
+      headers: { "content-length": String(256 * 1_024 + 1) },
+      body: "{}",
+    });
+    const arrayBuffer = vi.spyOn(request, "arrayBuffer");
+
+    const response = await handler(request);
+
+    expect(response.status).toBe(413);
+    expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(store.events).toHaveLength(0);
+  });
+
+  it("cancels a streaming body as soon as the byte limit is crossed", async () => {
+    const store = new MemoryWebhookStore();
+    let cancelled = false;
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(256 * 1_024));
+        controller.enqueue(new Uint8Array([1]));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const handler = createCalIdWebhookFetchHandler({
+      environment: { CALID_WEBHOOK_SECRET: secret },
+      store,
+    });
+    const request = new Request("https://nilima.example/api/cal-id-webhook", {
+      method: "POST",
+      body: stream,
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+
+    const response = await handler(request);
+
+    expect(response.status).toBe(413);
+    expect(cancelled).toBe(true);
+    expect(store.events).toHaveLength(0);
+  });
+
   it("fails closed without durable storage", async () => {
     const body = webhookBody("BOOKING_CREATED", "2026-09-09T10:00:00.000Z");
     const rawBody = encoder.encode(body);

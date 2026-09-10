@@ -5,6 +5,7 @@ export type AdminAuthEnvironment = Readonly<{
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD_HASH?: string;
   ADMIN_SESSION_SECRET?: string;
+  ADMIN_RATE_LIMIT_SECRET?: string;
 }>;
 
 type SessionPayload = {
@@ -52,6 +53,32 @@ async function hmac(secret: string, value: string) {
   );
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(value));
   return new Uint8Array(signature);
+}
+
+function bytesToHex(bytes: Uint8Array) {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function normalizedRequestSource(request: Request) {
+  const forwarded =
+    request.headers.get("x-vercel-forwarded-for") ??
+    request.headers.get("x-forwarded-for") ??
+    request.headers.get("x-real-ip") ??
+    request.headers.get("cf-connecting-ip") ??
+    "";
+  const candidate = forwarded.split(",", 1)[0]?.trim().toLowerCase() ?? "";
+  return (
+    candidate.length >= 3 &&
+    candidate.length <= 64 &&
+    /^[0-9a-f:.]+$/.test(candidate) &&
+    (candidate.includes(".") || candidate.includes(":"))
+  ) ? candidate : "unknown";
+}
+
+export async function createAdminRateLimitSourceKey(request: Request, secret: string) {
+  if (secret.length < 32) throw new Error("Admin rate-limit secret is not configured");
+  const source = normalizedRequestSource(request);
+  return bytesToHex(await hmac(secret, `nakshatra-admin-login-v1:${source}`));
 }
 
 async function derivePasswordHash(password: string, salt: Uint8Array, iterations: number) {

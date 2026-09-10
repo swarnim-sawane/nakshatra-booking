@@ -34,7 +34,7 @@ export function createAdminBookingsHandler({
 
     if (request.method === "GET") {
       try {
-        return jsonResponse(200, { bookings: await store.listBookings(now()) });
+        return jsonResponse(200, { bookings: await store.listBookings() });
       } catch {
         return jsonResponse(503, { error: "Appointments are temporarily unavailable." });
       }
@@ -57,7 +57,7 @@ export function createAdminBookingsHandler({
     }
 
     try {
-      const result = await store.deleteBooking(bookingUid, now());
+      const result = await store.deleteBooking(bookingUid);
       if (result === "active") {
         return jsonResponse(409, {
           error: "Active future appointments cannot be removed.",

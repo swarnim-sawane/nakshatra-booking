@@ -31,11 +31,14 @@ function storeWith(overrides: Partial<AdminDataStore> = {}) {
     listBookings: vi.fn().mockResolvedValue([]),
     deleteBooking: vi.fn(),
     savePushSubscription: vi.fn(),
+    renewPushSubscription: vi.fn(),
     deletePushSubscription: vi.fn(),
+    deleteAllPushSubscriptions: vi.fn(),
     getPushSubscription: vi.fn(),
     listPushSubscriptions: vi.fn(),
     claimPushDelivery: vi.fn(),
     completePushDelivery: vi.fn(),
+    consumeAdminLoginAttempt: vi.fn(),
     ...overrides,
   } as AdminDataStore;
 }
@@ -70,7 +73,7 @@ describe("protected admin APIs", () => {
     const response = await handler(new Request("https://nilima.example/api/admin/bookings", { headers: { cookie } }));
     const serialized = JSON.stringify(await response.json());
     expect(response.status).toBe(200);
-    expect(store.listBookings).toHaveBeenCalledWith(now);
+    expect(store.listBookings).toHaveBeenCalledWith();
     expect(serialized).toContain("Ananya");
     expect(serialized).not.toContain("email");
     expect(serialized).not.toContain("birth");
@@ -148,6 +151,79 @@ describe("protected admin APIs", () => {
     });
     expect((await handler(request())).status).toBe(409);
     expect((await handler(request())).status).toBe(200);
-    expect(deleteBooking).toHaveBeenNthCalledWith(1, "booking_123", now);
+    expect(deleteBooking).toHaveBeenNthCalledWith(1, "booking_123");
+  });
+
+  it("supports authenticated revoke-all without requiring a device endpoint", async () => {
+    const { environment, cookie } = await authContext();
+    const publicKey = base64UrlEncode(new Uint8Array(65).fill(1));
+    const vapid = { publicKey, privateKey: base64UrlEncode(new Uint8Array(32).fill(2)), subject: "mailto:owner@example.com" };
+    const deleteAllPushSubscriptions = vi.fn().mockResolvedValue(undefined);
+    const store = storeWith({ deleteAllPushSubscriptions });
+    const handler = createAdminPushSubscriptionHandler({ environment, store, vapid, now: () => now });
+    const response = await handler(new Request("https://nilima.example/api/admin/push-subscription", {
+      method: "DELETE",
+      headers: { cookie, origin: "https://nilima.example", "content-type": "application/json" },
+      body: JSON.stringify({ all: true }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ enabled: false, allDevices: true });
+    expect(deleteAllPushSubscriptions).toHaveBeenCalledTimes(1);
+    expect(store.deletePushSubscription).not.toHaveBeenCalled();
+  });
+
+  it("does not let background renewal recreate a centrally revoked device", async () => {
+    const { environment, cookie } = await authContext();
+    const publicKey = base64UrlEncode(new Uint8Array(65).fill(1));
+    const vapid = { publicKey, privateKey: base64UrlEncode(new Uint8Array(32).fill(2)), subject: "mailto:owner@example.com" };
+    const renewPushSubscription = vi.fn().mockResolvedValue(false);
+    const store = storeWith({ renewPushSubscription });
+    const handler = createAdminPushSubscriptionHandler({ environment, store, vapid, now: () => now });
+    const response = await handler(new Request("https://nilima.example/api/admin/push-subscription", {
+      method: "POST",
+      headers: { cookie, origin: "https://nilima.example", "content-type": "application/json" },
+      body: JSON.stringify({
+        endpoint: "https://push.example.test/device",
+        expirationTime: null,
+        keys: {
+          p256dh: base64UrlEncode(new Uint8Array(65).fill(1)),
+          auth: base64UrlEncode(new Uint8Array(16).fill(2)),
+        },
+        renewal: true,
+      }),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ enabled: false, revoked: true });
+    expect(renewPushSubscription).toHaveBeenCalledTimes(1);
+    expect(store.savePushSubscription).not.toHaveBeenCalled();
+  });
+
+  it("never supplies an application-controlled clock to privileged runtime functions", async () => {
+    const query = vi.fn(async (statement: string) => {
+      if (statement.includes("list_admin_bookings")) return [];
+      if (statement.includes("remove_admin_booking")) return [{ result: "deleted" }];
+      if (statement.includes("get_admin_push_subscription")) return [];
+      if (statement.includes("list_admin_push_subscriptions")) return [];
+      if (statement.includes("claim_admin_push_delivery")) return [];
+      return [];
+    });
+    const store = new NeonAdminStore({
+      databaseUrl: "postgresql://runtime:secret@ep-example.neon.tech/neondb?sslmode=require",
+      createQuery: () => query as NeonQuery,
+    });
+
+    await store.listBookings();
+    await store.deleteBooking("booking_123");
+    await store.getPushSubscription("https://push.example.test/device");
+    await store.listPushSubscriptions();
+    await store.claimPushDelivery("event_123");
+    await store.completePushDelivery("event_123", true);
+
+    for (const [statement, parameters] of query.mock.calls) {
+      expect(statement).not.toContain("p_now");
+      expect(JSON.stringify(parameters ?? [])).not.toContain("2026-");
+    }
   });
 });

@@ -1,6 +1,7 @@
 import {
   authenticateAdminRequest,
   clearAdminSessionCookie,
+  createAdminRateLimitSourceKey,
   createAdminSessionCookie,
   createAdminSessionToken,
   isAdminAuthConfigured,
@@ -12,11 +13,22 @@ import { emptyResponse, isRecord, jsonResponse, readLimitedJson } from "./adminH
 
 type AdminSessionHandlerOptions = {
   environment: AdminAuthEnvironment;
+  rateLimiter?: AdminLoginRateLimiter | null;
+  verifyCredentials?: typeof verifyAdminCredentials;
   now?: () => Date;
+};
+
+type AdminLoginRateLimiter = {
+  consumeAdminLoginAttempt(sourceKey: string): Promise<{
+    allowed: boolean;
+    retryAfterSeconds: number;
+  }>;
 };
 
 export function createAdminSessionHandler({
   environment,
+  rateLimiter = null,
+  verifyCredentials = verifyAdminCredentials,
   now = () => new Date(),
 }: AdminSessionHandlerOptions) {
   return async function handleAdminSession(request: Request) {
@@ -55,7 +67,30 @@ export function createAdminSessionHandler({
       return jsonResponse(400, { error: "Invalid sign-in request." });
     }
 
-    const valid = await verifyAdminCredentials(body.username, body.password, environment);
+    const rateLimitSecret = environment.ADMIN_RATE_LIMIT_SECRET?.trim() ?? "";
+    if (!rateLimiter || rateLimitSecret.length < 32) {
+      return jsonResponse(503, { error: "Sign-in temporarily unavailable." });
+    }
+
+    let limit: { allowed: boolean; retryAfterSeconds: number };
+    try {
+      const sourceKey = await createAdminRateLimitSourceKey(request, rateLimitSecret);
+      limit = await rateLimiter.consumeAdminLoginAttempt(sourceKey);
+    } catch {
+      return jsonResponse(503, { error: "Sign-in temporarily unavailable." });
+    }
+    if (!limit.allowed) {
+      const retryAfter = Number.isInteger(limit.retryAfterSeconds)
+        ? Math.min(3_600, Math.max(1, limit.retryAfterSeconds))
+        : 900;
+      return jsonResponse(
+        429,
+        { error: "Sign-in temporarily unavailable." },
+        { "Retry-After": String(retryAfter) },
+      );
+    }
+
+    const valid = await verifyCredentials(body.username, body.password, environment);
     if (!valid) return jsonResponse(401, { error: "Sign-in failed." });
 
     const username = environment.ADMIN_USERNAME!.trim();
