@@ -89,6 +89,85 @@ test("login throttling is durable, atomic, source-hashed and account-wide", () =
   assert.doesNotMatch(migration, /remote_ip|raw_ip|ip_address/i);
 });
 
+test("a source blocked at its own limit cannot consume the account-wide quota", () => {
+  const start = migration.indexOf(
+    "create or replace function nakshatra_admin.consume_admin_login_attempt",
+  );
+  const end = migration.indexOf(
+    "revoke all on all tables in schema nakshatra_admin",
+    start,
+  );
+  const limiter = migration.slice(start, end);
+  const sourceResult = limiter.indexOf(
+    "into v_source_attempts, v_source_started_at",
+  );
+  const sourceDenial = limiter.indexOf("if v_source_attempts > 5 then");
+  const accountIncrement = limiter.indexOf(
+    "'account', 'owner', v_now, 1, v_now",
+  );
+
+  assert.ok(sourceResult >= 0);
+  assert.ok(sourceDenial > sourceResult);
+  assert.ok(accountIncrement > sourceDenial);
+  assert.match(
+    limiter.slice(sourceDenial, accountIncrement),
+    /allowed := false;[\s\S]*return next;/i,
+  );
+});
+
+test("booking mutations serialize on deterministic per-booking advisory locks", () => {
+  const applyStart = migration.indexOf(
+    "create or replace function nakshatra_admin.apply_calid_webhook_event",
+  );
+  const applyEnd = migration.indexOf(
+    "create or replace function nakshatra_admin.list_admin_bookings",
+    applyStart,
+  );
+  const applyFunction = migration.slice(applyStart, applyEnd);
+  const applyLock = applyFunction.indexOf("pg_advisory_xact_lock");
+  const stateCheck = applyFunction.indexOf("if not exists (");
+  const customerInsert = applyFunction.indexOf(
+    "insert into nakshatra_admin.calid_booking_state",
+  );
+
+  assert.match(
+    applyFunction,
+    /unnest\(array\[p_booking_uid, p_rescheduled_from_uid\]\)[\s\S]*order by uid collate "C"/i,
+  );
+  assert.ok(applyLock >= 0);
+  assert.ok(stateCheck > applyLock);
+  assert.ok(customerInsert > applyLock);
+
+  const removalStart = migration.indexOf(
+    "create or replace function nakshatra_admin.remove_admin_booking",
+  );
+  const removalEnd = migration.indexOf(
+    "create or replace function nakshatra_admin.upsert_admin_push_subscription",
+    removalStart,
+  );
+  const removal = migration.slice(removalStart, removalEnd);
+  assert.ok(removal.indexOf("pg_advisory_xact_lock") >= 0);
+  assert.ok(
+    removal.indexOf("pg_advisory_xact_lock") <
+      removal.indexOf("select lifecycle_status, ends_at"),
+  );
+
+  const cleanupStart = migration.indexOf(
+    "create or replace function nakshatra_admin.cleanup_retention",
+  );
+  const cleanupEnd = migration.indexOf(
+    "create or replace function nakshatra_admin.apply_calid_webhook_event",
+    cleanupStart,
+  );
+  const cleanup = migration.slice(cleanupStart, cleanupEnd);
+  assert.match(cleanup, /order by b\.booking_uid collate "C"/i);
+  assert.ok(cleanup.indexOf("pg_advisory_xact_lock") >= 0);
+  assert.ok(
+    cleanup.indexOf("pg_advisory_xact_lock") <
+      cleanup.indexOf("delete from nakshatra_admin.calid_booking_state"),
+  );
+});
+
 test("push subscriptions expire, renew and can all be revoked", () => {
   assert.match(migration, /last_confirmed_at timestamptz not null/i);
   assert.match(migration, /last_confirmed_at <= v_now - interval '30 days'/i);

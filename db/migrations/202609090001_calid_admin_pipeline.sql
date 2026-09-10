@@ -136,39 +136,56 @@ as $$
 declare
   v_now constant timestamptz := statement_timestamp();
   v_bookings integer := 0;
+  v_booking_uid text;
+  v_removed integer := 0;
   v_outbox integer := 0;
   v_deliveries integer := 0;
   v_subscriptions integer := 0;
 begin
-  -- Extend replay protection before removing the customer-bearing row.
-  update nakshatra_admin.calid_webhook_deliveries d
-  set retain_until = greatest(d.retain_until, v_now + interval '30 days')
-  where exists (
-    select 1
+  -- Use the same deterministic per-booking locks as webhook ingestion and
+  -- manual removal. Re-check eligibility after locking so a concurrent
+  -- lifecycle event cannot be deleted or recreated across the retention edge.
+  for v_booking_uid in
+    select b.booking_uid
     from nakshatra_admin.calid_booking_state b
-    where b.booking_uid = d.booking_uid
-      and (
-        (
-          b.lifecycle_status = 'cancelled'
-          and b.cancelled_at is not null
-          and b.cancelled_at <= v_now - interval '7 days'
-        ) or (
-          b.lifecycle_status <> 'cancelled'
-          and b.ends_at <= v_now - interval '7 days'
-        )
-      )
-  );
+    where (
+      b.lifecycle_status = 'cancelled'
+      and b.cancelled_at is not null
+      and b.cancelled_at <= v_now - interval '7 days'
+    ) or (
+      b.lifecycle_status <> 'cancelled'
+      and b.ends_at <= v_now - interval '7 days'
+    )
+    order by b.booking_uid collate "C"
+  loop
+    perform pg_advisory_xact_lock(hashtextextended(v_booking_uid, 137));
 
-  delete from nakshatra_admin.calid_booking_state
-  where (
-    lifecycle_status = 'cancelled'
-    and cancelled_at is not null
-    and cancelled_at <= v_now - interval '7 days'
-  ) or (
-    lifecycle_status <> 'cancelled'
-    and ends_at <= v_now - interval '7 days'
-  );
-  get diagnostics v_bookings = row_count;
+    if exists (
+      select 1
+      from nakshatra_admin.calid_booking_state b
+      where b.booking_uid = v_booking_uid
+        and (
+          (
+            b.lifecycle_status = 'cancelled'
+            and b.cancelled_at is not null
+            and b.cancelled_at <= v_now - interval '7 days'
+          ) or (
+            b.lifecycle_status <> 'cancelled'
+            and b.ends_at <= v_now - interval '7 days'
+          )
+        )
+    ) then
+      -- Extend replay protection before removing the customer-bearing row.
+      update nakshatra_admin.calid_webhook_deliveries
+      set retain_until = greatest(retain_until, v_now + interval '30 days')
+      where booking_uid = v_booking_uid;
+
+      delete from nakshatra_admin.calid_booking_state
+      where booking_uid = v_booking_uid;
+      get diagnostics v_removed = row_count;
+      v_bookings := v_bookings + v_removed;
+    end if;
+  end loop;
 
   update nakshatra_admin.admin_push_outbox o
   set
@@ -232,6 +249,7 @@ as $$
 declare
   v_received_at constant timestamptz := statement_timestamp();
   v_inserted integer;
+  v_lock_uid text;
 begin
   if p_trigger not in (
     'BOOKING_CREATED', 'BOOKING_PAID', 'BOOKING_RESCHEDULED', 'BOOKING_CANCELLED'
@@ -242,6 +260,18 @@ begin
   end if;
 
   perform nakshatra_admin.cleanup_retention();
+
+  -- Lock every booking identity touched by this event in bytewise order.
+  -- Manual deletion and retention cleanup use the same lock namespace.
+  for v_lock_uid in
+    select uid
+    from unnest(array[p_booking_uid, p_rescheduled_from_uid]) as lock_ids(uid)
+    where uid is not null
+    group by uid
+    order by uid collate "C"
+  loop
+    perform pg_advisory_xact_lock(hashtextextended(v_lock_uid, 137));
+  end loop;
 
   insert into nakshatra_admin.calid_webhook_deliveries (
     event_id, trigger, booking_uid, occurred_at, received_at, retain_until
@@ -420,6 +450,8 @@ declare
   v_status text;
   v_ends_at timestamptz;
 begin
+  perform pg_advisory_xact_lock(hashtextextended(p_booking_uid, 137));
+
   select lifecycle_status, ends_at
   into v_status, v_ends_at
   from nakshatra_admin.calid_booking_state
@@ -640,6 +672,18 @@ begin
     last_attempt_at = v_now
   returning attempt_count, window_started_at
   into v_source_attempts, v_source_started_at;
+
+  -- Once this source is blocked it must not be able to exhaust the separate
+  -- account-wide allowance for legitimate attempts from other sources.
+  if v_source_attempts > 5 then
+    allowed := false;
+    retry_after_seconds := greatest(
+      1,
+      ceil(extract(epoch from (v_source_started_at + v_window - v_now)))::integer
+    );
+    return next;
+    return;
+  end if;
 
   insert into nakshatra_admin.admin_login_rate_limits (
     scope, limiter_key, window_started_at, attempt_count, last_attempt_at
