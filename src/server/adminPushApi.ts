@@ -3,13 +3,13 @@ import {
   base64UrlDecode,
   isSameOriginMutation,
   type AdminAuthEnvironment,
-} from "./adminAuth";
-import { isRecord, jsonResponse, readLimitedJson } from "./adminHttp";
+} from "./adminAuth.js";
+import { isRecord, jsonResponse, readLimitedJson } from "./adminHttp.js";
 import type {
   AdminDataStore,
   StoredPushSubscription,
-} from "./neonAdminStore";
-import { sendWebPush, type VapidConfig } from "./webPush";
+} from "./neonAdminStore.js";
+import { sendWebPush, type VapidConfig } from "./webPush.js";
 
 type PushHandlerOptions = {
   environment: AdminAuthEnvironment;

@@ -8,8 +8,8 @@ import {
   isSameOriginMutation,
   verifyAdminCredentials,
   type AdminAuthEnvironment,
-} from "./adminAuth";
-import { emptyResponse, isRecord, jsonResponse, readLimitedJson } from "./adminHttp";
+} from "./adminAuth.js";
+import { emptyResponse, isRecord, jsonResponse, readLimitedJson } from "./adminHttp.js";
 
 type AdminSessionHandlerOptions = {
   environment: AdminAuthEnvironment;

@@ -2,9 +2,9 @@ import {
   authenticateAdminRequest,
   isSameOriginMutation,
   type AdminAuthEnvironment,
-} from "./adminAuth";
-import { isRecord, jsonResponse, readLimitedJson } from "./adminHttp";
-import type { AdminDataStore } from "./neonAdminStore";
+} from "./adminAuth.js";
+import { isRecord, jsonResponse, readLimitedJson } from "./adminHttp.js";
+import type { AdminDataStore } from "./neonAdminStore.js";
 
 type AdminBookingsHandlerOptions = {
   environment: AdminAuthEnvironment;

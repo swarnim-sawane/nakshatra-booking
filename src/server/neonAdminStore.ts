@@ -4,7 +4,7 @@ import type {
   CalIdWebhookStore,
   CalIdWebhookStoreResult,
   CalIdWebhookTrigger,
-} from "./calIdWebhook";
+} from "./calIdWebhook.js";
 
 export type NeonEnvironment = Readonly<{
   DATABASE_URL?: string;

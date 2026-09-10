@@ -1,13 +1,13 @@
-import { base64UrlDecode, base64UrlEncode } from "./adminAuth";
+import { base64UrlDecode, base64UrlEncode } from "./adminAuth.js";
 import type {
   CalIdWebhookEvent,
   CalIdWebhookNotifier,
   CalIdWebhookTrigger,
-} from "./calIdWebhook";
+} from "./calIdWebhook.js";
 import type {
   AdminDataStore,
   StoredPushSubscription,
-} from "./neonAdminStore";
+} from "./neonAdminStore.js";
 
 export type VapidEnvironment = Readonly<{
   VAPID_PUBLIC_KEY?: string;
