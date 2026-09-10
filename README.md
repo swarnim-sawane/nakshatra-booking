@@ -99,9 +99,11 @@ Do not complete a real payment merely to prove the frontend is working. Use a co
 
 The source direction and exact final Image Generation prompt are recorded in `docs/brand/kundli-brand-assets.md`.
 
-## Future WhatsApp phase
+## WhatsApp Cloud API foundation
 
-WhatsApp automation is deliberately outside this release. The stable future entry point is `/book/?s=<opaque-token>`; this version preserves the parameter in the browser address while never reading, rendering, storing, decoding, or forwarding it. The proposed session, webhook, and ownership boundaries are documented in the approved design specification.
+The signature-verified WhatsApp webhook endpoint is documented in [docs/whatsapp-cloud-api-setup.md](docs/whatsapp-cloud-api-setup.md). It accepts Meta's callback verification and privacy-safe `messages` events, but does not yet send customer messages or store inbound message content.
+
+Outbound WhatsApp booking automation remains a separate activation phase. The stable future entry point is `/book/?s=<opaque-token>`; this version preserves the parameter in the browser address while never reading, rendering, storing, decoding, or forwarding it. The proposed session, webhook, and ownership boundaries are documented in the approved design specification.
 
 ## Evidence and design notes
 
