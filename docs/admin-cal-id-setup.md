@@ -1,6 +1,6 @@
 # Cal ID to Nakshatra Admin setup
 
-The code is complete locally, but the live connection remains inactive until the owner creates the database, applies the migration and adds the server secrets. None of these values may use a `PUBLIC_` or `VITE_` prefix.
+The production admin pipeline is deployed at `https://nilimasawane.vercel.app/admin/`. Neon, the database migration, Vercel secrets, and the account-level Cal ID webhook are active. None of the server values may use a `PUBLIC_` or `VITE_` prefix.
 
 ## 1. Add the free Neon database through Vercel
 
@@ -68,7 +68,7 @@ The admin session uses a signed `Secure`, `HttpOnly`, `SameSite=Strict` cookie. 
 
 In Cal ID, open **Settings → Webhooks** at `/settings/webhooks` and create one account-level webhook:
 
-- Subscriber URL: `https://nilima.vercel.app/api/cal-id-webhook`
+- Subscriber URL: `https://nilimasawane.vercel.app/api/cal-id-webhook`
 - Secret: the same random value stored in Vercel as `CALID_WEBHOOK_SECRET`
 - Triggers: `BOOKING_CREATED`, `BOOKING_PAID`, `BOOKING_RESCHEDULED`, `BOOKING_CANCELLED`
 - Active: enable only after the Neon migration and all Vercel variables are ready
