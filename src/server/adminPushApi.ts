@@ -173,7 +173,11 @@ export function createAdminTestNotificationHandler({
         return jsonResponse(410, { error: "This notification subscription has expired." });
       }
       return jsonResponse(200, { sent: true });
-    } catch {
+    } catch (error) {
+      console.error(
+        "Admin test notification delivery failed",
+        error instanceof Error ? error.message : "unknown-error",
+      );
       return jsonResponse(503, { error: "The test notification could not be sent." });
     }
   };
