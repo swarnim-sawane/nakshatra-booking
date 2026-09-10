@@ -182,3 +182,29 @@ test("push subscriptions expire, renew and can all be revoked", () => {
   assert.doesNotMatch(renewal, /insert into/i);
   assert.match(migration, /grant execute on function nakshatra_admin\.renew_admin_push_subscription/i);
 });
+
+test("push subscription readers qualify cleanup columns that shadow table-return fields", () => {
+  for (const functionName of [
+    "get_admin_push_subscription",
+    "list_admin_push_subscriptions",
+  ]) {
+    const start = migration.indexOf(
+      `create or replace function nakshatra_admin.${functionName}`,
+    );
+    const end = migration.indexOf("$$;", start);
+    const functionSql = migration.slice(start, end);
+
+    assert.match(
+      functionSql,
+      /delete from nakshatra_admin\.admin_push_subscriptions\s+s/i,
+    );
+    assert.match(
+      functionSql,
+      /where \(s\.expiration_time is not null and s\.expiration_time <= v_now\)/i,
+    );
+    assert.match(
+      functionSql,
+      /or s\.last_confirmed_at <= v_now - interval '30 days'/i,
+    );
+  }
+});

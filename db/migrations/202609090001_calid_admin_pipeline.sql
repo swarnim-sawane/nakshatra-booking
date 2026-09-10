@@ -569,9 +569,9 @@ as $$
 declare
   v_now constant timestamptz := statement_timestamp();
 begin
-  delete from nakshatra_admin.admin_push_subscriptions
-  where (expiration_time is not null and expiration_time <= v_now)
-    or last_confirmed_at <= v_now - interval '30 days';
+  delete from nakshatra_admin.admin_push_subscriptions s
+  where (s.expiration_time is not null and s.expiration_time <= v_now)
+    or s.last_confirmed_at <= v_now - interval '30 days';
   return query
   select s.endpoint, s.expiration_time, s.p256dh, s.auth
   from nakshatra_admin.admin_push_subscriptions s
@@ -588,9 +588,9 @@ as $$
 declare
   v_now constant timestamptz := statement_timestamp();
 begin
-  delete from nakshatra_admin.admin_push_subscriptions
-  where (expiration_time is not null and expiration_time <= v_now)
-    or last_confirmed_at <= v_now - interval '30 days';
+  delete from nakshatra_admin.admin_push_subscriptions s
+  where (s.expiration_time is not null and s.expiration_time <= v_now)
+    or s.last_confirmed_at <= v_now - interval '30 days';
   return query
   select s.endpoint, s.expiration_time, s.p256dh, s.auth
   from nakshatra_admin.admin_push_subscriptions s
