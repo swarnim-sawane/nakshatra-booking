@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 const migration = readFileSync(
   "db/migrations/202609090001_calid_admin_pipeline.sql",
   "utf8",
 );
+const whatsappMigrationPath = "db/migrations/202609110001_whatsapp_automation.sql";
+const whatsappMigration = existsSync(whatsappMigrationPath)
+  ? readFileSync(whatsappMigrationPath, "utf8")
+  : "";
 
 test("Neon storage is atomic, idempotent and restricted to database functions", () => {
   assert.match(migration, /create schema if not exists nakshatra_admin/i);
@@ -207,4 +211,27 @@ test("push subscription readers qualify cleanup columns that shadow table-return
       /or s\.last_confirmed_at <= v_now - interval '30 days'/i,
     );
   }
+});
+
+test("WhatsApp automation is consent-gated, idempotent and uses database time", () => {
+  assert.match(whatsappMigration, /whatsapp_recipient_e164/i);
+  assert.match(whatsappMigration, /whatsapp_transactional_consent_at/i);
+  assert.match(whatsappMigration, /unique \(booking_uid, message_kind\)/i);
+  assert.match(whatsappMigration, /booking_confirmation/i);
+  assert.match(whatsappMigration, /appointment_reminder_1h/i);
+  assert.match(whatsappMigration, /statement_timestamp\(\)/i);
+  assert.doesNotMatch(whatsappMigration, /\bp_now\b|\bp_received_at\b/i);
+  assert.doesNotMatch(
+    whatsappMigration,
+    /birth_date|birth_time|birth_place|attendee_email|raw_payload|message_body|inbound_body|consultation_question/i,
+  );
+});
+
+test("WhatsApp lifecycle moves reminders on reschedule and suppresses them on cancellation", () => {
+  assert.match(whatsappMigration, /p_trigger = 'BOOKING_RESCHEDULED'[\s\S]*appointment_reminder_1h/i);
+  assert.match(whatsappMigration, /p_trigger = 'BOOKING_CANCELLED'[\s\S]*appointment_reminder_1h/i);
+  assert.match(whatsappMigration, /claim_due_whatsapp_messages/i);
+  assert.match(whatsappMigration, /complete_whatsapp_message_delivery/i);
+  assert.match(whatsappMigration, /claim_whatsapp_inbound_delivery/i);
+  assert.match(whatsappMigration, /revoke all on all tables[\s\S]*grant execute/i);
 });

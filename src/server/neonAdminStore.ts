@@ -37,6 +37,35 @@ export type AdminLoginRateLimitResult = Readonly<{
   retryAfterSeconds: number;
 }>;
 
+export type WhatsAppMessageKind = "booking_confirmation" | "appointment_reminder_1h";
+export type WhatsAppDeliveryOutcome = "sent" | "retry" | "ambiguous";
+
+export type WhatsAppOutboundJob = Readonly<{
+  id: string;
+  kind: WhatsAppMessageKind;
+  recipientE164: string;
+  customerFirstName: string;
+  consultationName: string;
+  startsAt: string;
+  meetingUrl: string;
+}>;
+
+export interface WhatsAppAutomationStore {
+  claimDueWhatsAppMessages(limit: number): Promise<WhatsAppOutboundJob[]>;
+  completeWhatsAppMessageDelivery(
+    deliveryId: string,
+    outcome: WhatsAppDeliveryOutcome,
+    providerMessageIdHash?: string,
+    errorCode?: string,
+  ): Promise<void>;
+  claimWhatsAppInboundDelivery(eventId: string): Promise<boolean>;
+  completeWhatsAppInboundDelivery(
+    eventId: string,
+    delivered: boolean,
+    errorCode?: string,
+  ): Promise<void>;
+}
+
 export interface AdminDataStore extends CalIdWebhookStore {
   listBookings(): Promise<StoredAdminBooking[]>;
   deleteBooking(bookingUid: string): Promise<BookingRemovalResult>;
@@ -160,10 +189,10 @@ export class NeonAdminStore implements AdminDataStore {
 
   async applyEvent(event: CalIdWebhookEvent): Promise<CalIdWebhookStoreResult> {
     const rows = await this.query(
-      `select nakshatra_admin.apply_calid_webhook_event(
+      `select nakshatra_admin.apply_calid_webhook_event_with_whatsapp(
         $1::text, $2::text, $3::text, $4::text, $5::text,
         $6::timestamptz, $7::timestamptz, $8::text,
-        $9::timestamptz, $10::text
+        $9::timestamptz, $10::text, $11::text, $12::boolean
       ) as result`,
       [
         event.eventId,
@@ -176,6 +205,8 @@ export class NeonAdminStore implements AdminDataStore {
         event.meetingUrl ?? null,
         event.occurredAt,
         event.rescheduledFromUid ?? null,
+        event.whatsappRecipientE164 ?? null,
+        event.whatsappTransactionalConsent === true,
       ],
     );
     return singleResult(rows, ["applied", "duplicate", "suppressed"]) as CalIdWebhookStoreResult;
@@ -328,5 +359,72 @@ export class NeonAdminStore implements AdminDataStore {
       throw new Error("Neon returned an invalid login rate-limit result");
     }
     return { allowed, retryAfterSeconds };
+  }
+
+  async claimDueWhatsAppMessages(limit: number): Promise<WhatsAppOutboundJob[]> {
+    const safeLimit = Number.isInteger(limit) ? Math.min(25, Math.max(1, limit)) : 10;
+    const rows = await this.query(
+      "select * from nakshatra_admin.claim_due_whatsapp_messages($1::integer)",
+      [safeLimit],
+    );
+    return rows.map((row) => {
+      const kind = requireString(row.message_kind, "WhatsApp message kind");
+      if (kind !== "booking_confirmation" && kind !== "appointment_reminder_1h") {
+        throw new Error("Neon returned an invalid WhatsApp message kind");
+      }
+      const slug = requireString(row.event_type_slug, "event type") as keyof typeof serviceNames;
+      if (!serviceNames[slug]) throw new Error("Neon returned an invalid event type");
+      const rawId = row.delivery_id;
+      const id = typeof rawId === "number" || typeof rawId === "bigint"
+        ? String(rawId)
+        : requireString(rawId, "WhatsApp delivery ID");
+      return {
+        id,
+        kind,
+        recipientE164: requireString(row.whatsapp_recipient_e164, "WhatsApp recipient"),
+        customerFirstName: requireString(row.customer_first_name, "customer name"),
+        consultationName: serviceNames[slug],
+        startsAt: timestamp(row.starts_at, "start time"),
+        meetingUrl: requireString(row.meeting_url, "meeting URL"),
+      };
+    });
+  }
+
+  async completeWhatsAppMessageDelivery(
+    deliveryId: string,
+    outcome: WhatsAppDeliveryOutcome,
+    providerMessageIdHash?: string,
+    errorCode?: string,
+  ) {
+    await this.query(
+      `select nakshatra_admin.complete_whatsapp_message_delivery(
+        $1::bigint, $2::text, $3::text, $4::text
+      )`,
+      [deliveryId, outcome, providerMessageIdHash ?? null, errorCode?.slice(0, 80) ?? null],
+    );
+  }
+
+  async claimWhatsAppInboundDelivery(eventId: string) {
+    const rows = await this.query(
+      "select nakshatra_admin.claim_whatsapp_inbound_delivery($1::text) as claimed",
+      [eventId],
+    );
+    if (typeof rows[0]?.claimed !== "boolean") {
+      throw new Error("Neon returned an invalid WhatsApp inbound claim result");
+    }
+    return rows[0].claimed;
+  }
+
+  async completeWhatsAppInboundDelivery(
+    eventId: string,
+    delivered: boolean,
+    errorCode?: string,
+  ) {
+    await this.query(
+      `select nakshatra_admin.complete_whatsapp_inbound_delivery(
+        $1::text, $2::boolean, $3::text
+      )`,
+      [eventId, delivered, errorCode?.slice(0, 80) ?? null],
+    );
   }
 }

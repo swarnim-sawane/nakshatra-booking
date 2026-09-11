@@ -139,6 +139,39 @@ describe("Cal ID webhook receiver", () => {
     });
   });
 
+  it("projects an E.164 recipient only with explicit transactional WhatsApp consent", async () => {
+    const store = new MemoryWebhookStore();
+    await signedRequest(store, webhookBody("BOOKING_PAID", "2026-09-09T10:05:00.000Z", {
+      responses: {
+        whatsapp_phone: { value: "+91 98765 43210" },
+        whatsapp_transactional_opt_in: { value: true },
+        birth_date: { value: "1990-01-01" },
+        consultation_question: { value: "private family question" },
+      },
+    }));
+
+    expect(store.events[0]).toMatchObject({
+      whatsappRecipientE164: "+919876543210",
+      whatsappTransactionalConsent: true,
+    });
+    const projected = JSON.stringify(store.events[0]);
+    expect(projected).not.toContain("1990-01-01");
+    expect(projected).not.toContain("private family question");
+  });
+
+  it("fails closed for WhatsApp when either phone or explicit consent is absent", async () => {
+    const store = new MemoryWebhookStore();
+    await signedRequest(store, webhookBody("BOOKING_PAID", "2026-09-09T10:05:00.000Z", {
+      responses: {
+        whatsapp_phone: { value: "+919876543210" },
+        whatsapp_transactional_opt_in: { value: false },
+      },
+    }));
+
+    expect(store.events[0]).not.toHaveProperty("whatsappRecipientE164");
+    expect(store.events[0]).not.toHaveProperty("whatsappTransactionalConsent");
+  });
+
   it("reads exact Request bytes and triggers privacy-safe delivery", async () => {
     const store = new MemoryWebhookStore();
     const notifier = { notify: vi.fn().mockResolvedValue(undefined) };

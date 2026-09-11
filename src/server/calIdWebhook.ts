@@ -33,6 +33,8 @@ export type CalIdWebhookEvent = Readonly<{
   receivedAt: string;
   meetingUrl?: string;
   rescheduledFromUid?: string;
+  whatsappRecipientE164?: string;
+  whatsappTransactionalConsent?: true;
 }>;
 
 export type BookingLifecycleRecord = Readonly<{
@@ -202,6 +204,27 @@ function normalizeMeetingUrl(payload: Record<string, unknown>) {
   return undefined;
 }
 
+function responseValue(payload: Record<string, unknown>, field: string) {
+  const responses = isObject(payload.responses) ? payload.responses : {};
+  const response = responses[field];
+  return isObject(response) && "value" in response ? response.value : response;
+}
+
+function normalizeWhatsAppRecipient(payload: Record<string, unknown>) {
+  const raw = responseValue(payload, "whatsapp_phone");
+  if (typeof raw !== "string") return undefined;
+  const compact = raw.trim().replace(/[\s().-]/g, "").replace(/^00/, "+");
+  return /^\+[1-9]\d{7,14}$/.test(compact) ? compact : undefined;
+}
+
+function hasTransactionalWhatsAppConsent(payload: Record<string, unknown>) {
+  const raw = responseValue(payload, "whatsapp_transactional_opt_in");
+  if (raw === true) return true;
+  if (typeof raw === "string") return /^(yes|true|i agree)$/i.test(raw.trim());
+  return Array.isArray(raw)
+    && raw.some((value) => typeof value === "string" && /^(yes|true|i agree)$/i.test(value.trim()));
+}
+
 function laterTimestamp(left: string | undefined, right: string) {
   if (!left) return right;
   return new Date(left).getTime() >= new Date(right).getTime() ? left : right;
@@ -291,6 +314,8 @@ export async function projectCalIdWebhookEvent(
 
   const rescheduledFromUid = normalizeBookingUid(payload.rescheduleUid);
   const meetingUrl = normalizeMeetingUrl(payload);
+  const whatsappRecipientE164 = normalizeWhatsAppRecipient(payload);
+  const whatsappTransactionalConsent = hasTransactionalWhatsAppConsent(payload);
   const stableDeliveryKey = [
     trigger,
     bookingUid,
@@ -311,6 +336,9 @@ export async function projectCalIdWebhookEvent(
     receivedAt,
     ...(meetingUrl ? { meetingUrl } : {}),
     ...(rescheduledFromUid ? { rescheduledFromUid } : {}),
+    ...(whatsappRecipientE164 && whatsappTransactionalConsent
+      ? { whatsappRecipientE164, whatsappTransactionalConsent: true as const }
+      : {}),
   };
 
   return { event } as const;

@@ -47,6 +47,11 @@ describe("privacy-safe Web Push", () => {
     expect(serialized).not.toContain("customer");
     expect(serialized).not.toContain("email");
     expect(serialized).not.toContain("phone");
+    expect(privacySafeNotification("WHATSAPP_HUMAN_HELP" as never)).toEqual({
+      title: "Customer requested help",
+      body: "Open Nakshatra Admin for details.",
+      tag: "nakshatra-customer-help",
+    });
   });
 
   it("validates VAPID key shape and subject", async () => {

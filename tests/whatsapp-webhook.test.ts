@@ -124,4 +124,108 @@ describe("WhatsApp webhook receiver", () => {
 
     expect(response.status).toBe(503);
   });
+
+  it("deduplicates inbound messages and sends the deterministic website menu once", async () => {
+    const claimed = new Set<string>();
+    const storedIds: string[] = [];
+    const sent: Array<{ recipientE164: string; payload: Record<string, unknown> }> = [];
+    const automation = {
+      expectedBusinessAccountId: "waba-123",
+      expectedPhoneNumberId: "sender-123",
+      siteOrigin: "https://nilima.example",
+      store: {
+        claimWhatsAppInboundDelivery: async (eventId: string) => {
+          storedIds.push(eventId);
+          if (claimed.has(eventId)) return false;
+          claimed.add(eventId);
+          return true;
+        },
+        completeWhatsAppInboundDelivery: vi.fn(),
+      },
+      sendMessage: async (recipientE164: string, payload: Record<string, unknown>) => {
+        sent.push({ recipientE164, payload });
+      },
+      notifyHumanHelp: vi.fn(),
+    };
+    const body = JSON.stringify({
+      object: "whatsapp_business_account",
+      entry: [{
+        id: "waba-123",
+        changes: [{
+          field: "messages",
+          value: {
+            messaging_product: "whatsapp",
+            metadata: { phone_number_id: "sender-123" },
+            messages: [{ id: "wamid.private", from: "919999999999", text: { body: "hello" }, type: "text" }],
+          },
+        }],
+      }],
+    });
+    const rawBody = encoder.encode(body);
+    const request = {
+      method: "POST",
+      url: "https://nilima.example/api/whatsapp-webhook",
+      rawBody,
+      signature: await createWhatsAppWebhookSignature(appSecret, rawBody),
+      appSecret,
+      automation,
+    };
+
+    const first = await (await import("../src/server/whatsAppWebhook")).handleWhatsAppWebhookRequest(request as never);
+    const duplicate = await (await import("../src/server/whatsAppWebhook")).handleWhatsAppWebhookRequest(request as never);
+
+    expect(first.status).toBe(200);
+    expect(duplicate.status).toBe(200);
+    expect(sent).toHaveLength(1);
+    expect(sent[0]?.recipientE164).toBe("+919999999999");
+    expect(JSON.stringify(sent[0]?.payload)).toContain("Book a consultation");
+    expect(JSON.stringify(sent[0]?.payload)).toContain("Manage booking");
+    expect(JSON.stringify(sent[0]?.payload)).toContain("Consultation information");
+    expect(JSON.stringify(sent[0]?.payload)).toContain("Human help");
+    expect(storedIds[0]).toMatch(/^[a-f0-9]{64}$/);
+    expect(JSON.stringify(storedIds)).not.toContain("private");
+    expect(JSON.stringify(storedIds)).not.toContain("hello");
+  });
+
+  it("routes a human-help keyword through the existing admin notification path", async () => {
+    const notifyHumanHelp = vi.fn().mockResolvedValue(undefined);
+    const sent: Record<string, unknown>[] = [];
+    const body = JSON.stringify({
+      object: "whatsapp_business_account",
+      entry: [{
+        id: "waba-123",
+        changes: [{
+          field: "messages",
+          value: {
+            messaging_product: "whatsapp",
+            metadata: { phone_number_id: "sender-123" },
+            messages: [{ id: "wamid.help", from: "919999999999", text: { body: "human help" }, type: "text" }],
+          },
+        }],
+      }],
+    });
+    const rawBody = encoder.encode(body);
+    const response = await (await import("../src/server/whatsAppWebhook")).handleWhatsAppWebhookRequest({
+      method: "POST",
+      url: "https://nilima.example/api/whatsapp-webhook",
+      rawBody,
+      signature: await createWhatsAppWebhookSignature(appSecret, rawBody),
+      appSecret,
+      automation: {
+        expectedBusinessAccountId: "waba-123",
+        expectedPhoneNumberId: "sender-123",
+        siteOrigin: "https://nilima.example",
+        store: {
+          claimWhatsAppInboundDelivery: vi.fn().mockResolvedValue(true),
+          completeWhatsAppInboundDelivery: vi.fn(),
+        },
+        sendMessage: async (_recipientE164: string, payload: Record<string, unknown>) => { sent.push(payload); },
+        notifyHumanHelp,
+      },
+    } as never);
+
+    expect(response.status).toBe(200);
+    expect(notifyHumanHelp).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(sent)).toContain("Nilima has been notified");
+  });
 });

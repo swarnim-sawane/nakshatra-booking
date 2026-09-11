@@ -99,11 +99,11 @@ Do not complete a real payment merely to prove the frontend is working. Use a co
 
 The source direction and exact final Image Generation prompt are recorded in `docs/brand/kundli-brand-assets.md`.
 
-## WhatsApp Cloud API foundation
+## WhatsApp Cloud API automation
 
-The signature-verified WhatsApp webhook endpoint is documented in [docs/whatsapp-cloud-api-setup.md](docs/whatsapp-cloud-api-setup.md). It accepts Meta's callback verification and privacy-safe `messages` events, but does not yet send customer messages or store inbound message content.
+The signature-verified WhatsApp webhook, consent-gated booking messages and protected dispatcher are documented in [docs/whatsapp-cloud-api-setup.md](docs/whatsapp-cloud-api-setup.md). Paid bookings enqueue one approved confirmation and one one-hour reminder. Rescheduling moves a pending reminder and cancellation suppresses it. Inbound replies use a deterministic website menu; no inbound message content is stored.
 
-Outbound WhatsApp booking automation remains a separate activation phase. The stable future entry point is `/book/?s=<opaque-token>`; this version preserves the parameter in the browser address while never reading, rendering, storing, decoding, or forwarding it. The proposed session, webhook, and ownership boundaries are documented in the approved design specification.
+The dispatcher is intentionally not a Vercel cron. A small external worker such as Northflank calls `/api/whatsapp-dispatch` with a shared bearer secret. The stable future entry point is `/book/?s=<opaque-token>`; this version preserves the parameter in the browser address while never reading, rendering, storing, decoding, or forwarding it.
 
 ## Evidence and design notes
 

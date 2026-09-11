@@ -25,6 +25,10 @@ Run the migration as the Neon database owner, not as `nakshatra_runtime`. In the
 
 `db/migrations/202609090001_calid_admin_pipeline.sql`
 
+For WhatsApp booking automation, run this follow-up migration after it:
+
+`db/migrations/202609110001_whatsapp_automation.sql`
+
 With `psql` on PowerShell, the equivalent command is:
 
 ```powershell
@@ -35,7 +39,7 @@ Remove-Item Env:NEON_OWNER_DATABASE_URL
 
 `NEON_OWNER_DATABASE_URL` is temporary local migration access. Do not add it to Vercel. The deployed application uses only the pooled, restricted `DATABASE_URL` injected by the integration.
 
-The migration creates private tables and security-definer functions for atomic webhook deduplication, lifecycle ordering, manual deletion, retention cleanup and the push outbox. It never creates columns for birth details, questions, attendee email, phone number, raw webhook bodies or notification text.
+The migrations create private tables and security-definer functions for atomic webhook deduplication, lifecycle ordering, manual deletion, retention cleanup and notification outboxes. The WhatsApp follow-up retains only a consent-gated normalized E.164 recipient with the temporary booking. It stores no booking intake answers, email address, rendered message, inbound text or raw webhook body.
 
 ## 3. Create the owner sign-in and notification keys
 
@@ -87,9 +91,9 @@ Cal ID signs the exact request body with HMAC-SHA256 in `X-Cal-Signature-256`. T
 
 Cleanup is idempotent and runs opportunistically during a valid webhook ingestion or authenticated admin schedule read. No paid cron or scheduler is required. If the site receives no legitimate request at the exact deadline, cleanup occurs on the next legitimate request.
 
-## 6. Keep customer reminders in Cal ID
+## 6. Configure customer reminders
 
-For each of the three event types, keep exactly one customer email reminder scheduled **1 hour before** the consultation. Remove or disable any 24-hour reminder. Do not add a WhatsApp reminder in this release. Nakshatra Web Push alerts are private owner notifications and do not replace the customer's Cal ID email.
+For each event type, keep the Cal ID confirmation/management email. Remove any old 24-hour WhatsApp workflow. The approved WhatsApp automation sends only one booking confirmation and one reminder one hour before the current appointment. Follow [the WhatsApp setup guide](whatsapp-cloud-api-setup.md) for the exact consent fields, server variables and external dispatcher.
 
 ## 7. Owner activation check
 

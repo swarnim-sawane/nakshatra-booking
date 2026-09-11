@@ -22,6 +22,7 @@ export type VapidConfig = Readonly<{
 }>;
 
 type PushSendResult = "sent" | "gone";
+type PushNotificationTrigger = CalIdWebhookTrigger | "TEST" | "WHATSAPP_HUMAN_HELP";
 
 const encoder = new TextEncoder();
 
@@ -183,7 +184,7 @@ async function encryptPushPayload(subscription: StoredPushSubscription, payload:
   );
 }
 
-export function privacySafeNotification(trigger: CalIdWebhookTrigger | "TEST") {
+export function privacySafeNotification(trigger: PushNotificationTrigger) {
   const body = "Open Nakshatra Admin for details.";
   if (trigger === "BOOKING_RESCHEDULED") {
     return { title: "Consultation rescheduled", body, tag: "nakshatra-booking-update" };
@@ -194,6 +195,9 @@ export function privacySafeNotification(trigger: CalIdWebhookTrigger | "TEST") {
   if (trigger === "TEST") {
     return { title: "Nakshatra notifications are ready", body, tag: "nakshatra-admin-test" };
   }
+  if (trigger === "WHATSAPP_HUMAN_HELP") {
+    return { title: "Customer requested help", body, tag: "nakshatra-customer-help" };
+  }
   if (trigger === "BOOKING_PAID") {
     return { title: "Consultation payment confirmed", body, tag: "nakshatra-new-booking" };
   }
@@ -202,7 +206,7 @@ export function privacySafeNotification(trigger: CalIdWebhookTrigger | "TEST") {
 
 export async function sendWebPush(
   subscription: StoredPushSubscription,
-  trigger: CalIdWebhookTrigger | "TEST",
+  trigger: PushNotificationTrigger,
   config: VapidConfig,
   fetchImpl: typeof fetch = fetch,
 ): Promise<PushSendResult> {
@@ -227,6 +231,23 @@ export async function sendWebPush(
   if (response.status === 404 || response.status === 410) return "gone";
   if (!response.ok) throw new Error(`Push service returned ${response.status}`);
   return "sent";
+}
+
+export async function notifyAdminHumanHelp(
+  store: Pick<AdminDataStore, "listPushSubscriptions" | "deletePushSubscription">,
+  config: VapidConfig,
+  fetchImpl: typeof fetch = fetch,
+) {
+  const subscriptions = await store.listPushSubscriptions();
+  for (const subscription of subscriptions) {
+    const result = await sendWebPush(
+      subscription,
+      "WHATSAPP_HUMAN_HELP",
+      config,
+      fetchImpl,
+    );
+    if (result === "gone") await store.deletePushSubscription(subscription.endpoint);
+  }
 }
 
 export class DurablePushNotifier implements CalIdWebhookNotifier {
