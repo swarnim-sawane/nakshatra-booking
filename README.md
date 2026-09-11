@@ -4,11 +4,11 @@ Nakshatra is a responsive, Nilima-led astrology consultation website with three 
 
 | Reading | Duration | Price |
 | --- | ---: | ---: |
-| Personal Consultation | 60 minutes | ₹1,099 |
-| Relationship Consultation (Kundli Milan) | 60 minutes | ₹1,499 |
-| Muhurat | 30 minutes | ₹499 |
+| Personal Consultation | 30 minutes | ₹1,099 |
+| Relationship Consultation (Kundli Milan) | 20 minutes | ₹1,499 |
+| Muhurat | 10 minutes | ₹499 |
 
-Visitors can see a Nakshatra-designed Personal Consultation calendar directly in the landing-page hero and compare three concise readings. On `/book/`, each full-width service row goes straight to that service's exact event page; there is no second scheduler after the choices. The hero reads live availability through a server-only Cal ID proxy, then sends the selected slot to Cal ID for attendee details, Razorpay payment, confirmation, and Google Meet. The website never collects birth, attendee, or payment details.
+Visitors can see a Nakshatra-designed Personal Consultation calendar directly in the landing-page hero and compare three concise readings. On `/book/`, each full-width service row opens that service's exact Cal ID event in a Nakshatra overlay, with a separate-tab fallback. The hero reads live availability through a server-only Cal ID proxy, then sends the selected slot to Cal ID for attendee details, Razorpay payment, confirmation, and Google Meet. The website never collects birth, attendee, or payment details.
 
 ## Local setup
 
@@ -37,10 +37,11 @@ The three verified direct-event URLs are safe defaults in the application, so a 
 
 ```env
 PUBLIC_CAL_ID_BOOKING_URL=https://cal.id/nilima-sawane
-PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL=https://cal.id/nilima-sawane/personal-consultation?duration=60
-PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL=https://cal.id/nilima-sawane/relationship-consultation?duration=60
-PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL=https://cal.id/nilima-sawane/best-date-analysis?duration=30
+PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL=https://cal.id/nilima-sawane/personal-consultation?duration=30
+PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL=https://cal.id/nilima-sawane/relationship-consultation?duration=20
+PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL=https://cal.id/nilima-sawane/best-date-analysis?duration=10
 CALID_API_KEY=calid_your_server_only_key
+CALID_WEBHOOK_SECRET=generate_a_new_server_only_secret_after_storage_is_selected
 ```
 
 The `PUBLIC_CAL_ID_*` values are public URLs. `CALID_API_KEY` is a server-only secret: keep it in `.env.local` during development and add it to the Vercel project's environment variables for production. Never prefix it with `PUBLIC_` or `VITE_`.
@@ -48,6 +49,8 @@ The `PUBLIC_CAL_ID_*` values are public URLs. `CALID_API_KEY` is a server-only s
 Only HTTPS URLs on the exact `cal.id` or `app.cal.id` hosts are accepted. Credentials, custom ports, and explicitly written ports such as `:443` fail closed. A missing override uses that service's verified direct-event default; an explicitly unsafe override fails closed. If a hosting environment needs different URLs, configure all three `PUBLIC_CAL_ID_*_URL` values in its deployment settings and rebuild. The application selects services only from the URL hash and never reads, displays, stores, decodes, or forwards the future `s` query parameter. The availability proxy accepts only the three known service slugs, limits queries to 42 days, and returns normalized slot timestamps instead of forwarding Cal ID account data.
 
 Never place a Cal ID API key, Razorpay secret, webhook secret, Meta token, or customer birth details in a public environment value.
+
+The signed webhook receiver foundation is documented in [docs/operations/cal-id-webhook-foundation.md](docs/operations/cal-id-webhook-foundation.md). It remains intentionally inactive until a durable store is selected. Email and reminder setup is documented in [docs/operations/cal-id-email-workflows.md](docs/operations/cal-id-email-workflows.md); this phase uses exactly one reminder, 1 hour before the consultation.
 
 ## Cal ID dashboard checklist
 
@@ -61,7 +64,7 @@ For visual alignment:
 - Upload `public/brand/icon-512.png` as the Cal ID favicon; it has transparency and is below 1 MB.
 - Confirm the public profile no longer exposes unrelated event types.
 
-The homepage hero uses its own responsive calendar instead of an iframe, so there is no nested scroll or mismatched third-party panel. Selecting a time opens the exact Cal ID event and slot in the same tab. The dedicated booking page skips the duplicate calendar and sends each service row directly to its event. A customer-facing **View all available times** fallback remains available in the hero without exposing implementation details. Every destination is validated before it is rendered and fails closed if it is not an approved Cal ID address.
+The homepage hero uses its own responsive calendar, so there is no nested calendar scroll. Selecting a time opens the exact Cal ID event and slot in the booking overlay; customers can switch to a separate tab if needed. The dedicated booking page skips the duplicate calendar and opens each service's event in the same overlay. A customer-facing **Other consultations** fallback remains available in the hero without exposing implementation details. Every destination is validated before it is rendered and fails closed if it is not an approved Cal ID address.
 
 ## What to test before launch
 
@@ -74,7 +77,7 @@ Run one controlled booking for each event and verify:
 - A failed or cancelled payment creates no confirmed booking.
 - Rescheduling, cancellation, reminders, refunds, and timezone conversion behave according to the approved policy.
 - Each homepage calendar date and time opens the correct preselected Cal ID slot on mobile and desktop.
-- Each booking-page service row opens its exact event directly in the same tab.
+- Each booking-page service row opens its exact event in the booking overlay and retains the separate-tab fallback.
 - The same-tab hero fallback opens the correct Cal ID event if the availability API is unavailable.
 - The website does not append the future WhatsApp `s` token or any other customer data to the Cal ID destination.
 

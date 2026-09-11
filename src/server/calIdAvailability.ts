@@ -4,6 +4,8 @@ const CAL_ID_API_ORIGIN = "https://api.cal.id";
 const MAX_RANGE_MILLISECONDS = 42 * 24 * 60 * 60 * 1_000;
 const SUCCESS_CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
 const ERROR_CACHE_CONTROL = "no-store";
+const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const UPSTREAM_ATTEMPTS = 2;
 
 type AvailabilityRequest = {
   method: string;
@@ -104,6 +106,36 @@ async function readJson(response: Response) {
   }
 }
 
+async function fetchCalIdWithRetry(
+  fetchImpl: typeof fetch,
+  url: URL,
+  headers: Record<string, string>,
+) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < UPSTREAM_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetchImpl(url, {
+        headers,
+        signal: AbortSignal.timeout(5_000),
+      });
+
+      if (
+        response.ok ||
+        !RETRYABLE_STATUS_CODES.has(response.status) ||
+        attempt === UPSTREAM_ATTEMPTS - 1
+      ) {
+        return response;
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt === UPSTREAM_ATTEMPTS - 1) throw error;
+    }
+  }
+
+  throw lastError ?? new Error("Cal ID request failed");
+}
+
 export async function handleCalIdAvailabilityRequest({
   method,
   url,
@@ -151,10 +183,7 @@ export async function handleCalIdAvailabilityRequest({
     eventTypesUrl.searchParams.set("page", "1");
     eventTypesUrl.searchParams.set("limit", "1");
     eventTypesUrl.searchParams.set("slug", service.slug);
-    const eventTypesResponse = await fetchImpl(
-      eventTypesUrl,
-      { headers, signal: AbortSignal.timeout(8_000) },
-    );
+    const eventTypesResponse = await fetchCalIdWithRetry(fetchImpl, eventTypesUrl, headers);
     const eventTypesPayload = await readJson(eventTypesResponse);
     if (!eventTypesResponse.ok) throw new Error("event-types request failed");
 
@@ -177,10 +206,7 @@ export async function handleCalIdAvailabilityRequest({
     slotUrl.searchParams.set("timeZone", timeZone);
     slotUrl.searchParams.set("duration", String(service.durationMinutes));
 
-    const slotsResponse = await fetchImpl(slotUrl, {
-      headers,
-      signal: AbortSignal.timeout(8_000),
-    });
+    const slotsResponse = await fetchCalIdWithRetry(fetchImpl, slotUrl, headers);
     const slotsPayload = await readJson(slotsResponse);
     if (!slotsResponse.ok) throw new Error("slots request failed");
 

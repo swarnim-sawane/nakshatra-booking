@@ -1,16 +1,17 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import BookPage from "../src/pages/BookPage";
 
 const serviceEnvironment = {
   PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL:
-    "https://cal.id/nilima-sawane/personal-consultation?duration=60",
+    "https://cal.id/nilima-sawane/personal-consultation?duration=30",
   PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL:
-    "https://cal.id/nilima-sawane/relationship-consultation?duration=60",
+    "https://cal.id/nilima-sawane/relationship-consultation?duration=20",
   PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL:
-    "https://cal.id/nilima-sawane/best-date-analysis?duration=30",
+    "https://cal.id/nilima-sawane/best-date-analysis?duration=10",
 };
 
 describe("booking service interactions", () => {
@@ -23,6 +24,9 @@ describe("booking service interactions", () => {
   });
 
   afterEach(() => {
+    cleanup();
+    delete window.Cal;
+    vi.unstubAllGlobals();
     window.history.replaceState({}, "", "/");
   });
 
@@ -50,5 +54,50 @@ describe("booking service interactions", () => {
     expect(document.body.textContent).not.toContain("opaque-test-token");
     expect(document.querySelector(".availability-calendar")).toBeNull();
     expect(window.location.search).toBe("?s=opaque-test-token");
+  });
+
+  it("opens a responsive booking dialog and returns to the service choices on close", async () => {
+    const user = userEvent.setup();
+    render(<BookPage serviceEnvironment={serviceEnvironment} />);
+
+    await user.click(screen.getByRole("link", { name: /personal consultation/i }));
+
+    const dialog = screen.getByRole("dialog", { name: "Complete your booking" });
+    expect(dialog).toBeTruthy();
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(screen.getByRole<HTMLAnchorElement>("link", {
+      name: "Open booking in a separate tab",
+    }).href).toBe(serviceEnvironment.PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL);
+
+    await user.click(screen.getByRole("button", { name: "Close booking" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("uses the vertical Cal ID layout on a phone without losing service parameters", async () => {
+    vi.stubGlobal("matchMedia", vi.fn(() => ({
+      addEventListener: vi.fn(),
+      addListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      matches: true,
+      media: "(max-width: 700px)",
+      onchange: null,
+      removeEventListener: vi.fn(),
+      removeListener: vi.fn(),
+    })));
+    const user = userEvent.setup();
+    render(<BookPage serviceEnvironment={serviceEnvironment} />);
+
+    await user.click(screen.getByRole("link", { name: /personal consultation/i }));
+
+    const namespace = Object.values(window.Cal?.ns ?? {})[0];
+    const inlineCommand = namespace?.q
+      .map((args) => Array.from(args))
+      .find(([command]) => command === "inline");
+
+    expect(inlineCommand?.[1]).toMatchObject({
+      calLink: "nilima-sawane/personal-consultation?duration=30",
+      config: { layout: "column_view" },
+    });
   });
 });

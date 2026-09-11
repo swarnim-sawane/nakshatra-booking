@@ -95,6 +95,7 @@ describe("Cal ID booking page", () => {
   });
 
   it("classifies unknown paths as not found", () => {
+    expect(getRouteKind("/booking-confirmed/")).toBe("booking-confirmation");
     expect(getRouteKind("/missing-page")).toBe("not-found");
   });
 });

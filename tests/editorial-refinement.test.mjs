@@ -32,3 +32,19 @@ test("reveals Nilima's portrait before its semantic caption", () => {
   assert.match(component, /<motion\.img[\s\S]*?<motion\.figcaption/);
   assert.match(component, /<motion\.figcaption[\s\S]*?delay:\s*0\.14/);
 });
+
+test("keeps the Nakshatra mark upright while loaders animate", () => {
+  const availabilityCss = readFileSync("src/styles/availability-calendar.css", "utf8");
+  const bookingModalCss = readFileSync("src/styles/booking-modal.css", "utf8");
+  const availabilityAnimation = availabilityCss.slice(
+    availabilityCss.indexOf("@keyframes availability-logo-load"),
+    availabilityCss.indexOf("@media", availabilityCss.indexOf("@keyframes availability-logo-load")),
+  );
+  const bookingAnimation = bookingModalCss.slice(
+    bookingModalCss.indexOf("@keyframes booking-logo-pulse"),
+    bookingModalCss.indexOf("@media", bookingModalCss.indexOf("@keyframes booking-logo-pulse")),
+  );
+
+  assert.doesNotMatch(availabilityAnimation, /rotate\(/);
+  assert.doesNotMatch(bookingAnimation, /rotate\(/);
+});

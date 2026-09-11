@@ -77,6 +77,7 @@ module.exports = {
       input: {
         main: resolve(srcRoot, "index.html"),
         book: resolve(srcRoot, "book/index.html"),
+        bookingConfirmation: resolve(srcRoot, "booking-confirmed/index.html"),
         notFound: resolve(srcRoot, "404.html"),
       },
     },

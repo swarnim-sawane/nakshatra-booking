@@ -36,7 +36,7 @@ describe("getCalIdEventPath", () => {
   it("derives an embed-safe event path and drops query and hash data", () => {
     expect(
       getCalIdEventPath(
-        "https://cal.id/nilima-sawane/personal-consultation?duration=60#ignored",
+        "https://cal.id/nilima-sawane/personal-consultation?duration=30#ignored",
       ),
     ).toBe("nilima-sawane/personal-consultation");
   });
@@ -139,13 +139,13 @@ describe("buildCalIdCheckoutUrl", () => {
 
     const result = buildCalIdCheckoutUrl(
       new URL(
-        "https://cal.id/nilima-sawane/personal-consultation?duration=60&s=opaque-token#private",
+        "https://cal.id/nilima-sawane/personal-consultation?duration=30&s=opaque-token#private",
       ),
       "2026-09-08T09:15:00.000Z",
     ) as URL | null;
 
     expect(result?.href).toBe(
-      "https://cal.id/nilima-sawane/personal-consultation?duration=60&slot=2026-09-08T09%3A15%3A00.000Z",
+      "https://cal.id/nilima-sawane/personal-consultation?duration=30&slot=2026-09-08T09%3A15%3A00.000Z",
     );
     expect(result?.href).not.toContain("opaque-token");
   });

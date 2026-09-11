@@ -151,11 +151,11 @@
 .landing-hero__booking {
   grid-area: booking;
   min-width: 0;
-  scroll-margin-top: var(--space-4);
+  scroll-margin-top: 96px;
 }
 
 .landing-section {
-  scroll-margin-top: var(--space-6);
+  scroll-margin-top: 96px;
   padding-block: clamp(52px, 6vw, 76px);
 }
 
@@ -310,7 +310,7 @@
 .service-card__header,
 .service-card__facts,
 .service-card__action { margin-inline: clamp(22px, 2.2vw, 30px); }
-.service-card__header { display: grid; min-height: 12.5rem; padding-top: var(--space-6); align-content: start; }
+.service-card__header { display: grid; min-height: 12.5rem; padding-block: var(--space-6) var(--space-8); align-content: start; }
 .service-card__header h3 { font-size: clamp(1.65rem, 2vw, 2.15rem); line-height: 1.12; }
 
 .service-card__header > p { margin: var(--space-3) 0 0; color: var(--color-text-muted); font-size: 1rem; line-height: 1.65; }
@@ -403,7 +403,7 @@
 
 .faq__intro {
   position: sticky;
-  top: var(--space-6);
+  top: calc(80px + var(--space-6));
   align-self: start;
 }
 
@@ -585,6 +585,11 @@
 @media (max-width: 640px) {
   :root {
     --page-gutter: 24px;
+  }
+
+  .landing-hero__booking,
+  .landing-section {
+    scroll-margin-top: 80px;
   }
 
   .landing-hero {

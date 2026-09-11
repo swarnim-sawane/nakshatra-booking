@@ -7,7 +7,7 @@ export type ConsultationService = Readonly<{
   slug: ServiceSlug;
   hash: `#${ServiceSlug}`;
   name: string;
-  durationMinutes: 30 | 60;
+  durationMinutes: 10 | 20 | 30;
   priceInr: 499 | 1_099 | 1_499;
   purpose: string;
   imageSrc: `/images/${string}`;
@@ -18,7 +18,7 @@ export const consultationServices = [
     slug: "personal-consultation",
     hash: "#personal-consultation",
     name: "Personal Consultation",
-    durationMinutes: 60,
+    durationMinutes: 30,
     priceInr: 1_099,
     imageSrc: "/images/consultation-desk.webp",
     purpose:
@@ -28,7 +28,7 @@ export const consultationServices = [
     slug: "relationship-consultation",
     hash: "#relationship-consultation",
     name: "Relationship Consultation (Kundli Milan)",
-    durationMinutes: 60,
+    durationMinutes: 20,
     priceInr: 1_499,
     imageSrc: "/images/relationship-consultation.webp",
     purpose:
@@ -38,7 +38,7 @@ export const consultationServices = [
     slug: "best-date-analysis",
     hash: "#best-date-analysis",
     name: "Muhurat",
-    durationMinutes: 30,
+    durationMinutes: 10,
     priceInr: 499,
     imageSrc: "/images/best-date-analysis.webp",
     purpose:

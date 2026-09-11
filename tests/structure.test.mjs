@@ -12,9 +12,11 @@ test("active app is Vite/React and the prototype is preserved", () => {
   assert.equal(pkg.devDependencies.vitest, "4.1.2");
   assert.ok(existsSync("src/index.html"));
   assert.ok(existsSync("src/book/index.html"));
+  assert.ok(existsSync("src/booking-confirmed/index.html"));
   assert.ok(existsSync("src/main.tsx"));
   assert.ok(existsSync("src/App.tsx"));
   assert.ok(existsSync("dist/index.html"));
   assert.ok(existsSync("dist/book/index.html"));
+  assert.ok(existsSync("dist/booking-confirmed/index.html"));
   assert.ok(existsSync("legacy/calcom-prototype/index.html"));
 });

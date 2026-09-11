@@ -12,11 +12,11 @@ export const DEFAULT_CAL_ID_BOOKING_URL = "https://cal.id/nilima-sawane";
 
 export const DEFAULT_CAL_ID_EVENT_URLS = {
   "personal-consultation":
-    "https://cal.id/nilima-sawane/personal-consultation?duration=60",
+    "https://cal.id/nilima-sawane/personal-consultation?duration=30",
   "relationship-consultation":
-    "https://cal.id/nilima-sawane/relationship-consultation?duration=60",
+    "https://cal.id/nilima-sawane/relationship-consultation?duration=20",
   "best-date-analysis":
-    "https://cal.id/nilima-sawane/best-date-analysis?duration=30",
+    "https://cal.id/nilima-sawane/best-date-analysis?duration=10",
 } as const satisfies Record<ServiceSlug, string>;
 
 type CalIdEventEnvironmentKey =

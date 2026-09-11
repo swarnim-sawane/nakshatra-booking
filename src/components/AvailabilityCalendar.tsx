@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,7 +7,13 @@ import {
   buildCalIdCheckoutUrl,
   parseCalIdBookingUrl,
 } from "../config/scheduling";
-import type { ConsultationService, ServiceSlug } from "../config/services";
+import {
+  consultationServices,
+  type ConsultationService,
+  type ServiceSlug,
+} from "../config/services";
+import BookingModal, { shouldOpenBookingModal } from "./BookingModal";
+import { navigateToBookingConfirmation } from "../pages/BookingConfirmationPage";
 import "../styles/availability-calendar.css";
 
 export type AvailabilityPayload = {
@@ -157,72 +163,167 @@ function CalendarSkeleton() {
 
 type CalendarAlternateStateProps = {
   bookingUrl: URL | null;
-  kind: "error" | "unavailable";
-  onRetry?: () => void;
+  onOpenBooking?: (event: MouseEvent<HTMLAnchorElement>, bookingUrl: URL) => void;
   service: ConsultationService;
 };
 
+const alternateServiceContent = {
+  "personal-consultation": {
+    title: "Your chart is studied before the call begins.",
+    description:
+      "Send your birth date, exact time and place, along with the question weighing on you. Nilima prepares the Kundli beforehand, leaving the session for interpretation, context and your follow-up questions.",
+    facts: [
+      "Birth chart prepared in advance",
+      "Questions reviewed before the call",
+      "Hindi or Marathi",
+    ],
+    review: {
+      quote: "The consultation was very insightful, detailed, and easy to understand.",
+      author: "Poonam Thakkar",
+    },
+  },
+  "relationship-consultation": {
+    title: "See where two Kundlis align—and where they need care.",
+    description:
+      "Provide complete birth details for both people and the relationship question you want clarified. Nilima compares the charts for compatibility, recurring friction and the areas that deserve a thoughtful conversation.",
+    facts: [
+      "Both birth charts required",
+      "Alignment and friction considered",
+      "Clear compatibility discussion",
+    ],
+    review: {
+      quote:
+        "She blends ancient wisdom with modern practical solutions.",
+      author: "Achala Bhatia",
+    },
+  },
+  "best-date-analysis": {
+    title: "Find a suitable date within your real-world choices.",
+    description:
+      "Tell Nilima the occasion, city, preferred date range and dates you cannot use. She studies the timing within those practical limits and explains why the shortlisted options are suitable.",
+    facts: [
+      "Occasion and city",
+      "Preferred date range",
+      "Shortlisted dates explained",
+    ],
+    review: {
+      quote: "Accurate predictions, calm demeanor and valuable time well spent.",
+      author: "Meenu",
+    },
+  },
+} as const satisfies Record<
+  ServiceSlug,
+  {
+    title: string;
+    description: string;
+    facts: readonly string[];
+    review: { quote: string; author: string };
+  }
+>;
+
 function CalendarAlternateState({
   bookingUrl,
-  kind,
-  onRetry,
+  onOpenBooking,
   service,
 }: CalendarAlternateStateProps) {
-  const isError = kind === "error";
+  const initialServiceIndex = Math.max(
+    0,
+    consultationServices.findIndex((item) => item.slug === service.slug),
+  );
+  const [activeIndex, setActiveIndex] = useState(initialServiceIndex);
+  const [isPaused, setIsPaused] = useState(false);
+  const activeService = consultationServices[activeIndex];
+  const activeContent = alternateServiceContent[activeService.slug];
+  const directBookingUrl = activeService.slug === service.slug ? bookingUrl : null;
+  const bookingHref = directBookingUrl?.href ?? `/book/${activeService.hash}`;
+
+  useEffect(() => {
+    if (isPaused || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % consultationServices.length);
+    }, 8000);
+
+    return () => window.clearInterval(timer);
+  }, [isPaused]);
+
+  function moveSlide(offset: number) {
+    setActiveIndex(
+      (current) =>
+        (current + offset + consultationServices.length) % consultationServices.length,
+    );
+  }
 
   return (
     <section className="availability-calendar availability-calendar--alternate">
       <header className="availability-calendar__header">
         <div>
-          <p className="eyebrow">{service.name}</p>
-          <h2>{isError ? "Select a time" : "Booking details"}</h2>
+          <p className="eyebrow">{activeService.name}</p>
+          <h2>{activeContent.title}</h2>
         </div>
         <div className="availability-calendar__service-meta">
-          <strong>{service.durationMinutes} min</strong>
-          <span>₹{service.priceInr.toLocaleString("en-IN")}</span>
+          <strong>{activeService.durationMinutes} min</strong>
+          <span>₹{activeService.priceInr.toLocaleString("en-IN")}</span>
         </div>
       </header>
-      <div className="availability-calendar__alternate-body">
-        <img alt="" aria-hidden="true" height="48" src="/brand/icon-192.png" width="48" />
-        <p className="eyebrow">Booking information</p>
-        <h3>
-          {isError
-            ? "If the calendar is interrupted, you can still continue."
-            : "Have these details ready before booking."}
-        </h3>
-        <p>
-          {isError
-            ? "Open the complete booking page to choose a time and share the information Nilima needs to prepare."
-            : "Keep your birth date, exact birth time—if known—birth place and main questions ready."}
-        </p>
-        {isError ? (
-          <ol className="availability-calendar__booking-steps">
-            <li>Choose an available time</li>
-            <li>Share your birth details and questions</li>
-            <li>Pay securely and receive your confirmation</li>
-          </ol>
-        ) : null}
-        <div className="availability-calendar__alternate-actions">
-          {bookingUrl ? (
-            <a className="button button--primary" href={bookingUrl.href}>
-              Continue booking
-            </a>
-          ) : (
-            <a className="button button--primary" href="/#consultation">
-              Return to consultations
-            </a>
-          )}
-          {onRetry ? (
-            <button className="button button--secondary" onClick={onRetry} type="button">
-              Refresh calendar
+      <div
+        className="availability-calendar__alternate-body"
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false);
+        }}
+        onFocusCapture={() => setIsPaused(true)}
+      >
+        <div className="availability-calendar__alternate-toolbar">
+          <div className="availability-calendar__alternate-controls">
+            <button aria-label="Previous consultation" onClick={() => moveSlide(-1)} type="button">
+              <ChevronLeft aria-hidden="true" size={22} strokeWidth={1.5} />
             </button>
-          ) : null}
+            <button aria-label="Next consultation" onClick={() => moveSlide(1)} type="button">
+              <ChevronRight aria-hidden="true" size={22} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
-        {isError ? (
-          <p className="availability-calendar__alternate-note">
-            Payment is completed securely. Your confirmation email includes the meeting link and options to manage your booking.
-          </p>
-        ) : null}
+
+        <div className="availability-calendar__alternate-slide" key={activeService.slug}>
+          <p>{activeContent.description}</p>
+          <ul className="availability-calendar__alternate-facts">
+            {activeContent.facts.map((fact) => (
+              <li key={fact}>{fact}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="availability-calendar__alternate-actions">
+          <a
+            className="button button--primary"
+            href={bookingHref}
+            onClick={(event) => {
+              if (directBookingUrl) onOpenBooking?.(event, directBookingUrl);
+            }}
+          >
+            View available times
+          </a>
+          <a className="button button--secondary" href="/#reviews">
+            Read client reviews
+          </a>
+        </div>
+
+        <div className="availability-calendar__alternate-pagination" aria-label="Consultation slides">
+          {consultationServices.map((item, index) => (
+            <button
+              aria-label={`Show ${item.name}`}
+              aria-pressed={index === activeIndex}
+              key={item.slug}
+              onClick={() => setActiveIndex(index)}
+              type="button"
+            />
+          ))}
+        </div>
+
+        <blockquote className="availability-calendar__client-note">
+          <p>“{activeContent.review.quote}”</p>
+          <footer>— {activeContent.review.author}, on consulting with Nilima</footer>
+        </blockquote>
       </div>
     </section>
   );
@@ -248,7 +349,13 @@ export default function AvailabilityCalendar({
   const [requestState, setRequestState] = useState<"loading" | "ready" | "error">(
     "loading",
   );
-  const [retryCount, setRetryCount] = useState(0);
+  const [modalBookingUrl, setModalBookingUrl] = useState<URL | null>(null);
+
+  function openBooking(event: MouseEvent<HTMLAnchorElement>, url: URL) {
+    if (!shouldOpenBookingModal(event)) return;
+    event.preventDefault();
+    setModalBookingUrl(url);
+  }
 
   useEffect(() => {
     let active = true;
@@ -276,7 +383,7 @@ export default function AvailabilityCalendar({
     return () => {
       active = false;
     };
-  }, [loadAvailability, retryCount, safeBookingUrl, service.slug, timeZone, visibleMonth]);
+  }, [loadAvailability, safeBookingUrl, service.slug, timeZone, visibleMonth]);
 
   const slotsByDay = useMemo(() => {
     const grouped = new Map<string, string[]>();
@@ -310,17 +417,26 @@ export default function AvailabilityCalendar({
   const selectedSlots = selectedDay ? slotsByDay.get(selectedDay) ?? [] : [];
 
   if (!safeBookingUrl) {
-    return <CalendarAlternateState bookingUrl={null} kind="unavailable" service={service} />;
+    return <CalendarAlternateState bookingUrl={null} service={service} />;
   }
 
   if (requestState === "error") {
     return (
-      <CalendarAlternateState
-        bookingUrl={safeBookingUrl}
-        kind="error"
-        onRetry={() => setRetryCount((value) => value + 1)}
-        service={service}
-      />
+      <>
+        <CalendarAlternateState
+          bookingUrl={safeBookingUrl}
+          onOpenBooking={openBooking}
+          service={service}
+        />
+        {modalBookingUrl ? (
+          <BookingModal
+            bookingUrl={modalBookingUrl}
+            onClose={() => setModalBookingUrl(null)}
+            onBookingComplete={navigateToBookingConfirmation}
+            serviceName={service.name}
+          />
+        ) : null}
+      </>
     );
   }
 
@@ -400,7 +516,13 @@ export default function AvailabilityCalendar({
                 {selectedSlots.map((slot) => {
                   const checkoutUrl = buildCalIdCheckoutUrl(safeBookingUrl, slot);
                   return checkoutUrl ? (
-                    <a href={checkoutUrl.href} key={slot}>{formatTime(slot, timeZone)}</a>
+                    <a
+                      href={checkoutUrl.href}
+                      key={slot}
+                      onClick={(event) => openBooking(event, checkoutUrl)}
+                    >
+                      {formatTime(slot, timeZone)}
+                    </a>
                   ) : null;
                 })}
               </div>
@@ -436,6 +558,14 @@ export default function AvailabilityCalendar({
         </a>
       </footer>
       {requestState === "loading" && <CalendarSkeleton />}
+      {modalBookingUrl ? (
+        <BookingModal
+          bookingUrl={modalBookingUrl}
+          onClose={() => setModalBookingUrl(null)}
+          onBookingComplete={navigateToBookingConfirmation}
+          serviceName={service.name}
+        />
+      ) : null}
     </section>
   );
 }

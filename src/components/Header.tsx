@@ -25,6 +25,12 @@ export default function Header() {
           ))}
         </nav>
         <div className="header-actions">
+          <SocialLinks className="header-socials header-socials--desktop" label="Social profiles" />
+          <BookingAction class="header-booking-action header-booking-action--desktop" />
+          <BookingAction
+            label="Book consultation"
+            class="header-booking-action header-booking-action--mobile"
+          />
           <details className="mobile-navigation">
             <summary aria-label="Open navigation menu">
               <span className="mobile-navigation__icon" aria-hidden="true">
@@ -46,9 +52,6 @@ export default function Header() {
               />
             </nav>
           </details>
-          <SocialLinks className="header-socials header-socials--desktop" label="Social profiles" />
-          <BookingAction class="header-booking-action header-booking-action--desktop" />
-          <BookingAction class="header-booking-action header-booking-action--mobile" />
         </div>
       </div>
     </header>

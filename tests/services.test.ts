@@ -17,19 +17,19 @@ describe("consultationServices", () => {
       {
         slug: "personal-consultation",
         name: "Personal Consultation",
-        durationMinutes: 60,
+        durationMinutes: 30,
         priceInr: 1_099,
       },
       {
         slug: "relationship-consultation",
         name: "Relationship Consultation (Kundli Milan)",
-        durationMinutes: 60,
+        durationMinutes: 20,
         priceInr: 1_499,
       },
       {
         slug: "best-date-analysis",
         name: "Muhurat",
-        durationMinutes: 30,
+        durationMinutes: 10,
         priceInr: 499,
       },
     ]);

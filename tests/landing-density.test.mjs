@@ -61,22 +61,28 @@ test("keeps the approved desktop hero density within the first fold", () => {
   );
 });
 
-test("keeps the full approved booking action usable in the narrow header", () => {
+test("keeps the requested brand, booking action and menu order in the mobile header", () => {
   const css = readFileSync("src/styles/global.css", "utf8");
   const header = readFileSync("src/components/Header.tsx", "utf8");
 
   assert.match(
     header,
-    /<BookingAction class="header-booking-action header-booking-action--mobile"\s*\/>/,
-    "the mobile header should use the full default Book a consultation label",
+    /<BookingAction[\s\S]*?label="Book consultation"[\s\S]*?class="header-booking-action header-booking-action--mobile"[\s\S]*?\/>/,
+    "the mobile header should use a compact booking label",
+  );
+  assert.ok(
+    header.indexOf('class="header-booking-action header-booking-action--mobile"') <
+      header.indexOf('className="mobile-navigation"'),
+    "the booking action should sit immediately before the far-right menu",
   );
   assert.match(
     css,
-    /@media \(max-width: 480px\)[\s\S]*?\.site-header \.brand\s*\{[^}]*font-size:\s*1\.05rem;/s,
+    /@media \(max-width: 760px\)[\s\S]*?\.site-header \.brand\s*\{[^}]*position:\s*static;[^}]*font-size:\s*1\.05rem;/s,
+    "the full mobile brand should remain naturally aligned at the left",
   );
   assert.match(
     css,
-    /@media \(max-width: 480px\)[\s\S]*?\.site-header \.brand__wordmark\s*\{[^}]*display:\s*none;/s,
-    "the icon-only brand treatment should preserve room for the exact CTA on the narrowest screens",
+    /@media \(max-width: 760px\)[\s\S]*?\.mobile-navigation > nav\s*\{[^}]*right:\s*0;[^}]*left:\s*auto;/s,
+    "the menu panel should open inward from the right edge",
   );
 });

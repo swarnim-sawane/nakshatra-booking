@@ -8,6 +8,7 @@ html {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
+  scroll-padding-top: 96px;
   scroll-behavior: smooth;
 }
 
@@ -399,24 +400,33 @@ summary {
     --page-gutter: 24px;
   }
 
+  html {
+    scroll-padding-top: 80px;
+  }
+
   .site-header__inner {
-    position: relative;
     min-height: 64px;
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
 
-  .brand {
-    position: absolute;
-    z-index: 1;
-    left: 50%;
-    gap: 9px;
-    font-size: 1.35rem;
-    transform: translateX(-50%);
+  .site-header .brand {
+    position: static;
+    min-width: 0;
+    min-height: 44px;
+    gap: 8px;
+    justify-content: flex-start;
+    font-size: 1.05rem;
+    transform: none;
   }
 
-  .brand__mark {
-    width: 26px;
-    height: 26px;
+  .site-header .brand__mark {
+    width: 22px;
+    height: 22px;
+  }
+
+  .site-header .brand__wordmark {
+    display: inline;
+    white-space: nowrap;
   }
 
   .primary-navigation,
@@ -431,14 +441,15 @@ summary {
   }
 
   .header-actions {
-    width: 100%;
-    justify-content: space-between;
-    margin-left: 0;
+    width: auto;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-left: auto;
   }
 
   .mobile-navigation > nav {
-    right: auto;
-    left: 0;
+    right: 0;
+    left: auto;
   }
 
   .header-socials--mobile {
@@ -474,29 +485,44 @@ summary {
 
 @media (max-width: 480px) {
   .site-header__inner {
-    gap: var(--space-2);
+    width: calc(100% - 32px);
+    gap: 6px;
   }
 
   .site-header .brand {
     gap: 6px;
-    font-size: 1.05rem;
-    justify-content: center;
+    font-size: 0.92rem;
   }
 
   .site-header .brand__mark {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
-  .site-header .brand__wordmark {
-    display: none;
+  .header-booking-action--mobile {
+    padding-inline: 7px;
+    font-size: 0.6rem;
+    letter-spacing: 0.015em;
   }
 }
 
 @media (max-width: 380px) {
+  .site-header__inner {
+    width: calc(100% - 20px);
+  }
+
+  .site-header .brand {
+    font-size: 0.82rem;
+  }
+
+  .site-header .brand__mark {
+    width: 18px;
+    height: 18px;
+  }
+
   .header-booking-action--mobile {
-    padding-inline: 8px;
-    font-size: 0.64rem;
+    padding-inline: 5px;
+    font-size: 0.56rem;
   }
 }
 

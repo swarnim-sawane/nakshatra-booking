@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -11,10 +11,14 @@ import { consultationServices } from "../src/config/services";
 
 const personalService = consultationServices[0];
 const personalBookingUrl = new URL(
-  "https://cal.id/nilima-sawane/personal-consultation?duration=60&s=private-token",
+  "https://cal.id/nilima-sawane/personal-consultation?duration=30&s=private-token",
 );
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  delete window.Cal;
+});
 
 function successfulAvailability(): Promise<AvailabilityPayload> {
   return Promise.resolve({
@@ -54,7 +58,7 @@ describe("Nakshatra availability calendar", () => {
     });
 
     expect(timeLink.href).toBe(
-      "https://cal.id/nilima-sawane/personal-consultation?duration=60&slot=2026-09-08T09%3A15%3A00.000Z",
+      "https://cal.id/nilima-sawane/personal-consultation?duration=30&slot=2026-09-08T09%3A15%3A00.000Z",
     );
     expect(timeLink.target).toBe("");
     expect(timeLink.href).not.toContain("private-token");
@@ -75,6 +79,12 @@ describe("Nakshatra availability calendar", () => {
       name: "Other consultations",
     });
     expect(otherConsultations.href).toBe("http://localhost:3000/book/");
+
+    await user.click(timeLink);
+    expect(screen.getByRole("dialog", { name: "Complete your booking" })).toBeTruthy();
+    expect(screen.getByRole<HTMLAnchorElement>("link", {
+      name: "Open booking in a separate tab",
+    }).href).toBe(timeLink.href);
   });
 
   it("keeps the direct Cal ID path available if live availability cannot load", async () => {
@@ -91,18 +101,50 @@ describe("Nakshatra availability calendar", () => {
       />,
     );
 
-    await screen.findByText("If the calendar is interrupted, you can still continue.");
+    await screen.findByText("Your chart is studied before the call begins.");
     expect(screen.queryByText("September 2026")).toBeNull();
     expect(screen.queryByRole("button", { name: "Previous month" })).toBeNull();
     expect(document.querySelector(".availability-calendar__footer")).toBeNull();
     const fallback = screen.getByRole<HTMLAnchorElement>("link", {
-      name: "Continue booking",
+      name: "View available times",
     });
     expect(fallback.href).toBe(
-      "https://cal.id/nilima-sawane/personal-consultation?duration=60&s=private-token",
+      "https://cal.id/nilima-sawane/personal-consultation?duration=30&s=private-token",
     );
-    await user.click(screen.getByRole("button", { name: "Refresh calendar" }));
-    await waitFor(() => expect(loadAvailability).toHaveBeenCalledTimes(2));
+    expect(screen.queryByRole("button", { name: "Refresh calendar" })).toBeNull();
+    expect(screen.queryByText(/calendar is interrupted/i)).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Next consultation" }));
+    expect(screen.getByText("See where two Kundlis align—and where they need care.")).toBeTruthy();
+    expect(screen.getByText("Relationship Consultation (Kundli Milan)")).toBeTruthy();
+    expect(screen.getByText(/Achala Bhatia, on consulting with Nilima/)).toBeTruthy();
+  });
+
+  it("advances the service carousel without starting another browser request", async () => {
+    vi.useFakeTimers();
+    const loadAvailability = vi.fn(() => Promise.reject(new Error("offline")));
+
+    render(
+      <AvailabilityCalendar
+        bookingUrl={personalBookingUrl}
+        initialMonth={new Date("2026-09-01T00:00:00.000Z")}
+        loadAvailability={loadAvailability}
+        service={personalService}
+        timeZone="Asia/Kolkata"
+      />,
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Your chart is studied before the call begins.")).toBeTruthy();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(8000);
+    });
+
+    expect(screen.getByText("See where two Kundlis align—and where they need care.")).toBeTruthy();
+    expect(loadAvailability).toHaveBeenCalledTimes(1);
   });
 
   it("offers button-style actions and fetches the next month from an empty month", async () => {
@@ -155,8 +197,7 @@ describe("Nakshatra availability calendar", () => {
       />,
     );
 
-    expect(screen.getByText("Have these details ready before booking.")).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Continue booking" })).toBeNull();
+    expect(screen.getByText("Your chart is studied before the call begins.")).toBeTruthy();
     expect(
       [...document.querySelectorAll<HTMLAnchorElement>("a")].some((link) =>
         link.href.startsWith("https://cal.id/"),
@@ -179,7 +220,7 @@ describe("Nakshatra availability calendar", () => {
     );
 
     const overflow = getComputedStyle(
-      screen.getByText("Have these details ready before booking.").closest("section")!,
+      screen.getByText("Your chart is studied before the call begins.").closest("section")!,
     ).overflow;
     expect(["visible", "clip"]).toContain(overflow);
 

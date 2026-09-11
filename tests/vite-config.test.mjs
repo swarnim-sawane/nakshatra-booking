@@ -18,6 +18,13 @@ test("builds a static 404 document", () => {
   assert.match(viteConfig.build.rollupOptions.input.notFound, /src[\\/]404\.html$/);
 });
 
+test("builds a first-party booking confirmation page", () => {
+  assert.match(
+    viteConfig.build.rollupOptions.input.bookingConfirmation,
+    /src[\\/]booking-confirmed[\\/]index\.html$/,
+  );
+});
+
 test("deduplicates React for third-party embed packages", () => {
   assert.deepEqual(viteConfig.resolve.dedupe, ["react", "react-dom"]);
 });

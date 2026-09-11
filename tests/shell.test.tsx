@@ -14,7 +14,7 @@ describe("application shell", () => {
     expect(html).toContain('aria-label="Primary navigation"');
     expect(html).toContain('href="/book/"');
     expect(html).toContain(
-      'class="button button--primary header-booking-action header-booking-action--mobile" href="/book/">Book a consultation</a>',
+      'class="button button--primary header-booking-action header-booking-action--mobile" href="/book/">Book consultation</a>',
     );
     for (const label of ["About Nilima", "What she reads", "How it works", "Get in touch"]) {
       expect(html).toContain(label);

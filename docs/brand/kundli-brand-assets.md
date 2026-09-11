@@ -28,5 +28,12 @@ The result must remain unmistakably clean and readable at 28–32 px. No mockup,
 | `public/brand/apple-touch-icon-180.png` | 180 × 180 | Apple touch icon |
 | `public/brand/icon-192.png` | 192 × 192 | Compact app icon |
 | `public/brand/icon-512.png` | 512 × 512 | Cal ID favicon candidate and large app icon |
+| `public/brand/nakshatra-horizontal-dark.png` | 1600 × 400 | Primary transparent horizontal lockup |
+| `public/brand/nakshatra-horizontal-reversed.png` | 1600 × 400 | Reversed lockup for dark backgrounds |
+| `public/brand/nakshatra-horizontal-monochrome.png` | 1600 × 400 | Single-colour reproduction lockup |
 
 All delivered files are RGBA PNGs. `tests/brand-assets.test.mjs` verifies the PNG signature, dimensions, alpha-channel colour type, and the Cal ID favicon size limit.
+
+## Selected wordmark system
+
+The approved horizontal identity pairs the upright Kundli mark with a restrained Times New Roman wordmark. In the website header and footer, the symbol is optically aligned at 30 px beside live text so it remains crisp, accessible, and responsive. The exported horizontal PNGs use the same proportions with transparent backgrounds; presentation-sheet backgrounds and duplicate corner previews are not part of the production artwork.

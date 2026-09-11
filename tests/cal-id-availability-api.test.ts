@@ -89,7 +89,7 @@ describe("Cal ID availability endpoint", () => {
     expect(requests[0].url).toContain("slug=personal-consultation");
     expect(requests[0].url).toContain("limit=1");
     expect(requests[1].url).toContain("eventTypeId=77");
-    expect(requests[1].url).toContain("duration=60");
+    expect(requests[1].url).toContain("duration=30");
   });
 
   it("rejects unknown services and oversized ranges before contacting Cal ID", async () => {
@@ -166,6 +166,42 @@ describe("Cal ID availability endpoint", () => {
       timeZone: "Asia/Kolkata",
       slots: ["2026-09-08T09:15:00.000Z"],
     });
+  });
+
+  it("retries a transient Cal ID response once inside the server request", async () => {
+    const handleCalIdAvailabilityRequest = await loadHandler();
+    expect(handleCalIdAvailabilityRequest).toBeTypeOf("function");
+    if (!handleCalIdAvailabilityRequest) return;
+
+    let eventTypeAttempts = 0;
+    const fetchImpl = (async (input: string | URL | Request) => {
+      if (String(input).includes("/event-types/")) {
+        eventTypeAttempts += 1;
+        if (eventTypeAttempts === 1) {
+          return new Response(JSON.stringify({ error: "temporary" }), { status: 503 });
+        }
+        return new Response(
+          JSON.stringify({ data: [{ id: 77, slug: "personal-consultation" }] }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      return new Response(JSON.stringify({ data: { slots: {} } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const response = await handleCalIdAvailabilityRequest({
+      method: "GET",
+      url:
+        "https://nakshatra.example/api/cal-id-slots?service=personal-consultation&start=2026-09-01T00%3A00%3A00.000Z&end=2026-10-01T00%3A00%3A00.000Z&timeZone=Asia%2FKolkata",
+      apiKey: "calid_private_test_key",
+      fetchImpl,
+    });
+
+    expect(response.status).toBe(200);
+    expect(eventTypeAttempts).toBe(2);
   });
 
   it("fails safely when the server-side API key is missing", async () => {
