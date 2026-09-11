@@ -7,7 +7,7 @@ const completeEnvironment = {
   WHATSAPP_BUSINESS_ACCOUNT_ID: "987654321098765",
   WHATSAPP_BOOKING_CONFIRMATION_TEMPLATE: "booking_confirmation",
   WHATSAPP_APPOINTMENT_REMINDER_1H_TEMPLATE: "appointment_reminder_1h",
-  WHATSAPP_TEMPLATE_LANGUAGE: "en_US",
+  WHATSAPP_TEMPLATE_LANGUAGE: "en",
   WHATSAPP_DISPATCHER_SECRET: "test-dispatcher-secret-at-least-thirty-two-characters",
   SITE_URL: "https://nilima.example",
 };
@@ -39,7 +39,7 @@ describe("WhatsApp outbound automation", () => {
       type: "template",
       template: {
         name: "booking_confirmation",
-        language: { code: "en_US" },
+        language: { code: "en" },
         components: [{
           type: "body",
           parameters: [

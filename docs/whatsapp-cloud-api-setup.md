@@ -31,7 +31,7 @@ Add these to Vercel Production without a `PUBLIC_` or `VITE_` prefix:
 - `WHATSAPP_BUSINESS_ACCOUNT_ID` — the subscribed WABA ID.
 - `WHATSAPP_BOOKING_CONFIRMATION_TEMPLATE=booking_confirmation`.
 - `WHATSAPP_APPOINTMENT_REMINDER_1H_TEMPLATE=appointment_reminder_1h`.
-- `WHATSAPP_TEMPLATE_LANGUAGE=en_US` — change only if the approved templates use another exact language code.
+- `WHATSAPP_TEMPLATE_LANGUAGE=en` — exact code for the approved custom templates currently shown as **English** in WhatsApp Manager. Do not substitute `en_US`, which Meta labels **English (US)**.
 - `WHATSAPP_DISPATCHER_SECRET` — a separate random value of at least 32 characters, shared only with the external dispatcher.
 - `SITE_URL=https://nilimasawane.vercel.app` — canonical HTTPS website origin used for bot links.
 
