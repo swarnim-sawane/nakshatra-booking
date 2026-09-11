@@ -78,6 +78,7 @@ module.exports = {
         main: resolve(srcRoot, "index.html"),
         book: resolve(srcRoot, "book/index.html"),
         bookingConfirmation: resolve(srcRoot, "booking-confirmed/index.html"),
+        admin: resolve(srcRoot, "admin/index.html"),
         notFound: resolve(srcRoot, "404.html"),
       },
     },

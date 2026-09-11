@@ -1,4 +1,4 @@
-const MAX_WEBHOOK_BODY_BYTES = 256 * 1_024;
+export const MAX_WEBHOOK_BODY_BYTES = 256 * 1_024;
 
 export const CAL_ID_WEBHOOK_TRIGGERS = [
   "BOOKING_CREATED",
@@ -16,7 +16,7 @@ export const CAL_ID_EVENT_TYPE_SLUGS = [
 export type CalIdWebhookTrigger = (typeof CAL_ID_WEBHOOK_TRIGGERS)[number];
 export type CalIdEventTypeSlug = (typeof CAL_ID_EVENT_TYPE_SLUGS)[number];
 export type BookingLifecycleStatus =
-  | "created"
+  | "confirmed"
   | "paid"
   | "rescheduled"
   | "cancelled";
@@ -26,14 +26,24 @@ export type CalIdWebhookEvent = Readonly<{
   trigger: CalIdWebhookTrigger;
   bookingUid: string;
   eventTypeSlug: CalIdEventTypeSlug;
+  customerFirstName: string;
+  startsAt: string;
+  endsAt: string;
   occurredAt: string;
   receivedAt: string;
+  meetingUrl?: string;
   rescheduledFromUid?: string;
+  whatsappRecipientE164?: string;
+  whatsappTransactionalConsent?: true;
 }>;
 
 export type BookingLifecycleRecord = Readonly<{
   bookingUid: string;
   eventTypeSlug: CalIdEventTypeSlug;
+  customerFirstName: string;
+  startsAt: string;
+  endsAt: string;
+  meetingUrl?: string;
   status: BookingLifecycleStatus;
   createdAt?: string;
   paidAt?: string;
@@ -44,15 +54,14 @@ export type BookingLifecycleRecord = Readonly<{
   updatedAt: string;
 }>;
 
-export type CalIdWebhookStoreResult = "applied" | "duplicate";
+export type CalIdWebhookStoreResult = "applied" | "duplicate" | "suppressed";
 
-/**
- * The production implementation must atomically deduplicate eventId and update
- * the booking projection. An in-memory implementation is intentionally not
- * provided because Vercel function instances are ephemeral.
- */
 export interface CalIdWebhookStore {
   applyEvent(event: CalIdWebhookEvent): Promise<CalIdWebhookStoreResult>;
+}
+
+export interface CalIdWebhookNotifier {
+  notify(event: CalIdWebhookEvent): Promise<void>;
 }
 
 type WebhookRequest = {
@@ -61,6 +70,7 @@ type WebhookRequest = {
   signature?: string | null;
   secret?: string;
   store?: CalIdWebhookStore;
+  notifier?: CalIdWebhookNotifier;
   eventTypeIdMap?: ReadonlyMap<number, CalIdEventTypeSlug>;
   now?: () => Date;
 };
@@ -76,10 +86,7 @@ const textDecoder = new TextDecoder("utf-8", { fatal: true });
 const supportedTriggers = new Set<string>(CAL_ID_WEBHOOK_TRIGGERS);
 const supportedEventTypes = new Set<string>(CAL_ID_EVENT_TYPE_SLUGS);
 
-function jsonResponse(
-  status: number,
-  body: Record<string, unknown>,
-): WebhookResponse {
+function jsonResponse(status: number, body: Record<string, unknown>): WebhookResponse {
   return {
     status,
     headers: {
@@ -114,7 +121,6 @@ function hexToBytes(value: string) {
 
 function constantTimeEqual(left: Uint8Array, right: Uint8Array) {
   if (left.length !== right.length) return false;
-
   let difference = 0;
   for (let index = 0; index < left.length; index += 1) {
     difference |= left[index] ^ right[index];
@@ -122,10 +128,12 @@ function constantTimeEqual(left: Uint8Array, right: Uint8Array) {
   return difference === 0;
 }
 
-async function digestSha256(bytes: Uint8Array) {
-  return new Uint8Array(
-    await globalThis.crypto.subtle.digest("SHA-256", toArrayBuffer(bytes)),
+async function digestSha256(value: string) {
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    toArrayBuffer(textEncoder.encode(value)),
   );
+  return bytesToHex(new Uint8Array(digest));
 }
 
 export async function createCalIdWebhookSignature(
@@ -154,7 +162,6 @@ export async function verifyCalIdWebhookSignature(
 ) {
   const normalized = signature?.trim().replace(/^sha256=/i, "").toLowerCase();
   if (!normalized || !/^[a-f0-9]{64}$/.test(normalized)) return false;
-
   const expected = await createCalIdWebhookSignature(secret, rawBody);
   return constantTimeEqual(hexToBytes(normalized), hexToBytes(expected));
 }
@@ -169,6 +176,53 @@ function normalizeBookingUid(value: unknown) {
   if (typeof value !== "string") return null;
   const uid = value.trim();
   return /^[A-Za-z0-9_-]{1,200}$/.test(uid) ? uid : null;
+}
+
+function normalizeFirstName(payload: Record<string, unknown>) {
+  const attendees = Array.isArray(payload.attendees) ? payload.attendees : [];
+  const attendee = attendees.find(isObject);
+  const rawName = attendee && typeof attendee.name === "string" ? attendee.name : "";
+  const firstName = rawName.trim().split(/\s+/u)[0]?.slice(0, 80) ?? "";
+  return firstName || "Customer";
+}
+
+function normalizeMeetingUrl(payload: Record<string, unknown>) {
+  const metadata = isObject(payload.metadata) ? payload.metadata : {};
+  const candidates = [metadata.videoCallUrl, payload.videoCallUrl, payload.meetingUrl];
+
+  for (const value of candidates) {
+    if (typeof value !== "string") continue;
+    try {
+      const url = new URL(value);
+      if (url.protocol === "https:" && !url.username && !url.password) {
+        return url.href.slice(0, 2_048);
+      }
+    } catch {
+      // Ignore malformed or non-URL provider metadata.
+    }
+  }
+  return undefined;
+}
+
+function responseValue(payload: Record<string, unknown>, field: string) {
+  const responses = isObject(payload.responses) ? payload.responses : {};
+  const response = responses[field];
+  return isObject(response) && "value" in response ? response.value : response;
+}
+
+function normalizeWhatsAppRecipient(payload: Record<string, unknown>) {
+  const raw = responseValue(payload, "whatsapp_phone");
+  if (typeof raw !== "string") return undefined;
+  const compact = raw.trim().replace(/[\s().-]/g, "").replace(/^00/, "+");
+  return /^\+[1-9]\d{7,14}$/.test(compact) ? compact : undefined;
+}
+
+function hasTransactionalWhatsAppConsent(payload: Record<string, unknown>) {
+  const raw = responseValue(payload, "whatsapp_transactional_opt_in");
+  if (raw === true) return true;
+  if (typeof raw === "string") return /^(yes|true|i agree)$/i.test(raw.trim());
+  return Array.isArray(raw)
+    && raw.some((value) => typeof value === "string" && /^(yes|true|i agree)$/i.test(value.trim()));
 }
 
 function laterTimestamp(left: string | undefined, right: string) {
@@ -187,26 +241,27 @@ function deriveStatus(record: Omit<BookingLifecycleRecord, "status">) {
   if (cancelled >= rescheduled && Number.isFinite(cancelled)) return "cancelled";
   if (Number.isFinite(rescheduled)) return "rescheduled";
   if (record.paidAt) return "paid";
-  return "created";
+  return "confirmed";
 }
 
-/**
- * Pure reducer used by durable stores. It records late events without allowing
- * a delayed BOOKING_CREATED or BOOKING_PAID delivery to undo a terminal state.
- */
 export function transitionBookingLifecycle(
   current: BookingLifecycleRecord | undefined,
   event: CalIdWebhookEvent,
 ): BookingLifecycleRecord {
+  const eventIsNewest =
+    !current || new Date(event.occurredAt).getTime() >= new Date(current.lastEventAt).getTime();
   const next = {
     bookingUid: event.bookingUid,
-    eventTypeSlug: current?.eventTypeSlug ?? event.eventTypeSlug,
+    eventTypeSlug: eventIsNewest ? event.eventTypeSlug : current.eventTypeSlug,
+    customerFirstName: eventIsNewest ? event.customerFirstName : current.customerFirstName,
+    startsAt: eventIsNewest ? event.startsAt : current.startsAt,
+    endsAt: eventIsNewest ? event.endsAt : current.endsAt,
+    meetingUrl: eventIsNewest ? event.meetingUrl : current.meetingUrl,
     createdAt: current?.createdAt,
     paidAt: current?.paidAt,
     rescheduledAt: current?.rescheduledAt,
     cancelledAt: current?.cancelledAt,
-    rescheduledFromUid:
-      current?.rescheduledFromUid ?? event.rescheduledFromUid,
+    rescheduledFromUid: current?.rescheduledFromUid ?? event.rescheduledFromUid,
     lastEventAt: laterTimestamp(current?.lastEventAt, event.occurredAt),
     updatedAt: laterTimestamp(current?.updatedAt, event.receivedAt),
   } satisfies Omit<BookingLifecycleRecord, "status">;
@@ -224,11 +279,10 @@ export function transitionBookingLifecycle(
   return { ...next, status: deriveStatus(next) };
 }
 
-async function projectWebhookEvent(
+export async function projectCalIdWebhookEvent(
   parsed: unknown,
-  rawBody: Uint8Array,
   receivedAt: string,
-  eventTypeIdMap: ReadonlyMap<number, CalIdEventTypeSlug>,
+  eventTypeIdMap: ReadonlyMap<number, CalIdEventTypeSlug> = new Map(),
 ) {
   if (!isObject(parsed)) return { error: "Invalid webhook payload." } as const;
 
@@ -248,26 +302,43 @@ async function projectWebhookEvent(
       : typeof idValue === "number" && Number.isInteger(idValue)
         ? eventTypeIdMap.get(idValue)
         : undefined;
-  if (!eventTypeSlug) {
-    return { ignored: true } as const;
-  }
+  if (!eventTypeSlug) return { ignored: true } as const;
 
   const bookingUid = normalizeBookingUid(payload.uid);
   const occurredAt = normalizeIsoTimestamp(parsed.createdAt);
-  if (!bookingUid || !occurredAt) {
+  const startsAt = normalizeIsoTimestamp(payload.startTime);
+  const endsAt = normalizeIsoTimestamp(payload.endTime);
+  if (!bookingUid || !occurredAt || !startsAt || !endsAt) {
     return { error: "Invalid webhook payload." } as const;
   }
 
   const rescheduledFromUid = normalizeBookingUid(payload.rescheduleUid);
-  const eventHash = await digestSha256(rawBody);
+  const meetingUrl = normalizeMeetingUrl(payload);
+  const whatsappRecipientE164 = normalizeWhatsAppRecipient(payload);
+  const whatsappTransactionalConsent = hasTransactionalWhatsAppConsent(payload);
+  const stableDeliveryKey = [
+    trigger,
+    bookingUid,
+    occurredAt,
+    startsAt,
+    endsAt,
+    rescheduledFromUid ?? "",
+  ].join("\n");
   const event: CalIdWebhookEvent = {
-    eventId: bytesToHex(eventHash),
+    eventId: await digestSha256(stableDeliveryKey),
     trigger: trigger as CalIdWebhookTrigger,
     bookingUid,
     eventTypeSlug,
+    customerFirstName: normalizeFirstName(payload),
+    startsAt,
+    endsAt,
     occurredAt,
     receivedAt,
+    ...(meetingUrl ? { meetingUrl } : {}),
     ...(rescheduledFromUid ? { rescheduledFromUid } : {}),
+    ...(whatsappRecipientE164 && whatsappTransactionalConsent
+      ? { whatsappRecipientE164, whatsappTransactionalConsent: true as const }
+      : {}),
   };
 
   return { event } as const;
@@ -279,32 +350,19 @@ export async function handleCalIdWebhookRequest({
   signature,
   secret,
   store,
+  notifier,
   eventTypeIdMap = new Map(),
   now = () => new Date(),
 }: WebhookRequest): Promise<WebhookResponse> {
-  if (method !== "POST") {
-    return jsonResponse(405, { error: "Method not allowed." });
-  }
-
+  if (method !== "POST") return jsonResponse(405, { error: "Method not allowed." });
   if (!secret?.trim()) {
     return jsonResponse(503, { error: "Webhook receiver is not configured." });
   }
-
-  if (!store) {
-    return jsonResponse(503, { error: "Webhook storage is not configured." });
-  }
-
-  if (rawBody.byteLength === 0) {
-    return jsonResponse(400, { error: "Webhook body is required." });
-  }
-
+  if (rawBody.byteLength === 0) return jsonResponse(400, { error: "Webhook body is required." });
   if (rawBody.byteLength > MAX_WEBHOOK_BODY_BYTES) {
     return jsonResponse(413, { error: "Webhook body is too large." });
   }
-
-  if (
-    !(await verifyCalIdWebhookSignature(signature, secret.trim(), rawBody))
-  ) {
+  if (!(await verifyCalIdWebhookSignature(signature, secret.trim(), rawBody))) {
     return jsonResponse(401, { error: "Invalid webhook signature." });
   }
 
@@ -315,27 +373,24 @@ export async function handleCalIdWebhookRequest({
     return jsonResponse(400, { error: "Invalid webhook payload." });
   }
 
-  const receivedAt = now().toISOString();
-  const projected = await projectWebhookEvent(
+  const projected = await projectCalIdWebhookEvent(
     parsed,
-    rawBody,
-    receivedAt,
+    now().toISOString(),
     eventTypeIdMap,
   );
-  if ("ignored" in projected) {
-    return jsonResponse(202, { received: true, ignored: true });
-  }
-  if ("error" in projected) {
-    return jsonResponse(400, { error: projected.error });
-  }
+  if ("ignored" in projected) return jsonResponse(202, { received: true, ignored: true });
+  if ("error" in projected) return jsonResponse(400, { error: projected.error });
+  if (!store) return jsonResponse(503, { error: "Webhook storage is not configured." });
 
   try {
     const result = await store.applyEvent(projected.event);
+    if (result !== "suppressed" && notifier) await notifier.notify(projected.event);
     return jsonResponse(200, {
       received: true,
       duplicate: result === "duplicate",
+      ...(result === "suppressed" ? { suppressed: true } : {}),
     });
   } catch {
-    return jsonResponse(503, { error: "Webhook storage is unavailable." });
+    return jsonResponse(503, { error: "Webhook processing is temporarily unavailable." });
   }
 }

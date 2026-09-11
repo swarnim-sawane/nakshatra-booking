@@ -31,6 +31,12 @@ The active local preview is `http://127.0.0.1:4173/`. The production build is wr
 
 The committed `package-lock.json` keeps installs reproducible.
 
+## Private admin schedule
+
+The installable `/admin/` PWA reads sanitized Cal ID lifecycle events from a protected same-origin API. Production never falls back to sample appointments. Sample data is available only during development when `PUBLIC_ADMIN_DEMO_MODE=true`, and the screen labels it clearly.
+
+Setup instructions for Neon Postgres through Vercel, the single-owner session, Cal ID webhooks, short data retention and private Android Web Push are in [docs/admin-cal-id-setup.md](docs/admin-cal-id-setup.md).
+
 ## Cal ID configuration
 
 The three verified direct-event URLs are safe defaults in the application, so a clean deployment keeps exact service routing. Create an ignored `.env.local` from `.env.example` only when you need to override them. These are public scheduling URLs, not secrets:
@@ -96,9 +102,11 @@ Do not complete a real payment merely to prove the frontend is working. Use a co
 
 The source direction and exact final Image Generation prompt are recorded in `docs/brand/kundli-brand-assets.md`.
 
-## Future WhatsApp phase
+## WhatsApp Cloud API automation
 
-WhatsApp automation is deliberately outside this release. The stable future entry point is `/book/?s=<opaque-token>`; this version preserves the parameter in the browser address while never reading, rendering, storing, decoding, or forwarding it. The proposed session, webhook, and ownership boundaries are documented in the approved design specification.
+The signature-verified WhatsApp webhook, consent-gated booking messages and protected dispatcher are documented in [docs/whatsapp-cloud-api-setup.md](docs/whatsapp-cloud-api-setup.md). Paid bookings enqueue one approved confirmation and one one-hour reminder. Rescheduling moves a pending reminder and cancellation suppresses it. Inbound replies use a deterministic website menu; no inbound message content is stored.
+
+The dispatcher is intentionally not a Vercel cron. A small external worker such as Northflank calls `/api/whatsapp-dispatch` with a shared bearer secret. The stable future entry point is `/book/?s=<opaque-token>`; this version preserves the parameter in the browser address while never reading, rendering, storing, decoding, or forwarding it.
 
 ## Evidence and design notes
 
