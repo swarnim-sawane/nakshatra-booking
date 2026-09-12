@@ -71,8 +71,11 @@ describe("application shell", () => {
 
     expect(html.match(/aria-label="Instagram"/g)).toHaveLength(3);
     expect(html.match(/aria-label="Facebook"/g)).toHaveLength(3);
-    expect(html).toContain('href="https://www.instagram.com/nakshatra.placeholder/"');
-    expect(html).toContain('href="https://www.facebook.com/nakshatra.placeholder/"');
+    expect(html).toContain(
+      'href="https://www.instagram.com/nilimasawane?stkn=MXZzM3hxaXJhNWgwag=="',
+    );
+    expect(html).toContain('href="https://www.facebook.com/share/1CZU35pABz/"');
+    expect(html).not.toContain("nakshatra.placeholder");
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noreferrer noopener"');
     expect(html).not.toContain("Coming soon");

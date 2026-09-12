@@ -27,7 +27,9 @@ describe("Nilima-led reading services landing page", () => {
     const html = renderToStaticMarkup(<App pathname="/" />);
 
     expect(html).toContain("About");
-    expect(html).toContain("Nilima Sawane has been reading birth charts for over eight years");
+    expect(html).toContain("14+ years");
+    expect(html).toContain("Nilima Sawane has been reading birth charts for over fourteen years");
+    expect(html).not.toMatch(/8\+ years|over eight years/i);
     expect(html).toContain("A compatibility reading that looks at where two charts align");
     expect(html).toContain("Timing for weddings, ceremonies, and other important dates.");
     expect(html).not.toMatch(/certified astrologer|award-winning|clients served|five-star|5-star|testimonial/i);

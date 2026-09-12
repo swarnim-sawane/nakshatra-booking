@@ -8,10 +8,17 @@ export const navigation = [
   { label: "Get in touch", href: "/#contact" },
 ] as const;
 
-// Replace only these destinations when the real social profiles are available.
 export const socialProfiles = [
-  { label: "Instagram", href: "https://www.instagram.com/nakshatra.placeholder/", icon: "instagram" },
-  { label: "Facebook", href: "https://www.facebook.com/nakshatra.placeholder/", icon: "facebook" },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/nilimasawane?stkn=MXZzM3hxaXJhNWgwag==",
+    icon: "instagram",
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/share/1CZU35pABz/",
+    icon: "facebook",
+  },
 ] as const;
 
 export const consultationFaqItems = [

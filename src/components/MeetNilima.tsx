@@ -31,7 +31,7 @@ export default function MeetNilima() {
           <p className="eyebrow">About</p>
           <h2 id="meet-nilima-title">Nilima Sawane</h2>
           <p>
-            Nilima Sawane has been reading birth charts for over eight years, working directly with
+            Nilima Sawane has been reading birth charts for over fourteen years, working directly with
             individuals and families on the questions that matter most to them. Each consultation
             is built around your specific kundli, and she takes the time to explain what she sees
             in plain, clear language.
