@@ -89,6 +89,21 @@ describe("Nilima-led reading services landing page", () => {
     expect(html).not.toContain('href="https://wa.me/');
   });
 
+  it("uses reassuring FAQ language and preserves the privacy anchor", () => {
+    const html = renderToStaticMarkup(<App pathname="/" />);
+
+    expect(html).toContain("What can a Kundli reading help me understand?");
+    expect(html).toContain("How does Nilima explain future possibilities?");
+    expect(html).toContain("How are traditional remedies or nuskhe used in a consultation?");
+    expect(html).toContain("If needed, Nilima may suggest a traditional nuskha or practical step");
+    expect(html).toContain("How are my birth details and personal questions kept private?");
+    expect(html).toContain('id="privacy"');
+    expect(html).toContain("not for marketing, unrelated purposes or judgment");
+    expect(html).not.toContain("You do not need to know which astrological technique applies.");
+    expect(html).not.toContain("Are traditional remedies or nuskhe guaranteed to work?");
+    expect(html).not.toContain("Will the consultation tell me exactly what will happen?");
+  });
+
   it("presents the five reading areas without turning them into duplicate booking products", () => {
     const html = renderToStaticMarkup(<App pathname="/" />);
 

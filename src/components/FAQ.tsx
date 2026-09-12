@@ -17,7 +17,7 @@ export default function FAQ() {
             <div className="faq__list">
               {consultationFaqItems.map((item) => (
                 <details
-                  id={item.question === "Can I discuss a sensitive personal or relationship matter privately?" ? "privacy" : undefined}
+                  id={item.question === "How are my birth details and personal questions kept private?" ? "privacy" : undefined}
                   key={item.question}
                 >
                   <summary><span>{item.question}</span><ChevronDown aria-hidden="true" size={20} strokeWidth={1.75} /></summary>

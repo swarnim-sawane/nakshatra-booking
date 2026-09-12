@@ -25,12 +25,12 @@ export const consultationFaqItems = [
   {
     question: "What kind of question is suitable for a consultation?",
     answer:
-      "A focused question about a decision, recurring pattern, relationship, period of change or important date gives Nilima useful context. You do not need to know which astrological technique applies.",
+      "A focused question about a decision, recurring pattern, relationship, period of change or important date gives Nilima useful context.",
   },
   {
-    question: "What can a Kundli reading clarify—and what can it not decide for me?",
+    question: "What can a Kundli reading help me understand?",
     answer:
-      "A reading can help you understand patterns, timing and the considerations around a choice. It does not remove your agency, replace professional medical, legal or financial advice, or guarantee a particular outcome.",
+      "A reading can help you understand patterns, timing and the considerations around a choice, so you can approach important decisions with greater clarity. The final decision remains yours, while medical, legal and financial matters should continue to be discussed with the appropriate professional.",
   },
   {
     question: "What if my birth time is uncertain?",
@@ -43,19 +43,19 @@ export const consultationFaqItems = [
       "Nilima prepares your Janam Kundli herself and reviews the question or situation submitted with the booking. This allows the consultation to begin with context rather than spending most of the call gathering background.",
   },
   {
-    question: "Can I discuss a sensitive personal or relationship matter privately?",
+    question: "How are my birth details and personal questions kept private?",
     answer:
-      "Yes. Share only what is relevant and what you are comfortable discussing. Birth details and questions are submitted through the secure booking flow and used to prepare and conduct the consultation.",
+      "Your birth details and questions are treated as private and handled through the secure booking process. They are used only to prepare, conduct and manage your consultation—not for marketing, unrelated purposes or judgment. Share only what is relevant and what you feel comfortable discussing.",
   },
   {
-    question: "Will the consultation tell me exactly what will happen?",
+    question: "How does Nilima explain future possibilities?",
     answer:
-      "No responsible reading can promise a fixed future. Nilima explains the tendencies and timing she sees, including uncertainty, so you can make a more considered decision.",
+      "Nilima explains the tendencies, timing and possibilities she sees in your chart, including where circumstances and personal choices may influence the outcome. The aim is to help you make a more considered decision, rather than present the future as fixed.",
   },
   {
-    question: "Are traditional remedies or nuskhe guaranteed to work?",
+    question: "How are traditional remedies or nuskhe used in a consultation?",
     answer:
-      "No. Where relevant, Nilima may suggest a traditional nuskha or practical step as guidance. It is not presented as a guaranteed result or a substitute for professional care.",
+      "If needed, Nilima may suggest a traditional nuskha or practical step and explain why it may be appropriate for your situation. You decide whether to follow it, alongside any professional care or advice you may need.",
   },
 ] as const;
 
