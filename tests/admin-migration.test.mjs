@@ -248,6 +248,8 @@ test("customer preparation details expand the schema without removing the compat
   assert.match(customerDetailsMigration, /apply_calid_webhook_event_with_customer_details/i);
   assert.match(customerDetailsMigration, /apply_calid_webhook_event_with_whatsapp/i);
   assert.doesNotMatch(customerDetailsMigration, /drop function if exists nakshatra_admin\.apply_calid_webhook_event_with_whatsapp/i);
+  assert.match(customerDetailsMigration, /list_admin_bookings_with_customer_details/i);
+  assert.doesNotMatch(customerDetailsMigration, /drop function if exists nakshatra_admin\.list_admin_bookings/i);
   assert.doesNotMatch(customerDetailsMigration, /raw_payload|unrelated_private_answer|grant (select|insert|update|delete) on/i);
   assert.match(customerDetailsMigration, /grant execute on function nakshatra_admin\.apply_calid_webhook_event_with_customer_details/i);
 });

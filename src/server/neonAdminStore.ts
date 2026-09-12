@@ -241,7 +241,7 @@ export class NeonAdminStore implements AdminDataStore {
   }
 
   async listBookings(): Promise<StoredAdminBooking[]> {
-    const rows = await this.query("select * from nakshatra_admin.list_admin_bookings()");
+    const rows = await this.query("select * from nakshatra_admin.list_admin_bookings_with_customer_details()");
 
     return rows.map((row) => {
       const slug = row.event_type_slug as keyof typeof serviceNames;

@@ -150,9 +150,7 @@ begin
 end;
 $$;
 
-drop function if exists nakshatra_admin.list_admin_bookings();
-
-create function nakshatra_admin.list_admin_bookings()
+create or replace function nakshatra_admin.list_admin_bookings_with_customer_details()
 returns table (
   booking_uid text,
   event_type_slug text,
@@ -217,7 +215,7 @@ revoke all on function nakshatra_admin.apply_calid_webhook_event_with_customer_d
   timestamptz, text, text, boolean, text, text, text, text, text,
   text, text, text, text, text
 ) from public, nakshatra_runtime;
-revoke all on function nakshatra_admin.list_admin_bookings()
+revoke all on function nakshatra_admin.list_admin_bookings_with_customer_details()
   from public, nakshatra_runtime;
 
 grant usage on schema nakshatra_admin to nakshatra_runtime;
@@ -226,7 +224,7 @@ grant execute on function nakshatra_admin.apply_calid_webhook_event_with_custome
   timestamptz, text, text, boolean, text, text, text, text, text,
   text, text, text, text, text
 ) to nakshatra_runtime;
-grant execute on function nakshatra_admin.list_admin_bookings()
+grant execute on function nakshatra_admin.list_admin_bookings_with_customer_details()
   to nakshatra_runtime;
 
 commit;
