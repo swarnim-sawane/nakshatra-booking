@@ -19,6 +19,18 @@ function realBooking(): AdminBooking {
   return {
     id: "booking-123",
     customerFirstName: "Ananya",
+    customerFullName: "Ananya Sharma",
+    customerEmail: "ananya@example.com",
+    customerPhoneNumber: "+919811122334",
+    whatsappRecipientE164: "+919876543210",
+    whatsappConsent: true,
+    preferredLanguage: "Hindi",
+    birthDate: "12/02/1990",
+    birthTime: "10:35 AM",
+    birthTimeAccuracy: "Exact",
+    birthPlace: "Pune, Maharashtra, India",
+    consultationQuestions: "Career change and marriage timing",
+    additionalNotes: "Please speak in Hindi.",
     serviceName: "Personal Consultation",
     startsAt: "2026-09-09T08:00:00.000Z",
     endsAt: "2026-09-09T08:30:00.000Z",
@@ -33,7 +45,8 @@ describe("Nakshatra Admin", () => {
     render(<AdminApp loadBookings={() => loadDemoBookings(now)} now={now} serviceWorkerRegistration={null} />);
     expect(await screen.findByText("Development demo")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Next consultation" })).toBeTruthy();
-    expect(screen.getByText("Ananya")).toBeTruthy();
+    expect(screen.getByText("Ananya Sharma")).toBeTruthy();
+    expect(screen.getByText("12 February 1990")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Open video call" })).toBeTruthy();
     expect(screen.queryByText(/not connected/i)).toBeNull();
   });
@@ -78,13 +91,26 @@ describe("Nakshatra Admin", () => {
     ));
   });
 
-  it("opens minimized live booking details", async () => {
+  it("shows the next customer's Kundli preparation details at a glance", async () => {
+    render(<AdminApp loadBookings={async () => [realBooking()]} now={now} serviceWorkerRegistration={null} />);
+    expect(await screen.findByText("Ananya Sharma")).toBeTruthy();
+    expect(screen.getByText("12 February 1990")).toBeTruthy();
+    expect(screen.getByText("10:35 AM · Exact")).toBeTruthy();
+    expect(screen.getByText("Pune, Maharashtra, India")).toBeTruthy();
+    expect(screen.getByText("Career change and marriage timing")).toBeTruthy();
+  });
+
+  it("opens the complete protected customer record", async () => {
     const user = userEvent.setup();
     render(<AdminApp loadBookings={async () => [realBooking()]} now={now} serviceWorkerRegistration={null} />);
     await user.click(await screen.findByRole("button", { name: "View Ananya details" }));
     expect(screen.getByRole("dialog", { name: "Appointment details" })).toBeTruthy();
     expect(screen.getByText("Booking reference")).toBeTruthy();
-    expect(screen.queryByText(/email|phone|birth time/i)).toBeNull();
+    expect(screen.getAllByText("ananya@example.com").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("+919811122334").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("+919876543210").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("WhatsApp allowed").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Please speak in Hindi.").length).toBeGreaterThan(0);
   });
 
   it("requires confirmation before removing a cancelled appointment", async () => {

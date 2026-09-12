@@ -56,11 +56,23 @@ describe("protected admin APIs", () => {
     expect(store.listBookings).not.toHaveBeenCalled();
   });
 
-  it("returns only the minimized booking projection after authentication", async () => {
+  it("returns the protected customer preparation record after authentication", async () => {
     const { environment, cookie } = await authContext();
     const booking = {
       id: "booking_123",
       customerFirstName: "Ananya",
+      customerFullName: "Ananya Sharma",
+      customerEmail: "ananya@example.com",
+      customerPhoneNumber: "+919811122334",
+      whatsappRecipientE164: "+919876543210",
+      whatsappConsent: true,
+      preferredLanguage: "Hindi",
+      birthDate: "12/02/1990",
+      birthTime: "10:35 AM",
+      birthTimeAccuracy: "Exact",
+      birthPlace: "Pune, Maharashtra, India",
+      consultationQuestions: "Career change and marriage timing",
+      additionalNotes: "Please speak in Hindi.",
       serviceName: "Personal Consultation",
       startsAt: "2026-09-14T03:30:00.000Z",
       endsAt: "2026-09-14T04:00:00.000Z",
@@ -74,10 +86,10 @@ describe("protected admin APIs", () => {
     const serialized = JSON.stringify(await response.json());
     expect(response.status).toBe(200);
     expect(store.listBookings).toHaveBeenCalledWith();
-    expect(serialized).toContain("Ananya");
-    expect(serialized).not.toContain("email");
-    expect(serialized).not.toContain("birth");
-    expect(serialized).not.toContain("phone");
+    expect(serialized).toContain("Ananya Sharma");
+    expect(serialized).toContain("ananya@example.com");
+    expect(serialized).toContain("12/02/1990");
+    expect(serialized).toContain("Career change and marriage timing");
   });
 
   it("uses the server-only Neon URL and parameterized function calls", async () => {
@@ -91,6 +103,9 @@ describe("protected admin APIs", () => {
       bookingUid: "booking-1",
       eventTypeSlug: "personal-consultation",
       customerFirstName: "Ananya",
+      customerFullName: "Ananya Sharma",
+      customerEmail: "ananya@example.com",
+      birthDate: "12/02/1990",
       startsAt: "2026-09-14T03:30:00.000Z",
       endsAt: "2026-09-14T04:00:00.000Z",
       occurredAt: "2026-09-09T10:00:00.000Z",
@@ -101,8 +116,9 @@ describe("protected admin APIs", () => {
     expect(statement).toContain("$1::text");
     expect(statement).not.toContain("Ananya");
     expect(JSON.stringify(parameters)).not.toContain("server-secret");
-    expect(JSON.stringify(parameters)).not.toContain("birth");
-    expect(JSON.stringify(parameters)).not.toContain("email");
+    expect(JSON.stringify(parameters)).toContain("Ananya Sharma");
+    expect(JSON.stringify(parameters)).toContain("ananya@example.com");
+    expect(JSON.stringify(parameters)).toContain("12/02/1990");
   });
 
   it("protects push subscription writes and rejects cross-origin requests", async () => {

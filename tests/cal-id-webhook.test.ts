@@ -120,20 +120,40 @@ describe("Cal ID webhook receiver", () => {
     });
   });
 
-  it("stores only the first name and operational fields", async () => {
+  it("projects the customer details Nilima needs to prepare the Kundli", async () => {
     const store = new MemoryWebhookStore();
     await signedRequest(store, webhookBody("BOOKING_CREATED", "2026-09-09T10:00:00.000Z", {
-      customInputs: { birthDate: "1990-01-01", birthTime: "08:30", birthPlace: "Pune" },
-      additionalNotes: "Sensitive family question",
+      attendees: [{
+        email: "ananya@example.com",
+        name: "Ananya Sharma",
+        phoneNumber: "+91 98111 22334",
+      }],
+      responses: {
+        preferred_language: { value: "Hindi" },
+        date_of_birth: { value: "12/02/1990" },
+        time_of_birth: { value: "10:35 AM" },
+        birth_time_accuracy: { value: "Exact" },
+        place_of_birth: { value: "Pune, Maharashtra, India" },
+        consultation_questions: { value: "Career change and marriage timing" },
+        unrelated_private_answer: { value: "must not be copied" },
+      },
+      additionalNotes: "Please speak in Hindi.",
       metadata: { videoCallUrl: "https://meet.google.com/abc-defg-hij" },
     }));
     const persisted = JSON.stringify(store.events);
-    expect(persisted).not.toContain("private@example.com");
-    expect(persisted).not.toContain("Sharma");
-    expect(persisted).not.toContain("1990-01-01");
-    expect(persisted).not.toContain("Sensitive family question");
+    expect(persisted).not.toContain("must not be copied");
     expect(store.events[0]).toMatchObject({
       customerFirstName: "Ananya",
+      customerFullName: "Ananya Sharma",
+      customerEmail: "ananya@example.com",
+      customerPhoneNumber: "+919811122334",
+      preferredLanguage: "Hindi",
+      birthDate: "12/02/1990",
+      birthTime: "10:35 AM",
+      birthTimeAccuracy: "Exact",
+      birthPlace: "Pune, Maharashtra, India",
+      consultationQuestions: "Career change and marriage timing",
+      additionalNotes: "Please speak in Hindi.",
       startsAt: "2026-09-14T03:30:00.000Z",
       meetingUrl: "https://meet.google.com/abc-defg-hij",
     });
@@ -145,8 +165,8 @@ describe("Cal ID webhook receiver", () => {
       responses: {
         whatsapp_phone: { value: "+91 98765 43210" },
         whatsapp_transactional_opt_in: { value: true },
-        birth_date: { value: "1990-01-01" },
-        consultation_question: { value: "private family question" },
+        date_of_birth: { value: "1990-01-01" },
+        consultation_questions: { value: "private family question" },
       },
     }));
 
@@ -155,8 +175,8 @@ describe("Cal ID webhook receiver", () => {
       whatsappTransactionalConsent: true,
     });
     const projected = JSON.stringify(store.events[0]);
-    expect(projected).not.toContain("1990-01-01");
-    expect(projected).not.toContain("private family question");
+    expect(projected).toContain("1990-01-01");
+    expect(projected).toContain("private family question");
   });
 
   it("fails closed for WhatsApp when either phone or explicit consent is absent", async () => {

@@ -280,6 +280,85 @@ a:focus-visible {
   font-weight: 600;
 }
 
+.admin-customer-details {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 18px;
+  padding: 17px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 17px;
+  background: rgb(255 255 255 / 7%);
+}
+
+.admin-customer-details h4,
+.admin-customer-details h5 {
+  margin: 0;
+  font-family: inherit;
+}
+
+.admin-customer-details h4 {
+  margin-bottom: 14px;
+  color: #e5c58e;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-customer-details dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  margin: 0;
+}
+
+.admin-customer-details dt,
+.admin-customer-details h5 {
+  margin-bottom: 4px;
+  color: #cbd8d1;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-customer-details dd,
+.admin-customer-details p {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #fffdf7;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.admin-customer-details__answer {
+  margin-top: 15px;
+  padding-top: 14px;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+}
+
+.admin-customer-details--light {
+  border-color: #ddd4c6;
+  background: #f7f2e9;
+}
+
+.admin-customer-details--light h4 {
+  color: #7a5524;
+}
+
+.admin-customer-details--light dt,
+.admin-customer-details--light h5 {
+  color: #746d64;
+}
+
+.admin-customer-details--light dd,
+.admin-customer-details--light p {
+  color: #292621;
+}
+
+.admin-customer-details--light .admin-customer-details__answer {
+  border-top-color: #ddd4c6;
+}
+
 .admin-meeting-link {
   position: relative;
   z-index: 1;
