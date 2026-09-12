@@ -78,6 +78,59 @@ describe("WhatsApp webhook receiver", () => {
     expect(responseText).not.toContain("private consultation text");
   });
 
+  it("reports outbound delivery failures using status and error codes only", async () => {
+    const recordDeliveryStatus = vi.fn().mockResolvedValue(undefined);
+    const body = JSON.stringify({
+      object: "whatsapp_business_account",
+      entry: [{
+        id: "waba-123",
+        changes: [{
+          field: "messages",
+          value: {
+            messaging_product: "whatsapp",
+            metadata: { phone_number_id: "sender-123" },
+            contacts: [{ wa_id: "919999999999" }],
+            statuses: [{
+              id: "wamid.private-provider-id",
+              recipient_id: "919999999999",
+              status: "failed",
+              errors: [{ code: 131026, title: "Message undeliverable" }],
+            }],
+          },
+        }],
+      }],
+    });
+    const rawBody = encoder.encode(body);
+    const response = await (await import("../src/server/whatsAppWebhook")).handleWhatsAppWebhookRequest({
+      method: "POST",
+      url: "https://nilima.example/api/whatsapp-webhook",
+      rawBody,
+      signature: await createWhatsAppWebhookSignature(appSecret, rawBody),
+      appSecret,
+      automation: {
+        expectedBusinessAccountId: "waba-123",
+        expectedPhoneNumberId: "sender-123",
+        siteOrigin: "https://nilima.example",
+        store: {
+          claimWhatsAppInboundDelivery: vi.fn(),
+          completeWhatsAppInboundDelivery: vi.fn(),
+        },
+        sendMessage: vi.fn(),
+        notifyHumanHelp: vi.fn(),
+        recordDeliveryStatus,
+      },
+    } as never);
+
+    expect(response.status).toBe(200);
+    expect(recordDeliveryStatus).toHaveBeenCalledWith({
+      status: "failed",
+      errorCodes: ["131026"],
+    });
+    expect(JSON.stringify(recordDeliveryStatus.mock.calls)).not.toContain("919999999999");
+    expect(JSON.stringify(recordDeliveryStatus.mock.calls)).not.toContain("private-provider-id");
+    expect(JSON.stringify(recordDeliveryStatus.mock.calls)).not.toContain("Message undeliverable");
+  });
+
   it("rejects an invalid signature before parsing the request body", async () => {
     const response = await signedPost("not-json", `sha256=${"0".repeat(64)}`);
 

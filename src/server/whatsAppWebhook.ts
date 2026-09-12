@@ -46,6 +46,11 @@ export type WhatsAppConfig = Readonly<{
 
 type WhatsAppPayload = Record<string, unknown>;
 
+export type WhatsAppDeliveryStatus = Readonly<{
+  status: string;
+  errorCodes: string[];
+}>;
+
 export type WhatsAppInboundAutomation = Readonly<{
   expectedBusinessAccountId: string;
   expectedPhoneNumberId: string;
@@ -56,6 +61,7 @@ export type WhatsAppInboundAutomation = Readonly<{
   >;
   sendMessage: (recipientE164: string, payload: WhatsAppPayload) => Promise<void>;
   notifyHumanHelp: () => Promise<void>;
+  recordDeliveryStatus?: (deliveryStatus: WhatsAppDeliveryStatus) => Promise<void>;
 }>;
 
 type DispatchStore = Pick<
@@ -465,6 +471,41 @@ function extractInboundMessages(
   return messages;
 }
 
+function extractDeliveryStatuses(
+  parsed: unknown,
+  expectedBusinessAccountId: string,
+  expectedPhoneNumberId: string,
+) {
+  if (!isObject(parsed) || parsed.object !== "whatsapp_business_account" || !Array.isArray(parsed.entry)) {
+    return [];
+  }
+  const deliveryStatuses: WhatsAppDeliveryStatus[] = [];
+  for (const entry of parsed.entry) {
+    if (!isObject(entry) || entry.id !== expectedBusinessAccountId || !Array.isArray(entry.changes)) continue;
+    for (const change of entry.changes) {
+      if (!isObject(change) || change.field !== "messages" || !isObject(change.value)) continue;
+      const metadata = isObject(change.value.metadata) ? change.value.metadata : {};
+      if (metadata.phone_number_id !== expectedPhoneNumberId || !Array.isArray(change.value.statuses)) continue;
+      for (const rawStatus of change.value.statuses) {
+        if (!isObject(rawStatus) || typeof rawStatus.status !== "string") continue;
+        const status = rawStatus.status.trim().toLowerCase();
+        if (!/^[a-z_]{1,32}$/.test(status)) continue;
+        const errorCodes = Array.isArray(rawStatus.errors)
+          ? rawStatus.errors.flatMap((rawError) => {
+            if (!isObject(rawError)) return [];
+            const code = rawError.code;
+            if (typeof code !== "string" && typeof code !== "number") return [];
+            const normalized = String(code).trim();
+            return /^[a-zA-Z0-9_-]{1,80}$/.test(normalized) ? [normalized] : [];
+          })
+          : [];
+        deliveryStatuses.push({ status, errorCodes: [...new Set(errorCodes)] });
+      }
+    }
+  }
+  return deliveryStatuses;
+}
+
 function menuPayload() {
   return {
     messaging_product: "whatsapp",
@@ -628,6 +669,15 @@ export async function handleWhatsAppWebhookRequest({
   }
   if (automation) {
     try {
+      if (automation.recordDeliveryStatus) {
+        for (const deliveryStatus of extractDeliveryStatuses(
+          parsed,
+          automation.expectedBusinessAccountId,
+          automation.expectedPhoneNumberId,
+        )) {
+          await automation.recordDeliveryStatus(deliveryStatus);
+        }
+      }
       await processInboundMessages(parsed, automation);
     } catch {
       return jsonResponse(503, { error: "WhatsApp processing is temporarily unavailable." });

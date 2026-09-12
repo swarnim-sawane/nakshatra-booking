@@ -40,6 +40,13 @@ export function createWhatsAppWebhookFetchHandler({
   const configuredStore = store === undefined ? createNeonAdminStore(environment) : store;
   const config = readWhatsAppConfig(environment);
   const vapid = readVapidConfig(environment);
+  const recordDeliveryStatus = async (deliveryStatus: { status: string; errorCodes: string[] }) => {
+    console.info(JSON.stringify({
+      event: "whatsapp_delivery_status",
+      status: deliveryStatus.status,
+      errorCodes: deliveryStatus.errorCodes,
+    }));
+  };
   const configuredAutomation = automation ?? (
     config && configuredStore && vapid
       ? {
@@ -49,6 +56,7 @@ export function createWhatsAppWebhookFetchHandler({
         store: configuredStore,
         sendMessage: createWhatsAppMessageSender(config, fetchImpl),
         notifyHumanHelp: () => notifyAdminHumanHelp(configuredStore, vapid, fetchImpl),
+        recordDeliveryStatus,
       }
       : config
         ? {
@@ -61,6 +69,7 @@ export function createWhatsAppWebhookFetchHandler({
           },
           sendMessage: async () => { throw new Error("delivery unavailable"); },
           notifyHumanHelp: async () => { throw new Error("notification unavailable"); },
+          recordDeliveryStatus,
         }
         : undefined
   );
