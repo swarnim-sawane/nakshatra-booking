@@ -42,10 +42,10 @@ Setup instructions for Neon Postgres through Vercel, the single-owner session, C
 The three verified direct-event URLs are safe defaults in the application, so a clean deployment keeps exact service routing. Create an ignored `.env.local` from `.env.example` only when you need to override them. These are public scheduling URLs, not secrets:
 
 ```env
-PUBLIC_CAL_ID_BOOKING_URL=https://cal.id/nilima-sawane
-PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL=https://cal.id/nilima-sawane/personal-consultation?duration=30
-PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL=https://cal.id/nilima-sawane/relationship-consultation?duration=20
-PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL=https://cal.id/nilima-sawane/best-date-analysis?duration=10
+PUBLIC_CAL_ID_BOOKING_URL=https://cal.id/nakshatra-astrology
+PUBLIC_CAL_ID_PERSONAL_CONSULTATION_URL=https://cal.id/nakshatra-astrology/personal-consultation?duration=30
+PUBLIC_CAL_ID_RELATIONSHIP_CONSULTATION_URL=https://cal.id/nakshatra-astrology/relationship-consultation?duration=20
+PUBLIC_CAL_ID_BEST_DATE_ANALYSIS_URL=https://cal.id/nakshatra-astrology/best-date-analysis?duration=10
 CALID_API_KEY=calid_your_server_only_key
 CALID_WEBHOOK_SECRET=generate_a_new_server_only_secret_after_storage_is_selected
 ```

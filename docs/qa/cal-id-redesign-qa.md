@@ -47,6 +47,18 @@ All three events were also verified with a 48-hour minimum booking notice, a 15-
 
 The signed webhook foundation is implemented for booking-created, booking-paid, rescheduled and cancelled events. It verifies the raw-body HMAC, filters to the three event types, projects no birth or attendee details, and provides idempotent lifecycle transitions. The production adapter remains deliberately fail-closed because no durable store has been selected.
 
+- The three landing-card actions route to `/book/#personal-consultation`, `/book/#relationship-consultation`, and `/book/#best-date-analysis`.
+- Clicking Best Date Analysis updated the browser hash, accessible active state, selected duration/price/preparation, and same-tab secure-booking action.
+- The exact event-specific destinations are:
+  - `https://cal.id/nakshatra-astrology/personal-consultation?duration=30`
+  - `https://cal.id/nakshatra-astrology/relationship-consultation?duration=20`
+  - `https://cal.id/nakshatra-astrology/best-date-analysis?duration=10`
+- `/book/?s=opaque-test-token#best-date-analysis` kept the token in the visitor-facing URL but did not render it or forward it to Cal ID.
+- The booking route renders no iframe. The local page has one scrollbar and the selected Cal ID event opens as a complete page in the same tab.
+- Relationship Consultation exposed Asia/Kolkata, Google Meet, ₹1,000, live dates, and time slots.
+- A Relationship time slot was selected to open the attendee form. Name, email, notes, guest, Terms, Privacy Policy, Back, and Pay to book controls were visible. No customer data was entered and no booking or payment was submitted.
+- Browser diagnostics returned no warning or error whose source URL was the local application.
+
 Cal ID account changes were not made. The exact owner-approved setup is recorded in:
 
 - `docs/operations/cal-id-email-workflows.md`

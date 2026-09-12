@@ -29,6 +29,10 @@ For WhatsApp booking automation, run this follow-up migration after it:
 
 `db/migrations/202609110001_whatsapp_automation.sql`
 
+To show the customer's Kundli preparation details in the protected admin app, run this migration last:
+
+`db/migrations/202609120001_admin_customer_details.sql`
+
 With `psql` on PowerShell, the equivalent command is:
 
 ```powershell
@@ -39,7 +43,7 @@ Remove-Item Env:NEON_OWNER_DATABASE_URL
 
 `NEON_OWNER_DATABASE_URL` is temporary local migration access. Do not add it to Vercel. The deployed application uses only the pooled, restricted `DATABASE_URL` injected by the integration.
 
-The migrations create private tables and security-definer functions for atomic webhook deduplication, lifecycle ordering, manual deletion, retention cleanup and notification outboxes. The WhatsApp follow-up retains only a consent-gated normalized E.164 recipient with the temporary booking. It stores no booking intake answers, email address, rendered message, inbound text or raw webhook body.
+The migrations create private tables and security-definer functions for atomic webhook deduplication, lifecycle ordering, manual deletion, retention cleanup and notification outboxes. The customer-details migration stores only the named fields needed to prepare the consultation: full name, email, phone, WhatsApp number and consent status, preferred language, birth date/time/accuracy/place, consultation questions and additional notes. Arbitrary answers, rendered notifications, inbound WhatsApp text and the raw webhook body are not stored.
 
 ## 3. Create the owner sign-in and notification keys
 
@@ -83,7 +87,7 @@ Cal ID signs the exact request body with HMAC-SHA256 in `X-Cal-Signature-256`. T
 
 ## 5. Retention and manual removal
 
-- Customer-bearing appointment rows are removed seven days after the appointment ends.
+- Customer-bearing appointment rows, including Kundli preparation details, are removed seven days after the appointment ends.
 - Cancelled appointment rows are removed seven days after cancellation, even if the former appointment date is later.
 - A signed-in owner can remove a completed or cancelled appointment immediately from its details. Active future appointments cannot be removed through this housekeeping control; Postgres rechecks this rule.
 - Minimal webhook delivery IDs remain while their appointment record exists, then for at least 30 days after the appointment record is removed. This prevents a Cal ID retry from recreating a customer record or resending an already handled alert after the visible appointment was removed.
@@ -103,7 +107,7 @@ After deployment over HTTPS:
 2. Install the PWA on the owner's Android phone.
 3. Select **Enable alerts**, then **Send private test**.
 4. Create one controlled test booking without completing an unnecessary real payment.
-5. Confirm a single sanitized record appears, a privacy-safe alert arrives and no name or appointment detail appears on the lock screen.
+5. Confirm one appointment appears with the customer's preparation details inside the signed-in app, while the lock-screen alert contains no name, birth detail or private question.
 6. Reschedule and cancel the controlled booking, checking that the record advances without duplication or regression.
 7. Remove the cancelled test booking in the admin app and confirm it disappears while a future active booking cannot be removed.
 

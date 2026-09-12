@@ -13,6 +13,18 @@ export type NeonEnvironment = Readonly<{
 export type StoredAdminBooking = Readonly<{
   id: string;
   customerFirstName: string;
+  customerFullName: string;
+  customerEmail?: string;
+  customerPhoneNumber?: string;
+  whatsappRecipientE164?: string;
+  whatsappConsent: boolean;
+  preferredLanguage?: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthTimeAccuracy?: string;
+  birthPlace?: string;
+  consultationQuestions?: string;
+  additionalNotes?: string;
   serviceName: string;
   startsAt: string;
   endsAt: string;
@@ -132,6 +144,10 @@ function requireString(value: unknown, field: string) {
   return value;
 }
 
+function optionalString(value: unknown) {
+  return typeof value === "string" && value ? value : undefined;
+}
+
 function timestamp(value: unknown, field: string) {
   const raw = value instanceof Date ? value.toISOString() : requireString(value, field);
   const milliseconds = new Date(raw).getTime();
@@ -189,10 +205,12 @@ export class NeonAdminStore implements AdminDataStore {
 
   async applyEvent(event: CalIdWebhookEvent): Promise<CalIdWebhookStoreResult> {
     const rows = await this.query(
-      `select nakshatra_admin.apply_calid_webhook_event_with_whatsapp(
+      `select nakshatra_admin.apply_calid_webhook_event_with_customer_details(
         $1::text, $2::text, $3::text, $4::text, $5::text,
         $6::timestamptz, $7::timestamptz, $8::text,
-        $9::timestamptz, $10::text, $11::text, $12::boolean
+        $9::timestamptz, $10::text, $11::text, $12::boolean,
+        $13::text, $14::text, $15::text, $16::text, $17::text,
+        $18::text, $19::text, $20::text, $21::text, $22::text
       ) as result`,
       [
         event.eventId,
@@ -207,13 +225,23 @@ export class NeonAdminStore implements AdminDataStore {
         event.rescheduledFromUid ?? null,
         event.whatsappRecipientE164 ?? null,
         event.whatsappTransactionalConsent === true,
+        event.customerFullName,
+        event.customerEmail ?? null,
+        event.customerPhoneNumber ?? null,
+        event.preferredLanguage ?? null,
+        event.birthDate ?? null,
+        event.birthTime ?? null,
+        event.birthTimeAccuracy ?? null,
+        event.birthPlace ?? null,
+        event.consultationQuestions ?? null,
+        event.additionalNotes ?? null,
       ],
     );
     return singleResult(rows, ["applied", "duplicate", "suppressed"]) as CalIdWebhookStoreResult;
   }
 
   async listBookings(): Promise<StoredAdminBooking[]> {
-    const rows = await this.query("select * from nakshatra_admin.list_admin_bookings()");
+    const rows = await this.query("select * from nakshatra_admin.list_admin_bookings_with_customer_details()");
 
     return rows.map((row) => {
       const slug = row.event_type_slug as keyof typeof serviceNames;
@@ -227,6 +255,19 @@ export class NeonAdminStore implements AdminDataStore {
       return {
         id: requireString(row.booking_uid, "booking UID"),
         customerFirstName: requireString(row.customer_first_name, "customer name"),
+        customerFullName: optionalString(row.customer_full_name)
+          ?? requireString(row.customer_first_name, "customer name"),
+        ...(optionalString(row.customer_email) ? { customerEmail: optionalString(row.customer_email) } : {}),
+        ...(optionalString(row.customer_phone_number) ? { customerPhoneNumber: optionalString(row.customer_phone_number) } : {}),
+        ...(optionalString(row.whatsapp_recipient_e164) ? { whatsappRecipientE164: optionalString(row.whatsapp_recipient_e164) } : {}),
+        whatsappConsent: row.whatsapp_consent === true,
+        ...(optionalString(row.preferred_language) ? { preferredLanguage: optionalString(row.preferred_language) } : {}),
+        ...(optionalString(row.date_of_birth) ? { birthDate: optionalString(row.date_of_birth) } : {}),
+        ...(optionalString(row.time_of_birth) ? { birthTime: optionalString(row.time_of_birth) } : {}),
+        ...(optionalString(row.birth_time_accuracy) ? { birthTimeAccuracy: optionalString(row.birth_time_accuracy) } : {}),
+        ...(optionalString(row.place_of_birth) ? { birthPlace: optionalString(row.place_of_birth) } : {}),
+        ...(optionalString(row.consultation_questions) ? { consultationQuestions: optionalString(row.consultation_questions) } : {}),
+        ...(optionalString(row.additional_notes) ? { additionalNotes: optionalString(row.additional_notes) } : {}),
         serviceName: serviceNames[slug],
         startsAt: timestamp(row.starts_at, "start time"),
         endsAt: timestamp(row.ends_at, "end time"),

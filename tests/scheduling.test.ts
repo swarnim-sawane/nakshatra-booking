@@ -59,9 +59,23 @@ describe("getCalIdEventPath", () => {
 });
 
 describe("resolveCalIdBookingUrl", () => {
-  it("uses Nilima Sawane's public Cal ID page when no deployment override is set", () => {
-    expect(resolveCalIdBookingUrl(undefined)?.href).toBe("https://cal.id/nilima-sawane");
-    expect(resolveCalIdBookingUrl("  ")?.href).toBe("https://cal.id/nilima-sawane");
+  it("uses the live Nakshatra Cal ID account and service durations by default", () => {
+    expect(DEFAULT_CAL_ID_EVENT_URLS).toEqual({
+      "personal-consultation":
+        "https://cal.id/nakshatra-astrology/personal-consultation?duration=30",
+      "relationship-consultation":
+        "https://cal.id/nakshatra-astrology/relationship-consultation?duration=20",
+      "best-date-analysis":
+        "https://cal.id/nakshatra-astrology/best-date-analysis?duration=10",
+    });
+    expect(resolveCalIdBookingUrl(undefined)?.href).toBe(
+      "https://cal.id/nakshatra-astrology",
+    );
+  });
+
+  it("uses Nakshatra's public Cal ID page when no deployment override is set", () => {
+    expect(resolveCalIdBookingUrl(undefined)?.href).toBe("https://cal.id/nakshatra-astrology");
+    expect(resolveCalIdBookingUrl("  ")?.href).toBe("https://cal.id/nakshatra-astrology");
   });
 
   it("keeps a valid event-specific deployment override", () => {

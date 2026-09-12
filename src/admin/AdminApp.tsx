@@ -23,6 +23,7 @@ import {
   canRemoveBooking,
   filterBookings,
   findNextBooking,
+  formatBirthDate,
   formatBookingDate,
   formatBookingTime,
   safeMeetingUrl,
@@ -97,6 +98,52 @@ function MeetingLink({ booking, compact = false }: { booking: AdminBooking; comp
       <Video aria-hidden="true" size={18} strokeWidth={1.8} />
       Open video call
     </a>
+  );
+}
+
+function CustomerPreparationDetails({
+  booking,
+  light = false,
+}: {
+  booking: AdminBooking;
+  light?: boolean;
+}) {
+  const fullName = booking.customerFullName ?? booking.customerFirstName;
+  const birthTime = [booking.birthTime, booking.birthTimeAccuracy].filter(Boolean).join(" · ");
+  const fields = [
+    ["Email", booking.customerEmail],
+    ["Phone", booking.customerPhoneNumber],
+    ["WhatsApp", booking.whatsappRecipientE164],
+    ["WhatsApp updates", booking.whatsappConsent ? "WhatsApp allowed" : "Not allowed"],
+    ["Preferred language", booking.preferredLanguage],
+    ["Date of birth", formatBirthDate(booking.birthDate)],
+    ["Time of birth", birthTime || undefined],
+    ["Place of birth", booking.birthPlace],
+  ] as const;
+
+  return (
+    <section
+      aria-label={`${fullName} Kundli preparation details`}
+      className={`admin-customer-details${light ? " admin-customer-details--light" : ""}`}
+    >
+      <h4>Kundli preparation</h4>
+      <dl>
+        {fields.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value || "Not provided"}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="admin-customer-details__answer">
+        <h5>Questions for the consultation</h5>
+        <p>{booking.consultationQuestions || "Not provided"}</p>
+      </div>
+      <div className="admin-customer-details__answer">
+        <h5>Additional notes</h5>
+        <p>{booking.additionalNotes || "Not provided"}</p>
+      </div>
+    </section>
   );
 }
 
@@ -429,9 +476,10 @@ export default function AdminApp({
               {nextBooking ? (
                 <section className="admin-next" aria-labelledby="next-consultation-title">
                   <div className="admin-section-heading admin-section-heading--light"><div><p className="admin-eyebrow">Your day at a glance</p><h2 id="next-consultation-title">Next consultation</h2></div><StatusPill status={nextBooking.status} /></div>
-                  <div className="admin-next__person"><p>{nextBooking.serviceName}</p><h3>{nextBooking.customerFirstName}</h3></div>
+                  <div className="admin-next__person"><p>{nextBooking.serviceName}</p><h3>{nextBooking.customerFullName ?? nextBooking.customerFirstName}</h3></div>
                   <div className="admin-next__time"><span><CalendarDays aria-hidden="true" size={18} />{formatBookingDate(nextBooking.startsAt)}</span><span><Clock3 aria-hidden="true" size={18} />{formatBookingTime(nextBooking.startsAt)}</span></div>
                   <p className="admin-next__countdown">{timeUntil(nextBooking.startsAt, referenceNow)}</p>
+                  <CustomerPreparationDetails booking={nextBooking} />
                   <MeetingLink booking={nextBooking} />
                 </section>
               ) : (
@@ -482,13 +530,14 @@ export default function AdminApp({
           <section aria-labelledby="appointment-dialog-title" aria-modal="true" className="admin-dialog" onMouseDown={(event) => event.stopPropagation()} role="dialog">
             <button aria-label="Close appointment details" className="admin-dialog__close" onClick={() => setSelectedBooking(null)} type="button"><X aria-hidden="true" size={22} /></button>
             <p className="admin-eyebrow">Appointment details</p><h2 id="appointment-dialog-title">Appointment details</h2>
-            <div className="admin-dialog__person"><h3>{selectedBooking.customerFirstName}</h3><p>{selectedBooking.serviceName}</p></div>
+            <div className="admin-dialog__person"><h3>{selectedBooking.customerFullName ?? selectedBooking.customerFirstName}</h3><p>{selectedBooking.serviceName}</p></div>
             <dl className="admin-dialog__facts">
               <div><dt>Date</dt><dd>{formatBookingDate(selectedBooking.startsAt)}</dd></div><div><dt>Time</dt><dd>{formatBookingTime(selectedBooking.startsAt)} · India time</dd></div>
               <div><dt>Status</dt><dd><StatusPill status={selectedBooking.status} /></dd></div><div><dt>Booking reference</dt><dd>{selectedBooking.id.toUpperCase()}</dd></div>
             </dl>
+            <CustomerPreparationDetails booking={selectedBooking} light />
             <MeetingLink booking={selectedBooking} compact />
-            <p className="admin-dialog__privacy">Only the operational details needed for the appointment are shown here. Birth details and private questions are not stored by this website. Appointment records are removed automatically after the short retention period.</p>
+            <p className="admin-dialog__privacy">These private preparation details are visible only after admin sign-in. Appointment records are removed automatically after the short retention period.</p>
             {selectedBookingCanBeRemoved && !demoMode ? (
               confirmingRemoval ? (
                 <div className="admin-removal-confirmation" role="alert">

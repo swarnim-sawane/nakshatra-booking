@@ -10,6 +10,10 @@ const whatsappMigrationPath = "db/migrations/202609110001_whatsapp_automation.sq
 const whatsappMigration = existsSync(whatsappMigrationPath)
   ? readFileSync(whatsappMigrationPath, "utf8")
   : "";
+const customerDetailsMigrationPath = "db/migrations/202609120001_admin_customer_details.sql";
+const customerDetailsMigration = existsSync(customerDetailsMigrationPath)
+  ? readFileSync(customerDetailsMigrationPath, "utf8")
+  : "";
 
 test("Neon storage is atomic, idempotent and restricted to database functions", () => {
   assert.match(migration, /create schema if not exists nakshatra_admin/i);
@@ -234,4 +238,18 @@ test("WhatsApp lifecycle moves reminders on reschedule and suppresses them on ca
   assert.match(whatsappMigration, /complete_whatsapp_message_delivery/i);
   assert.match(whatsappMigration, /claim_whatsapp_inbound_delivery/i);
   assert.match(whatsappMigration, /revoke all on all tables[\s\S]*grant execute/i);
+});
+
+test("customer preparation details expand the schema without removing the compatible webhook function", () => {
+  assert.match(customerDetailsMigration, /add column if not exists customer_full_name/i);
+  assert.match(customerDetailsMigration, /customer_email/i);
+  assert.match(customerDetailsMigration, /date_of_birth/i);
+  assert.match(customerDetailsMigration, /consultation_questions/i);
+  assert.match(customerDetailsMigration, /apply_calid_webhook_event_with_customer_details/i);
+  assert.match(customerDetailsMigration, /apply_calid_webhook_event_with_whatsapp/i);
+  assert.doesNotMatch(customerDetailsMigration, /drop function if exists nakshatra_admin\.apply_calid_webhook_event_with_whatsapp/i);
+  assert.match(customerDetailsMigration, /list_admin_bookings_with_customer_details/i);
+  assert.doesNotMatch(customerDetailsMigration, /drop function if exists nakshatra_admin\.list_admin_bookings/i);
+  assert.doesNotMatch(customerDetailsMigration, /raw_payload|unrelated_private_answer|grant (select|insert|update|delete) on/i);
+  assert.match(customerDetailsMigration, /grant execute on function nakshatra_admin\.apply_calid_webhook_event_with_customer_details/i);
 });

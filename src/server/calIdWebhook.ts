@@ -27,6 +27,16 @@ export type CalIdWebhookEvent = Readonly<{
   bookingUid: string;
   eventTypeSlug: CalIdEventTypeSlug;
   customerFirstName: string;
+  customerFullName: string;
+  customerEmail?: string;
+  customerPhoneNumber?: string;
+  preferredLanguage?: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthTimeAccuracy?: string;
+  birthPlace?: string;
+  consultationQuestions?: string;
+  additionalNotes?: string;
   startsAt: string;
   endsAt: string;
   occurredAt: string;
@@ -41,6 +51,16 @@ export type BookingLifecycleRecord = Readonly<{
   bookingUid: string;
   eventTypeSlug: CalIdEventTypeSlug;
   customerFirstName: string;
+  customerFullName: string;
+  customerEmail?: string;
+  customerPhoneNumber?: string;
+  preferredLanguage?: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthTimeAccuracy?: string;
+  birthPlace?: string;
+  consultationQuestions?: string;
+  additionalNotes?: string;
   startsAt: string;
   endsAt: string;
   meetingUrl?: string;
@@ -178,12 +198,29 @@ function normalizeBookingUid(value: unknown) {
   return /^[A-Za-z0-9_-]{1,200}$/.test(uid) ? uid : null;
 }
 
-function normalizeFirstName(payload: Record<string, unknown>) {
+function normalizeText(value: unknown, maximumLength: number) {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().replace(/\s+/gu, " ").slice(0, maximumLength);
+  return normalized || undefined;
+}
+
+function firstAttendee(payload: Record<string, unknown>) {
   const attendees = Array.isArray(payload.attendees) ? payload.attendees : [];
-  const attendee = attendees.find(isObject);
-  const rawName = attendee && typeof attendee.name === "string" ? attendee.name : "";
-  const firstName = rawName.trim().split(/\s+/u)[0]?.slice(0, 80) ?? "";
+  return attendees.find(isObject);
+}
+
+function normalizeCustomerFullName(payload: Record<string, unknown>) {
+  return normalizeText(firstAttendee(payload)?.name, 160) ?? "Customer";
+}
+
+function normalizeFirstName(fullName: string) {
+  const firstName = fullName.split(/\s+/u)[0]?.slice(0, 80) ?? "";
   return firstName || "Customer";
+}
+
+function normalizeEmail(payload: Record<string, unknown>) {
+  const value = normalizeText(firstAttendee(payload)?.email, 254)?.toLowerCase();
+  return value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(value) ? value : undefined;
 }
 
 function normalizeMeetingUrl(payload: Record<string, unknown>) {
@@ -210,11 +247,27 @@ function responseValue(payload: Record<string, unknown>, field: string) {
   return isObject(response) && "value" in response ? response.value : response;
 }
 
-function normalizeWhatsAppRecipient(payload: Record<string, unknown>) {
-  const raw = responseValue(payload, "whatsapp_phone");
-  if (typeof raw !== "string") return undefined;
-  const compact = raw.trim().replace(/[\s().-]/g, "").replace(/^00/, "+");
+function responseText(payload: Record<string, unknown>, field: string, maximumLength: number) {
+  return normalizeText(responseValue(payload, field), maximumLength);
+}
+
+function normalizePhoneNumber(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const compact = value.trim().replace(/[\s().-]/g, "").replace(/^00/, "+");
   return /^\+[1-9]\d{7,14}$/.test(compact) ? compact : undefined;
+}
+
+function normalizeCustomerPhoneNumber(payload: Record<string, unknown>) {
+  const attendee = firstAttendee(payload);
+  return normalizePhoneNumber(
+    attendee?.phoneNumber
+      ?? payload.attendeePhoneNumber
+      ?? responseValue(payload, "attendeePhoneNumber"),
+  );
+}
+
+function normalizeWhatsAppRecipient(payload: Record<string, unknown>) {
+  return normalizePhoneNumber(responseValue(payload, "whatsapp_phone"));
 }
 
 function hasTransactionalWhatsAppConsent(payload: Record<string, unknown>) {
@@ -254,6 +307,16 @@ export function transitionBookingLifecycle(
     bookingUid: event.bookingUid,
     eventTypeSlug: eventIsNewest ? event.eventTypeSlug : current.eventTypeSlug,
     customerFirstName: eventIsNewest ? event.customerFirstName : current.customerFirstName,
+    customerFullName: eventIsNewest ? event.customerFullName : current.customerFullName,
+    customerEmail: eventIsNewest ? event.customerEmail : current.customerEmail,
+    customerPhoneNumber: eventIsNewest ? event.customerPhoneNumber : current.customerPhoneNumber,
+    preferredLanguage: eventIsNewest ? event.preferredLanguage : current.preferredLanguage,
+    birthDate: eventIsNewest ? event.birthDate : current.birthDate,
+    birthTime: eventIsNewest ? event.birthTime : current.birthTime,
+    birthTimeAccuracy: eventIsNewest ? event.birthTimeAccuracy : current.birthTimeAccuracy,
+    birthPlace: eventIsNewest ? event.birthPlace : current.birthPlace,
+    consultationQuestions: eventIsNewest ? event.consultationQuestions : current.consultationQuestions,
+    additionalNotes: eventIsNewest ? event.additionalNotes : current.additionalNotes,
     startsAt: eventIsNewest ? event.startsAt : current.startsAt,
     endsAt: eventIsNewest ? event.endsAt : current.endsAt,
     meetingUrl: eventIsNewest ? event.meetingUrl : current.meetingUrl,
@@ -314,6 +377,17 @@ export async function projectCalIdWebhookEvent(
 
   const rescheduledFromUid = normalizeBookingUid(payload.rescheduleUid);
   const meetingUrl = normalizeMeetingUrl(payload);
+  const customerFullName = normalizeCustomerFullName(payload);
+  const customerEmail = normalizeEmail(payload);
+  const customerPhoneNumber = normalizeCustomerPhoneNumber(payload);
+  const preferredLanguage = responseText(payload, "preferred_language", 40);
+  const birthDate = responseText(payload, "date_of_birth", 40);
+  const birthTime = responseText(payload, "time_of_birth", 80);
+  const birthTimeAccuracy = responseText(payload, "birth_time_accuracy", 80);
+  const birthPlace = responseText(payload, "place_of_birth", 240);
+  const consultationQuestions = responseText(payload, "consultation_questions", 4_000);
+  const additionalNotes = normalizeText(payload.additionalNotes, 2_000)
+    ?? responseText(payload, "notes", 2_000);
   const whatsappRecipientE164 = normalizeWhatsAppRecipient(payload);
   const whatsappTransactionalConsent = hasTransactionalWhatsAppConsent(payload);
   const stableDeliveryKey = [
@@ -329,7 +403,17 @@ export async function projectCalIdWebhookEvent(
     trigger: trigger as CalIdWebhookTrigger,
     bookingUid,
     eventTypeSlug,
-    customerFirstName: normalizeFirstName(payload),
+    customerFirstName: normalizeFirstName(customerFullName),
+    customerFullName,
+    ...(customerEmail ? { customerEmail } : {}),
+    ...(customerPhoneNumber ? { customerPhoneNumber } : {}),
+    ...(preferredLanguage ? { preferredLanguage } : {}),
+    ...(birthDate ? { birthDate } : {}),
+    ...(birthTime ? { birthTime } : {}),
+    ...(birthTimeAccuracy ? { birthTimeAccuracy } : {}),
+    ...(birthPlace ? { birthPlace } : {}),
+    ...(consultationQuestions ? { consultationQuestions } : {}),
+    ...(additionalNotes ? { additionalNotes } : {}),
     startsAt,
     endsAt,
     occurredAt,

@@ -18,6 +18,7 @@ describe("Neon WhatsApp automation boundary", () => {
       bookingUid: "booking-123",
       eventTypeSlug: "personal-consultation",
       customerFirstName: "Ananya",
+      customerFullName: "Ananya Sharma",
       startsAt: "2026-09-14T03:30:00.000Z",
       endsAt: "2026-09-14T04:00:00.000Z",
       occurredAt: "2026-09-09T10:05:00.000Z",
@@ -25,10 +26,10 @@ describe("Neon WhatsApp automation boundary", () => {
       meetingUrl: "https://meet.google.com/abc-defg-hij",
       whatsappRecipientE164: "+919876543210",
       whatsappTransactionalConsent: true,
-    } as never);
+    });
 
-    expect(calls[0]?.statement).toContain("apply_calid_webhook_event_with_whatsapp");
-    expect(calls[0]?.parameters.slice(-2)).toEqual(["+919876543210", true]);
+    expect(calls[0]?.statement).toContain("apply_calid_webhook_event_with_customer_details");
+    expect(calls[0]?.parameters.slice(10, 12)).toEqual(["+919876543210", true]);
   });
 
   it("maps due outbox rows without exposing intake answers", async () => {

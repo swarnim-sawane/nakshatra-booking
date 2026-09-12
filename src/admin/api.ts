@@ -20,6 +20,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isBooking(value: unknown): value is AdminBooking {
   if (!isRecord(value)) return false;
+  const optionalTextFields = [
+    "customerFullName",
+    "customerEmail",
+    "customerPhoneNumber",
+    "whatsappRecipientE164",
+    "preferredLanguage",
+    "birthDate",
+    "birthTime",
+    "birthTimeAccuracy",
+    "birthPlace",
+    "consultationQuestions",
+    "additionalNotes",
+    "meetingUrl",
+  ];
   return (
     typeof value.id === "string" &&
     typeof value.customerFirstName === "string" &&
@@ -30,7 +44,8 @@ function isBooking(value: unknown): value is AdminBooking {
     ["confirmed", "paid", "rescheduled", "cancelled", "completed"].includes(
       String(value.status),
     ) &&
-    (value.meetingUrl === undefined || typeof value.meetingUrl === "string")
+    optionalTextFields.every((field) => value[field] === undefined || typeof value[field] === "string") &&
+    (value.whatsappConsent === undefined || typeof value.whatsappConsent === "boolean")
   );
 }
 

@@ -12,6 +12,18 @@ export type BookingFilter = "upcoming" | "today" | "all";
 export type AdminBooking = {
   id: string;
   customerFirstName: string;
+  customerFullName?: string;
+  customerEmail?: string;
+  customerPhoneNumber?: string;
+  whatsappRecipientE164?: string;
+  whatsappConsent?: boolean;
+  preferredLanguage?: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthTimeAccuracy?: string;
+  birthPlace?: string;
+  consultationQuestions?: string;
+  additionalNotes?: string;
   serviceName: string;
   startsAt: string;
   endsAt: string;
@@ -79,25 +91,36 @@ function sampleBooking(
     durationMinutes: number;
     status: BookingStatus;
     meetingUrl?: string;
-  },
+  } & Partial<Pick<
+    AdminBooking,
+    | "customerFullName"
+    | "customerEmail"
+    | "customerPhoneNumber"
+    | "whatsappRecipientE164"
+    | "whatsappConsent"
+    | "preferredLanguage"
+    | "birthDate"
+    | "birthTime"
+    | "birthTimeAccuracy"
+    | "birthPlace"
+    | "consultationQuestions"
+    | "additionalNotes"
+  >>,
 ): AdminBooking {
+  const { dayOffset, hour, minute, durationMinutes, ...bookingDetails } = details;
   const startsAt = atKolkataTime(
     dayStart,
-    details.dayOffset,
-    details.hour,
-    details.minute,
+    dayOffset,
+    hour,
+    minute,
   );
-  const endsAt = new Date(startsAt.getTime() + details.durationMinutes * 60 * 1000);
+  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
 
   return {
-    id: details.id,
-    customerFirstName: details.customerFirstName,
-    serviceName: details.serviceName,
+    ...bookingDetails,
     startsAt: startsAt.toISOString(),
     endsAt: endsAt.toISOString(),
     timezone: ADMIN_TIME_ZONE,
-    status: details.status,
-    meetingUrl: details.meetingUrl,
     isSample: true,
   };
 }
@@ -133,6 +156,18 @@ export async function loadDemoBookings(now = new Date()): Promise<AdminBooking[]
       durationMinutes: 30,
       status: "confirmed",
       meetingUrl: "https://meet.google.com/abc-defg-hij",
+      customerFullName: "Ananya Sharma",
+      customerEmail: "ananya@example.com",
+      customerPhoneNumber: "+919811122334",
+      whatsappRecipientE164: "+919876543210",
+      whatsappConsent: true,
+      preferredLanguage: "Hindi",
+      birthDate: "12/02/1990",
+      birthTime: "10:35 AM",
+      birthTimeAccuracy: "Exact",
+      birthPlace: "Pune, Maharashtra, India",
+      consultationQuestions: "Career change and marriage timing",
+      additionalNotes: "Please speak in Hindi.",
     }),
     sampleBooking(dayStart, {
       id: "sample-nak-104",
@@ -211,6 +246,25 @@ export function formatBookingDate(startsAt: string) {
 
 export function formatBookingTime(startsAt: string) {
   return timeFormatter.format(new Date(startsAt));
+}
+
+export function formatBirthDate(value?: string) {
+  if (!value) return undefined;
+  const match = value.match(/^(?:(\d{2})\/(\d{2})\/(\d{4})|(\d{4})-(\d{2})-(\d{2}))$/u);
+  if (!match) return value;
+  const year = Number(match[3] ?? match[4]);
+  const month = Number(match[2] ?? match[5]);
+  const day = Number(match[1] ?? match[6]);
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    return value;
+  }
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(date);
 }
 
 export function safeMeetingUrl(booking: AdminBooking) {
