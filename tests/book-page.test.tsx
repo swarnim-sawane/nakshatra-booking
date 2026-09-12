@@ -10,7 +10,7 @@ afterEach(() => {
 
 describe("Cal ID booking page", () => {
   it("sends every service row directly to its same-tab Cal ID event", () => {
-    const html = renderToStaticMarkup(<BookPage />);
+    const html = renderToStaticMarkup(<BookPage serviceEnvironment={{}} />);
 
     expect(html).toContain(`href="${DEFAULT_CAL_ID_EVENT_URLS["personal-consultation"]}"`);
     expect(html).toContain(`href="${DEFAULT_CAL_ID_EVENT_URLS["relationship-consultation"]}"`);
